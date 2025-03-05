@@ -24,3 +24,4 @@ yarn-debug.log*
 yarn-error.log*
 
 src/__test__
+src/App.js
