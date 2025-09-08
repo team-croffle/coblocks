@@ -11,9 +11,9 @@ src/__test__
 src/App.js
 node_modules
 
-/.cache
-/build
-.env
+node_modules
+dist
+dist-ssr
 *.local
 
 # Editor directories and files

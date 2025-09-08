@@ -1,30 +1,32 @@
-import { vitePlugin as remix } from "@remix-run/dev";
-import { defineConfig } from "vite";
-import tsconfigPaths from "vite-tsconfig-paths";
-import path from "path";
+import path from 'path';
+import { defineConfig } from 'vitest/config';
+import react from '@vitejs/plugin-react';
+import tailwindcss from '@tailwindcss/vite';
+import { tanstackRouter } from '@tanstack/router-plugin/vite';
 
-declare module "@remix-run/node" {
-  interface Future {
-    v3_singleFetch: true;
-  }
-}
-
+// https://vite.dev/config/
 export default defineConfig({
   plugins: [
-    remix({
-      future: {
-        v3_fetcherPersist: true,
-        v3_relativeSplatPath: true,
-        v3_throwAbortReason: true,
-        v3_singleFetch: true,
-        v3_lazyRouteDiscovery: true,
+    tanstackRouter({
+      target: 'react',
+      autoCodeSplitting: true,
+    }),
+    react({
+      babel: {
+        plugins: [['babel-plugin-react-compiler']],
       },
     }),
-    tsconfigPaths(),
+    tailwindcss(),
   ],
   resolve: {
     alias: {
-      "~": path.resolve(__dirname, "app"),
-    }
-  }
+      '@': path.resolve(__dirname, 'src'),
+    },
+  },
+  test: {
+    globals: true,
+    environment: 'jsdom',
+    setupFiles: './src/test/setup.js',
+    css: true,
+  },
 });
