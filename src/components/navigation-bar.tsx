@@ -1,8 +1,11 @@
 import { useEffect, useState, type JSX } from 'react';
-import { Link } from '@tanstack/react-router';
-import { supabase } from '@/utils/supabase';
-import type { User } from '@supabase/supabase-js';
+import { Button } from './ui/button';
+import { Avatar, AvatarFallback } from './ui/avatar';
+import { Switch } from './ui/switch';
 import mainLogo from '../assets/images/Logo/minilogo-bg-tp.png';
+// import { useUserStore } from '@/store/userStore';
+import { useNavStore } from '@/store/navStore';
+import { useThemeStore } from '@/store/themeStore';
 
 // interface NavigationBarProps {
 //   user: User | null; // 사용자 정보 (로그인 상태에 따라 null일 수 있음)
@@ -11,91 +14,109 @@ import mainLogo from '../assets/images/Logo/minilogo-bg-tp.png';
 // 2. 가짜 Supabase 객체는 완전히 삭제합니다.
 
 export default function NavigationBar(): JSX.Element {
-  // 로그인 상태와 사용자 정보를 관리하는 상태 변수
-  const [user, setUser] = useState<User | null>(null);
-  // 모바일 햄버거 메뉴 확장 상태를 관리하는 상태 변수
-  const [isNavbarExpanded, setIsNavbarExpanded] = useState<boolean>(false);
+  const isAppThemeDark = useThemeStore((state) => state.isAppThemeDark);
+  const switchTheme = useThemeStore((state) => state.toggleAppTheme);
+  const [isSwitchOn, setIsSwitchOn] = useState<boolean>(false);
 
-  // 컴포넌트가 마운트될 때, 그리고 인증 상태가 변경될 때 실행되는 효과 훅
-  useEffect(() => {
-    // 페이지 로드 시 현재 세션을 확인
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
-    });
+  const navMenuItem = useNavStore((state) => state);
+  const [isNavbarExpanded, setIsNavbarExpanded] = useState<boolean>(false); // 네비게이션 바 확장 상태
 
-    // Supabase 인증 상태 변경을 구독
-    // 사용자가 로그인하거나 로그아웃할 때마다 이 콜백 함수가 실행
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
-    });
+  const [activePageId, setActivePageId] = useState<string | null>(null);
 
-    // 컴포넌트가 언마운트될 때 인증 상태 구독을 해제
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, []);
+  // const isLoggedIn = useUserStore((state) => state.isLoggedIn);
+  // const user = useUserStore((state) => state.user);
+  // const signOut = useUserStore((state) => state.logout);
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false); // 임시로 로그인 상태를 설정
+  const user = { user_metadata: { email: 'test@example.com' } }; // 임시 사용자 데이터
 
-  // 로그아웃 처리 함수
   const handleLogout = async (): Promise<void> => {
-    const { error } = await supabase.auth.signOut(); // Supabase 로그아웃 요청
-    if (error) {
-      console.error('로그아웃 오류:', error);
-    }
-    // 상태는 onAuthStateChange가 자동으로 업데이트합니다.
+    // signOut();
+    setIsNavbarExpanded(false); // 로그아웃 후 네비게이션 바 닫기
+    setIsLoggedIn(false); // 임시로 로그아웃 상태 변경
   };
 
+  // useEffect(() => {
+  //   console.log(navMenuItem);
+  //   console.log($isLoggedIn);
+  //   console.log(isThemeDark);
+  // }, [navMenuItem]);
+
+  useEffect(() => {
+    setIsSwitchOn(isAppThemeDark);
+  }, [isAppThemeDark]);
+
+  useEffect(() => {
+    const currentPath = window.location.pathname;
+    const currentPage = navMenuItem.find((item) => item.link === currentPath);
+    if (currentPage) {
+      setActivePageId(currentPage.id);
+    }
+  }, []); // 컴포넌트 마운트 시에만 실행
+
   // 회원 버튼 (로그인 상태에 따라 드롭다운 또는 로그인 버튼 표시)
-  const memberBtn = (): JSX.Element => {
-    // 👈 3. isLoggedIn 대신 user 객체의 존재 여부로 상태를 확인합니다.
-    if (user) {
+  const MemberBtn = (): JSX.Element => {
+    if (!isLoggedIn) {
       return (
-        // 로그인 상태일 때 드롭다운 메뉴를 표시합니다.
         <div className='relative'>
-          {' '}
-          {/* 드롭다운 위치 지정을 위한 relative */}
-          <button
-            className='flex h-12 w-12 items-center justify-center rounded-full border-2 border-white p-2 text-2xl text-white transition-colors duration-200 hover:bg-white/20'
+          <Button
+            variant='outline'
+            className='flex items-center justify-center p-2 transition-colors duration-200 hover:opacity-50'
             onClick={(): void => {
-              // 드롭다운 메뉴의 확장 상태는 isNavbarExpanded와 별도로 관리할 수 있습니다.
-              // 여기서는 기존 로직 유지를 위해 isNavbarExpanded를 그대로 사용합니다.
-              setIsNavbarExpanded(!isNavbarExpanded);
+              // window.location.href = '/login';
+              setIsLoggedIn(true); // 임시로 로그인 상태 변경
             }}
-            aria-expanded={isNavbarExpanded}
-            aria-haspopup='true'
           >
-            <span className='iconify=[ant-design--user-outlined] h-6 w-6'></span>
-          </button>
-          {isNavbarExpanded && ( // isNavbarExpanded 상태에 따라 드롭다운 메뉴 표시
-            <div className='absolute right-0 z-50 mt-2 w-48 rounded-md bg-white py-1 shadow-lg'>
-              <div className='block px-4 py-2 text-left text-sm whitespace-pre-wrap text-gray-700'>
-                {user.email || '이메일 없음'}
-              </div>
-              <Link
-                to='/profile'
-                className='block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100'
-              >
-                회원정보
-              </Link>
-              <button
-                onClick={handleLogout}
-                className='block w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100'
-              >
-                로그아웃
-              </button>
-            </div>
-          )}
+            <span className='iconify-[solar--login-3-line-duotone] h-6 w-6' />
+            로그인
+          </Button>
         </div>
       );
     }
-    // 로그인 상태가 아닐 때 로그인 버튼을 표시합니다.
     return (
-      <Link to='/login'>
-        <button className='flex h-12 w-12 items-center justify-center rounded-full border-2 border-white p-2 text-2xl text-white transition-colors duration-200 hover:bg-white/20'>
-          <span className='iconify=[ant-design--user-outlined] h-6 w-6'></span>
-        </button>
-      </Link>
+      // 로그인 상태일 때 드롭다운 메뉴를 표시합니다.
+      <div className='relative'>
+        {/* 드롭다운 위치 지정을 위한 relative */}
+        <Button
+          variant='ghost'
+          size='sm'
+          className='flex items-center justify-center p-2 transition-colors duration-200 hover:opacity-50'
+          onClick={(): void => {
+            // 드롭다운 메뉴의 확장 상태는 isNavbarExpanded와 별도로 관리할 수 있습니다.
+            // 여기서는 기존 로직 유지를 위해 isNavbarExpanded를 그대로 사용합니다.
+            setIsNavbarExpanded(!isNavbarExpanded);
+          }}
+          aria-expanded={isNavbarExpanded}
+          aria-haspopup='true'
+        >
+          <Avatar className='h-8 w-8'>
+            <AvatarFallback>
+              <span className='iconify-[f7--person-circle] h-8 w-8'></span>
+            </AvatarFallback>
+          </Avatar>
+        </Button>
+        {isNavbarExpanded && ( // isNavbarExpanded 상태에 따라 드롭다운 메뉴 표시
+          <div className='absolute right-0 z-50 mt-2 w-48 rounded-md bg-white py-1 shadow-lg dark:bg-neutral-800 dark:text-white'>
+            <div className='block px-4 py-2 text-left text-sm whitespace-pre-wrap'>
+              {user?.user_metadata.email || '이메일 없음'}
+            </div>
+            <a
+              href='/profile'
+              className='block rounded-md px-4 py-2 text-sm hover:bg-neutral-100 dark:text-white dark:hover:bg-neutral-700'
+            >
+              회원정보
+            </a>
+            <Button
+              variant='secondary'
+              onClick={(): void => {
+                handleLogout();
+              }}
+              className='block w-full px-4 py-2 text-left text-sm hover:bg-neutral-100 dark:hover:bg-neutral-700'
+            >
+              로그아웃
+            </Button>
+          </div>
+        )}
+      </div>
     );
   };
 
@@ -103,66 +124,48 @@ export default function NavigationBar(): JSX.Element {
     <nav
       // Tailwind CSS
       // py-3: 상하 패딩
-      className='relative z-40 h-24 bg-[#5193d9] py-3 shadow' // 다른 요소 위에 표시
+      className='bg-background/95 supports-backdrop-filter:bg-background/60 sticky top-0 z-50 w-full border-b backdrop-blur'
     >
-      <div className='container mx-auto flex h-full items-center justify-between px-4'>
-        {' '}
-        {/* 모바일 메뉴 토글 버튼 */}
-        <button
-          className='text-3xl text-white focus:outline-none lg:hidden' // 큰 화면에서는 숨김
-          onClick={(): void => {
-            setIsNavbarExpanded(!isNavbarExpanded);
-          }}
-          aria-controls='basic-navbar-nav'
-          aria-expanded={isNavbarExpanded}
-        >
-          &#9776; {/* 메뉴 토글 */}
-        </button>
+      <div className='container mx-auto flex h-16 items-center justify-between px-4'>
         {/* 로고 영역 */}
-        <Link to='/' className='mr-3 shrink-0 rounded px-2 py-1 text-white'>
+        <a href='/' className='flex items-center space-x-2'>
           <img
             src={mainLogo}
             alt='Logo'
-            className='h-16' // 로고 크기 설정
+            className='h-12' // 로고 크기 설정
           />
-        </Link>
-        {/* 모바일에서만 보이는 회원 버튼 */}
-        <div className='lg:hidden'>{memberBtn()}</div>
-        {/* 네비게이션 메뉴 (모바일에서는 숨겨지고, 메뉴 클릭 시 토글) */}
-        <div
-          id='basic-navbar-nav'
-          className={`lg:flex lg:grow lg:items-center lg:justify-between ${
-            isNavbarExpanded
-              ? 'absolute top-24 left-0 block w-full bg-[#5193d9] py-4 shadow-lg lg:relative lg:top-auto lg:py-0 lg:shadow-none'
-              : 'hidden'
-          }`}
-          // 모바일에서 확장 시 전체 너비, 배경색, 그림자 추가
-        >
-          <div className='flex flex-col lg:ml-auto lg:flex-row'>
-            {' '}
-            <Link
-              to='/'
-              className='mr-2 mb-2 flex items-center rounded-md border-2 border-white px-3 py-2 text-white transition-colors duration-200 hover:bg-white/20 lg:mb-0' // 모바일에서 마진 추가
+          <span className='font-bungee bg-linear-to-r from-indigo-600 to-sky-600 bg-clip-text text-2xl font-bold text-transparent'>
+            COBLOCKS
+          </span>
+        </a>
+
+        <div id='basic-navbar-nav' className='hidden items-center space-x-1 md:flex'>
+          {navMenuItem.map((item) => (
+            <Button
+              key={item.id}
+              variant={activePageId === item.id ? 'default' : 'ghost'}
+              size='sm'
               onClick={(): void => {
-                setIsNavbarExpanded(false);
+                if (activePageId === item.id) return;
+                window.location.href = item.link;
               }}
+              className='flex items-center space-x-2'
             >
-              <span className='iconify-[ant-design--home-filled] mr-1 text-xl'></span> 홈
-            </Link>
-            <Link
-              to='/classroomSetup'
-              className='mr-2 flex items-center rounded-md border-2 border-white px-3 py-2 text-white transition-colors duration-200 hover:bg-white/20'
-              onClick={(): void => {
-                setIsNavbarExpanded(false);
-              }}
-            >
-              <span className='iconify-[fa-solid--school] mr-1 h-6 w-5'></span>
-              강의실
-            </Link>
+              <span className={`${item.icon} h-4 w-4`}></span>
+              {item.label}
+            </Button>
+          ))}
+        </div>
+
+        {/* 우측 메뉴 */}
+        <div className='flex items-center space-x-4'>
+          <div className='flex items-center space-x-2'>
+            <span className='iconify-[humbleicons--sun] h-4 w-4' />
+            <Switch id='theme-toggle' checked={isSwitchOn} onCheckedChange={switchTheme} />
+            <span className='iconify-[humbleicons--moon] h-4 w-4' />
           </div>
 
-          {/* 데스크탑에서만 보이는 회원 버튼 (메뉴 오른쪽) */}
-          <div className='ml-auto hidden items-center lg:flex'>{memberBtn()}</div>
+          <MemberBtn />
         </div>
       </div>
     </nav>

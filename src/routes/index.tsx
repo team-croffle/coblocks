@@ -1,7 +1,9 @@
-import { createFileRoute } from '@tanstack/react-router';
-import { Badge } from '@/components/ui/badge';
 import mainlogo from '@/assets/images/Logo/mainlogo-bg-tp.png';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { mainFeatures } from '@/data/mainFeatures';
+import { createFileRoute } from '@tanstack/react-router';
 
 // @ts-ignore
 export const Route = createFileRoute('/')({

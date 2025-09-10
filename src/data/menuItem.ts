@@ -1,11 +1,11 @@
-export type MenuItem = {
+export interface MenuItem {
   id: string;
   label: string;
   link: string;
   icon: string;
-};
+}
 
-export const menuItem: MenuItem[] = [
+export const menuItems: MenuItem[] = [
   {
     id: 'home',
     label: '홈',
