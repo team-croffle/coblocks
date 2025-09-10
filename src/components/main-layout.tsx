@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { type JSX } from 'react';
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -6,7 +6,7 @@ interface MainLayoutProps {
 
 export default function MainLayout({ children }: MainLayoutProps): JSX.Element {
   return (
-    <main className='relative flex-grow bg-[linear-gradient(-5deg,rgb(202,244,255)_10%,rgb(160,222,255)_50%,rgb(90,178,255)_100%)]'>
+    <main className='relative grow bg-[linear-gradient(-5deg,rgb(202,244,255)_10%,rgb(160,222,255)_50%,rgb(90,178,255)_100%)]'>
       {/* 2. 페이지 콘텐츠(children)는 main 바로 아래에 위치시킵니다. */}
       <div className='relative z-10 mx-auto max-w-4xl px-4 py-12'>{children}</div>
 

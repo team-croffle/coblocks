@@ -1,14 +1,12 @@
-import { useEffect, useState } from 'react';
-import { AiOutlineUser, AiFillHome } from 'react-icons/ai';
-import { FaSchool } from 'react-icons/fa';
-import { Link } from '@remix-run/react';
-import { supabase } from '~/utils/supabase.client';
+import { useEffect, useState, type JSX } from 'react';
+import { Link } from '@tanstack/react-router';
+import { supabase } from '@/utils/supabase';
 import type { User } from '@supabase/supabase-js';
 import mainLogo from '../assets/images/Logo/minilogo-bg-tp.png';
 
-interface NavigationBarProps {
-  user: User | null; // 사용자 정보 (로그인 상태에 따라 null일 수 있음)
-}
+// interface NavigationBarProps {
+//   user: User | null; // 사용자 정보 (로그인 상태에 따라 null일 수 있음)
+// }
 
 // 2. 가짜 Supabase 객체는 완전히 삭제합니다.
 
@@ -58,7 +56,7 @@ export default function NavigationBar(): JSX.Element {
           {' '}
           {/* 드롭다운 위치 지정을 위한 relative */}
           <button
-            className='flex items-center justify-center p-2 border-2 border-white rounded-full text-white w-12 h-12 text-2xl hover:bg-white/20 transition-colors duration-200'
+            className='flex h-12 w-12 items-center justify-center rounded-full border-2 border-white p-2 text-2xl text-white transition-colors duration-200 hover:bg-white/20'
             onClick={(): void => {
               // 드롭다운 메뉴의 확장 상태는 isNavbarExpanded와 별도로 관리할 수 있습니다.
               // 여기서는 기존 로직 유지를 위해 isNavbarExpanded를 그대로 사용합니다.
@@ -67,11 +65,11 @@ export default function NavigationBar(): JSX.Element {
             aria-expanded={isNavbarExpanded}
             aria-haspopup='true'
           >
-            <AiOutlineUser /> {/* 사용자 아이콘 */}
+            <span className='iconify=[ant-design--user-outlined] h-6 w-6'></span>
           </button>
           {isNavbarExpanded && ( // isNavbarExpanded 상태에 따라 드롭다운 메뉴 표시
-            <div className='absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50'>
-              <div className='block px-4 py-2 text-sm text-gray-700 text-left whitespace-pre-wrap'>
+            <div className='absolute right-0 z-50 mt-2 w-48 rounded-md bg-white py-1 shadow-lg'>
+              <div className='block px-4 py-2 text-left text-sm whitespace-pre-wrap text-gray-700'>
                 {user.email || '이메일 없음'}
               </div>
               <Link
@@ -82,7 +80,7 @@ export default function NavigationBar(): JSX.Element {
               </Link>
               <button
                 onClick={handleLogout}
-                className='block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100'
+                className='block w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100'
               >
                 로그아웃
               </button>
@@ -94,8 +92,8 @@ export default function NavigationBar(): JSX.Element {
     // 로그인 상태가 아닐 때 로그인 버튼을 표시합니다.
     return (
       <Link to='/login'>
-        <button className='flex items-center justify-center p-2 border-2 border-white rounded-full text-white w-12 h-12 text-2xl hover:bg-white/20 transition-colors duration-200'>
-          <AiOutlineUser /> {/* 사용자 아이콘 */}
+        <button className='flex h-12 w-12 items-center justify-center rounded-full border-2 border-white p-2 text-2xl text-white transition-colors duration-200 hover:bg-white/20'>
+          <span className='iconify=[ant-design--user-outlined] h-6 w-6'></span>
         </button>
       </Link>
     );
@@ -105,13 +103,13 @@ export default function NavigationBar(): JSX.Element {
     <nav
       // Tailwind CSS
       // py-3: 상하 패딩
-      className='shadow py-3 bg-[#5193d9] h-24 relative z-40' // 다른 요소 위에 표시
+      className='relative z-40 h-24 bg-[#5193d9] py-3 shadow' // 다른 요소 위에 표시
     >
-      <div className='container mx-auto px-4 flex items-center justify-between h-full'>
+      <div className='container mx-auto flex h-full items-center justify-between px-4'>
         {' '}
         {/* 모바일 메뉴 토글 버튼 */}
         <button
-          className='lg:hidden text-white text-3xl focus:outline-none' // 큰 화면에서는 숨김
+          className='text-3xl text-white focus:outline-none lg:hidden' // 큰 화면에서는 숨김
           onClick={(): void => {
             setIsNavbarExpanded(!isNavbarExpanded);
           }}
@@ -121,10 +119,7 @@ export default function NavigationBar(): JSX.Element {
           &#9776; {/* 메뉴 토글 */}
         </button>
         {/* 로고 영역 */}
-        <Link
-          to='/'
-          className='flex-shrink-0 text-white rounded px-2 py-1 mr-3'
-        >
+        <Link to='/' className='mr-3 shrink-0 rounded px-2 py-1 text-white'>
           <img
             src={mainLogo}
             alt='Logo'
@@ -136,38 +131,38 @@ export default function NavigationBar(): JSX.Element {
         {/* 네비게이션 메뉴 (모바일에서는 숨겨지고, 메뉴 클릭 시 토글) */}
         <div
           id='basic-navbar-nav'
-          className={`lg:flex lg:flex-grow lg:items-center lg:justify-between ${
+          className={`lg:flex lg:grow lg:items-center lg:justify-between ${
             isNavbarExpanded
-              ? 'block absolute top-24 left-0 w-full bg-[#5193d9] shadow-lg py-4 lg:relative lg:top-auto lg:shadow-none lg:py-0'
+              ? 'absolute top-24 left-0 block w-full bg-[#5193d9] py-4 shadow-lg lg:relative lg:top-auto lg:py-0 lg:shadow-none'
               : 'hidden'
           }`}
           // 모바일에서 확장 시 전체 너비, 배경색, 그림자 추가
         >
-          <div className='flex flex-col lg:flex-row lg:ml-auto'>
+          <div className='flex flex-col lg:ml-auto lg:flex-row'>
             {' '}
             <Link
               to='/'
-              className='text-white rounded px-3 py-2 mr-2 flex items-center border-2 border-white rounded-md hover:bg-white/20 transition-colors duration-200 mb-2 lg:mb-0' // 모바일에서 마진 추가
+              className='mr-2 mb-2 flex items-center rounded-md border-2 border-white px-3 py-2 text-white transition-colors duration-200 hover:bg-white/20 lg:mb-0' // 모바일에서 마진 추가
               onClick={(): void => {
                 setIsNavbarExpanded(false);
               }}
             >
-              <AiFillHome className='text-xl mr-1' /> 홈
+              <span className='iconify-[ant-design--home-filled] mr-1 text-xl'></span> 홈
             </Link>
             <Link
               to='/classroomSetup'
-              className='text-white rounded px-3 py-2 mr-2 flex items-center border-2 border-white rounded-md hover:bg-white/20 transition-colors duration-200'
+              className='mr-2 flex items-center rounded-md border-2 border-white px-3 py-2 text-white transition-colors duration-200 hover:bg-white/20'
               onClick={(): void => {
                 setIsNavbarExpanded(false);
               }}
             >
-              <FaSchool className='text-xl mr-1' />
+              <span className='iconify-[fa-solid--school] mr-1 h-6 w-5'></span>
               강의실
             </Link>
           </div>
 
           {/* 데스크탑에서만 보이는 회원 버튼 (메뉴 오른쪽) */}
-          <div className='hidden lg:flex items-center ml-auto'>{memberBtn()}</div>
+          <div className='ml-auto hidden items-center lg:flex'>{memberBtn()}</div>
         </div>
       </div>
     </nav>

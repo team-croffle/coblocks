@@ -1,18 +1,19 @@
-import { Link } from '@remix-run/react';
+import type { JSX } from 'react';
+import { Link } from '@tanstack/react-router';
 
 export default function Footer(): JSX.Element {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className='bg-black text-white py-2 text-sm z-50'>
+    <footer className='z-50 bg-black py-2 text-sm text-white'>
       <div className='container mx-auto px-4 text-center'>
-        <div className='flex flex-col items-center justify-center space-y-1 md:space-y-0 md:flex-row md:space-x-4'>
+        <div className='flex flex-col items-center justify-center space-y-1 md:flex-row md:space-y-0 md:space-x-4'>
           <p className='mb-0'>
             <strong className='whitespace-nowrap'>Create by Team.Croffle</strong>
             <span className='hidden md:inline'> | </span>
             <Link
               to='/developer-info'
-              className='text-white underline hover:no-underline whitespace-nowrap'
+              className='whitespace-nowrap text-white underline hover:no-underline'
             >
               팀원소개
             </Link>
@@ -24,7 +25,7 @@ export default function Footer(): JSX.Element {
               href='https://www.wku.ac.kr/'
               target='_blank'
               rel='noopener noreferrer'
-              className='text-white underline hover:no-underline whitespace-nowrap'
+              className='whitespace-nowrap text-white underline hover:no-underline'
             >
               원광대학교
             </a>
