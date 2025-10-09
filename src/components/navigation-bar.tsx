@@ -4,8 +4,22 @@ import { Avatar, AvatarFallback } from './ui/avatar';
 import { Switch } from './ui/switch';
 import mainLogo from '../assets/images/Logo/minilogo-bg-tp.png';
 // import { useUserStore } from '@/store/userStore';
-import { useNavStore } from '@/store/navStore';
 import { useThemeStore } from '@/store/themeStore';
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuItem,
+} from './ui/dropdown-menu';
+import {
+  NavigationMenu,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+} from './ui/navigation-menu';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 // interface NavigationBarProps {
 //   user: User | null; // 사용자 정보 (로그인 상태에 따라 null일 수 있음)
@@ -14,32 +28,34 @@ import { useThemeStore } from '@/store/themeStore';
 // 2. 가짜 Supabase 객체는 완전히 삭제합니다.
 
 export default function NavigationBar(): JSX.Element {
+  const isMobile = useIsMobile();
+
   const isAppThemeDark = useThemeStore((state) => state.isAppThemeDark);
   const switchTheme = useThemeStore((state) => state.toggleAppTheme);
+
   const [isSwitchOn, setIsSwitchOn] = useState<boolean>(false);
-
-  const navMenuItem = useNavStore((state) => state);
-  const [isNavbarExpanded, setIsNavbarExpanded] = useState<boolean>(false); // 네비게이션 바 확장 상태
-
   const [activePageId, setActivePageId] = useState<string | null>(null);
 
   // const isLoggedIn = useUserStore((state) => state.isLoggedIn);
   // const user = useUserStore((state) => state.user);
   // const signOut = useUserStore((state) => state.logout);
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false); // 임시로 로그인 상태를 설정
   const user = { user_metadata: { email: 'test@example.com' } }; // 임시 사용자 데이터
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false); // 임시로 로그인 상태를 설정
 
   const handleLogout = async (): Promise<void> => {
     // signOut();
-    setIsNavbarExpanded(false); // 로그아웃 후 네비게이션 바 닫기
     setIsLoggedIn(false); // 임시로 로그아웃 상태 변경
   };
 
-  // useEffect(() => {
-  //   console.log(navMenuItem);
-  //   console.log($isLoggedIn);
-  //   console.log(isThemeDark);
-  // }, [navMenuItem]);
+  function getClassPrimaryMenuItem(isActive: boolean): string {
+    const activeClass = isActive
+      ? 'bg-primary text-primary-foreground hover:bg-primary/80 hover:text-primary-foreground focus:bg-primary/80 focus:text-primary-foreground outline-none'
+      : '';
+    return (
+      'group inline-flex h-9 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium ' +
+      activeClass
+    );
+  }
 
   useEffect(() => {
     setIsSwitchOn(isAppThemeDark);
@@ -47,9 +63,9 @@ export default function NavigationBar(): JSX.Element {
 
   useEffect(() => {
     const currentPath = window.location.pathname;
-    const currentPage = navMenuItem.find((item) => item.link === currentPath);
-    if (currentPage) {
-      setActivePageId(currentPage.id);
+    console.log('Current Path:', currentPath);
+    if (currentPath) {
+      setActivePageId(currentPath);
     }
   }, []); // 컴포넌트 마운트 시에만 실행
 
@@ -60,7 +76,7 @@ export default function NavigationBar(): JSX.Element {
         <div className='relative'>
           <Button
             variant='outline'
-            className='flex items-center justify-center p-2 transition-colors duration-200 hover:opacity-50'
+            className='hover:bg-accent hover:text-accent-foreground flex items-center justify-center p-2 transition-colors duration-200'
             onClick={(): void => {
               // window.location.href = '/login';
               setIsLoggedIn(true); // 임시로 로그인 상태 변경
@@ -75,47 +91,22 @@ export default function NavigationBar(): JSX.Element {
     return (
       // 로그인 상태일 때 드롭다운 메뉴를 표시합니다.
       <div className='relative'>
-        {/* 드롭다운 위치 지정을 위한 relative */}
-        <Button
-          variant='ghost'
-          size='sm'
-          className='flex items-center justify-center p-2 transition-colors duration-200 hover:opacity-50'
-          onClick={(): void => {
-            // 드롭다운 메뉴의 확장 상태는 isNavbarExpanded와 별도로 관리할 수 있습니다.
-            // 여기서는 기존 로직 유지를 위해 isNavbarExpanded를 그대로 사용합니다.
-            setIsNavbarExpanded(!isNavbarExpanded);
-          }}
-          aria-expanded={isNavbarExpanded}
-          aria-haspopup='true'
-        >
-          <Avatar className='h-8 w-8'>
-            <AvatarFallback>
-              <span className='iconify-[f7--person-circle] h-8 w-8'></span>
-            </AvatarFallback>
-          </Avatar>
-        </Button>
-        {isNavbarExpanded && ( // isNavbarExpanded 상태에 따라 드롭다운 메뉴 표시
-          <div className='absolute right-0 z-50 mt-2 w-48 rounded-md bg-white py-1 shadow-lg dark:bg-neutral-800 dark:text-white'>
-            <div className='block px-4 py-2 text-left text-sm whitespace-pre-wrap'>
-              {user?.user_metadata.email || '이메일 없음'}
-            </div>
-            <a
-              href='/profile'
-              className='block rounded-md px-4 py-2 text-sm hover:bg-neutral-100 dark:text-white dark:hover:bg-neutral-700'
-            >
-              회원정보
-            </a>
-            <Button
-              variant='secondary'
-              onClick={(): void => {
-                handleLogout();
-              }}
-              className='block w-full px-4 py-2 text-left text-sm hover:bg-neutral-100 dark:hover:bg-neutral-700'
-            >
-              로그아웃
-            </Button>
-          </div>
-        )}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Avatar className='h-8 w-8'>
+              <AvatarFallback>
+                <span className='iconify-[f7--person-circle] hover:text-muted-foreground h-8 w-8'></span>
+              </AvatarFallback>
+            </Avatar>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent>
+            <DropdownMenuLabel>My Account</DropdownMenuLabel>
+            <DropdownMenuItem disabled>{user?.user_metadata.email}</DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem>회원정보</DropdownMenuItem>
+            <DropdownMenuItem onSelect={handleLogout}>로그아웃</DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     );
   };
@@ -139,29 +130,46 @@ export default function NavigationBar(): JSX.Element {
           </span>
         </a>
 
-        <div id='basic-navbar-nav' className='hidden items-center space-x-1 md:flex'>
-          {navMenuItem.map((item) => (
-            <Button
-              key={item.id}
-              variant={activePageId === item.id ? 'default' : 'ghost'}
-              size='sm'
-              onClick={(): void => {
-                if (activePageId === item.id) return;
-                window.location.href = item.link;
-              }}
-              className='flex items-center space-x-2'
-            >
-              <span className={`${item.icon} h-4 w-4`}></span>
-              {item.label}
-            </Button>
-          ))}
-        </div>
+        {/* 중앙 네비게이션 메뉴 */}
+        <NavigationMenu viewport={isMobile}>
+          <NavigationMenuList className='flex-wrap gap-2'>
+            <NavigationMenuItem>
+              <NavigationMenuLink
+                href='/'
+                className={`${getClassPrimaryMenuItem(activePageId === '/')} flex-row gap-2`}
+              >
+                <span className='iconify-[fa-solid--home] h-4 w-4'></span>홈
+              </NavigationMenuLink>
+            </NavigationMenuItem>
+            <NavigationMenuItem>
+              <NavigationMenuLink
+                href='/algorithm'
+                className={`${getClassPrimaryMenuItem(activePageId === '/algorithm')} flex-row gap-2`}
+              >
+                <span className='iconify-[fa7-solid--puzzle-piece] h-4 w-4'></span>알고리즘
+              </NavigationMenuLink>
+            </NavigationMenuItem>
+            <NavigationMenuItem>
+              <NavigationMenuLink
+                href='/about'
+                className={`${getClassPrimaryMenuItem(activePageId === '/about')} flex-row gap-2`}
+              >
+                <span className='iconify-[fa-solid--info-circle] h-4 w-4'></span>소개
+              </NavigationMenuLink>
+            </NavigationMenuItem>
+          </NavigationMenuList>
+        </NavigationMenu>
 
         {/* 우측 메뉴 */}
         <div className='flex items-center space-x-4'>
           <div className='flex items-center space-x-2'>
             <span className='iconify-[humbleicons--sun] h-4 w-4' />
-            <Switch id='theme-toggle' checked={isSwitchOn} onCheckedChange={switchTheme} />
+            <Switch
+              id='theme-toggle'
+              className='hover:cursor-pointer'
+              checked={isSwitchOn}
+              onCheckedChange={switchTheme}
+            />
             <span className='iconify-[humbleicons--moon] h-4 w-4' />
           </div>
 
