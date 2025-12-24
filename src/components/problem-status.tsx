@@ -1,21 +1,13 @@
 import { Card, CardContent } from '@/components/ui/card';
-import { useAlgorithmSearchStore } from '@/store/searchStore';
-import { useEffect, useState } from 'react';
 import { Spinner } from './ui/spinner';
+import type { AlgorithmProblem } from '@/store/searchStore.type';
 
-export default function ProblemStatus() {
-  const problems = useAlgorithmSearchStore((state) => state.algorithmProblems);
-  const updateProblems = useAlgorithmSearchStore((state) => state.updateProblems);
+interface ProblemStatusProps {
+  problems: AlgorithmProblem[];
+  isLoading: boolean;
+}
 
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-
-  useEffect(() => {
-    (async () => {
-      await updateProblems();
-      setIsLoading(false);
-    })();
-  }, [updateProblems]);
-
+export default function ProblemStatus({ problems, isLoading }: ProblemStatusProps) {
   const totalProblems = problems.length;
   const completedProblems = problems.filter((problem) => problem.isCompleted);
   const completionRate =

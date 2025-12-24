@@ -1,12 +1,27 @@
 import { createFileRoute } from '@tanstack/react-router';
 import ProblemStatus from '@/components/problem-status';
 import SearchFilter from '@/components/search-filter';
+import { ProblemList } from '@/components/algorithm/problem-list';
+import { useEffect, useState } from 'react';
+import { useAlgorithmSearchStore } from '@/store/searchStore';
 
 export const Route = createFileRoute('/algorithm/')({
   component: RouteComponent,
 });
 
 function RouteComponent() {
+  const problems = useAlgorithmSearchStore((state) => state.algorithmProblems);
+  const updateProblems = useAlgorithmSearchStore((state) => state.updateProblems);
+
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+
+  useEffect(() => {
+    (async () => {
+      await updateProblems();
+      setIsLoading(false);
+    })();
+  }, [updateProblems]);
+
   return (
     <>
       <section className='min-h-screen py-8'>
@@ -23,7 +38,8 @@ function RouteComponent() {
             </p>
           </div>
           <SearchFilter />
-          <ProblemStatus />
+          <ProblemStatus problems={problems} isLoading={isLoading} />
+          <ProblemList filteredProblems={problems} />
         </div>
       </section>
     </>
