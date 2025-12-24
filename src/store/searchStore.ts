@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
 import type { AlgorithmProblem } from './searchStore.type';
+import mockData from '@/data/mock/problem.mock.json';
 
 interface AlgorithmProblemList {
   algorithmProblems: AlgorithmProblem[];
@@ -12,18 +13,21 @@ export const useAlgorithmSearchStore = create(
     return {
       algorithmProblems: [],
       updateProblems: async () => {
-        fetch('https://my-json-server.typicode.com/Team-Croffle/coblocks-mock-api/algorithmList')
-          .then((resp) => {
-            return resp.json();
-          })
-          .then((data) => {
-            set((state) => {
-              state.algorithmProblems = data;
-            });
-          })
-          .catch((err) => {
-            console.error('Failed to fetch algorithm problems:', err);
-          });
+        // fetch('@/data/mock/problem.mock.json')
+        // .then((resp) => {
+        //   return resp.json();
+        // })
+        // .then((data) => {
+        //   set((state) => {
+        //     state.algorithmProblems = data;
+        //   });
+        // })
+        // .catch((err) => {
+        //   console.error('Failed to fetch algorithm problems:', err);
+        // });
+        set((state) => {
+          state.algorithmProblems = mockData as AlgorithmProblem[];
+        });
       },
     };
   }),

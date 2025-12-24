@@ -10,8 +10,16 @@ export default function ProblemStatus() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    updateProblems().then(() => setIsLoading(false));
+    (async () => {
+      await updateProblems();
+      setIsLoading(false);
+    })();
   }, [updateProblems]);
+
+  const totalProblems = problems.length;
+  const completedProblems = problems.filter((problem) => problem.isCompleted);
+  const completionRate =
+    totalProblems === 0 ? 0 : Math.round((completedProblems.length / totalProblems) * 100);
 
   return (
     <div className='grid grid-cols-2 gap-4 md:grid-cols-4'>
@@ -23,7 +31,7 @@ export default function ProblemStatus() {
             </div>
           ) : (
             <>
-              <div className='text-primary text-2xl font-bold'>{problems.length}</div>
+              <div className='text-primary text-2xl font-bold'>{totalProblems}</div>
               <div className='text-muted-foreground text-sm'>전체 문제</div>
             </>
           )}
@@ -37,9 +45,7 @@ export default function ProblemStatus() {
             </div>
           ) : (
             <>
-              <div className='text-2xl font-bold text-green-600'>
-                {problems.filter((problem) => problem.isCompleted).length}
-              </div>
+              <div className='text-2xl font-bold text-green-600'>{completedProblems.length}</div>
               <div className='text-muted-foreground text-sm'>해결한 문제</div>
             </>
           )}
@@ -53,13 +59,7 @@ export default function ProblemStatus() {
             </div>
           ) : (
             <>
-              <div className='text-2xl font-bold text-orange-600'>
-                {Math.round(
-                  (problems.filter((problem) => problem.isCompleted).length / problems.length) *
-                    100,
-                ) || 0}
-                %
-              </div>
+              <div className='text-2xl font-bold text-orange-600'>{completionRate}%</div>
               <div className='text-muted-foreground text-sm'>해결 진행도</div>
             </>
           )}

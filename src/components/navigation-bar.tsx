@@ -63,7 +63,6 @@ export default function NavigationBar(): JSX.Element {
 
   useEffect(() => {
     const currentPath = window.location.pathname;
-    console.log('Current Path:', currentPath);
     if (currentPath) {
       setActivePageId(currentPath);
     }
