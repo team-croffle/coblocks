@@ -14,7 +14,7 @@ export default function ProblemStatus({ problems, isLoading }: ProblemStatusProp
     totalProblems === 0 ? 0 : Math.round((completedProblems.length / totalProblems) * 100);
 
   return (
-    <div className='grid grid-cols-2 gap-4 md:grid-cols-4'>
+    <div className='mb-8 grid grid-cols-2 gap-4 md:grid-cols-4'>
       <Card>
         <CardContent className='pt-6 text-center'>
           {isLoading ? (
