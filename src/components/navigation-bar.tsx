@@ -20,6 +20,7 @@ import {
   NavigationMenuList,
 } from './ui/navigation-menu';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { Link, useNavigate } from '@tanstack/react-router';
 
 // interface NavigationBarProps {
 //   user: User | null; // 사용자 정보 (로그인 상태에 따라 null일 수 있음)
@@ -41,6 +42,8 @@ export default function NavigationBar(): JSX.Element {
   // const signOut = useUserStore((state) => state.logout);
   const user = { user_metadata: { email: 'test@example.com' } }; // 임시 사용자 데이터
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false); // 임시로 로그인 상태를 설정
+
+  const navigate = useNavigate();
 
   const handleLogout = async (): Promise<void> => {
     // signOut();
@@ -78,7 +81,8 @@ export default function NavigationBar(): JSX.Element {
             className='hover:bg-accent hover:text-accent-foreground flex items-center justify-center p-2 transition-colors duration-200'
             onClick={(): void => {
               // window.location.href = '/login';
-              setIsLoggedIn(true); // 임시로 로그인 상태 변경
+              navigate({ to: '/login' });
+              // setIsLoggedIn(true); // 임시로 로그인 상태 변경
             }}
           >
             <span className='iconify-[solar--login-3-line-duotone] h-6 w-6' />
@@ -118,7 +122,7 @@ export default function NavigationBar(): JSX.Element {
     >
       <div className='container mx-auto flex h-16 items-center justify-between px-4'>
         {/* 로고 영역 */}
-        <a href='/' className='flex items-center space-x-2'>
+        <Link to='/' className='flex items-center space-x-2'>
           <img
             src={mainLogo}
             alt='Logo'
@@ -127,7 +131,7 @@ export default function NavigationBar(): JSX.Element {
           <span className='font-bungee bg-linear-to-r from-indigo-600 to-sky-600 bg-clip-text text-2xl font-bold text-transparent'>
             COBLOCKS
           </span>
-        </a>
+        </Link>
 
         {/* 중앙 네비게이션 메뉴 */}
         <NavigationMenu viewport={isMobile}>

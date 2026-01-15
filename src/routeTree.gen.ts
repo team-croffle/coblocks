@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AlgorithmIndexRouteImport } from './routes/algorithm/index'
+import { Route as AuthLoginRouteImport } from './routes/_auth/login'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -22,30 +23,39 @@ const AlgorithmIndexRoute = AlgorithmIndexRouteImport.update({
   path: '/algorithm/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthLoginRoute = AuthLoginRouteImport.update({
+  id: '/_auth/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/login': typeof AuthLoginRoute
   '/algorithm': typeof AlgorithmIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/login': typeof AuthLoginRoute
   '/algorithm': typeof AlgorithmIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_auth/login': typeof AuthLoginRoute
   '/algorithm/': typeof AlgorithmIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/algorithm'
+  fullPaths: '/' | '/login' | '/algorithm'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/algorithm'
-  id: '__root__' | '/' | '/algorithm/'
+  to: '/' | '/login' | '/algorithm'
+  id: '__root__' | '/' | '/_auth/login' | '/algorithm/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthLoginRoute: typeof AuthLoginRoute
   AlgorithmIndexRoute: typeof AlgorithmIndexRoute
 }
 
@@ -65,11 +75,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AlgorithmIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_auth/login': {
+      id: '/_auth/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof AuthLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthLoginRoute: AuthLoginRoute,
   AlgorithmIndexRoute: AlgorithmIndexRoute,
 }
 export const routeTree = rootRouteImport

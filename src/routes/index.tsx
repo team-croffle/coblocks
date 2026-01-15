@@ -12,7 +12,7 @@ export const Route = createFileRoute('/')({
 
 function RouteComponent() {
   return (
-    <>
+    <main>
       {/* Hero Section */}
       <section className='relative overflow-hidden bg-linear-to-br from-purple-100 via-blue-100 to-sky-100 dark:from-purple-900/30 dark:via-blue-900/30 dark:to-sky-900/30'>
         <div className='container mx-auto px-4 py-20'>
@@ -110,6 +110,6 @@ function RouteComponent() {
           </Button>
         </div>
       </section>
-    </>
+    </main>
   );
 }

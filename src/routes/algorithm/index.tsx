@@ -23,7 +23,7 @@ function RouteComponent() {
   }, [updateProblems]);
 
   return (
-    <>
+    <main>
       <section className='min-h-screen py-8'>
         <div className='container mx-auto px-4'>
           <div className='mb-12 text-center'>
@@ -42,6 +42,6 @@ function RouteComponent() {
           <ProblemList filteredProblems={problems} />
         </div>
       </section>
-    </>
+    </main>
   );
 }
