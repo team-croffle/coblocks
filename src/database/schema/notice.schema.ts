@@ -5,7 +5,7 @@ export const notice = pgTable('notice', {
   id: uuid('id').primaryKey().defaultRandom(),
   title: text('title').notNull(),
   content: text('content').notNull(),
-  authorId: uuid('author_id')
+  authorId: text('author_id') // Better Auth users.id는 text 타입
     .notNull()
     .references(() => users.id),
   isPinned: boolean('is_pinned').notNull().default(false),

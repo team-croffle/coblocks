@@ -1,4 +1,5 @@
 export * from './users.schema';
+export * from './auth.schema';
 export * from './chapter.schema';
 export * from './quest.schema';
 export * from './quest-detail.schema';

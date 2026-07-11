@@ -11,7 +11,7 @@ export const classroom = pgTable('classroom', {
   id: uuid('id').primaryKey().defaultRandom(),
   name: text('name').notNull(),
   code: text('code').notNull().unique(),
-  managerId: uuid('manager_id')
+  managerId: text('manager_id') // Better Auth users.id는 text 타입
     .notNull()
     .references(() => users.id),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),

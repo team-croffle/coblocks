@@ -1,4 +1,4 @@
-import { integer, jsonb, pgTable, timestamp, uuid } from 'drizzle-orm/pg-core';
+import { integer, jsonb, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core';
 import { users } from './users.schema';
 import { quest } from './quest.schema';
 import { classroom } from './classroom.schema';
@@ -17,7 +17,7 @@ import { classroom } from './classroom.schema';
  */
 export const storeQuest = pgTable('store_quest', {
   id: uuid('id').primaryKey().defaultRandom(),
-  userId: uuid('user_id')
+  userId: text('user_id') // Better Auth users.id는 text 타입
     .notNull()
     .references(() => users.id),
   questId: uuid('quest_id')

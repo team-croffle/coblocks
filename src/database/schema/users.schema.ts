@@ -1,13 +1,22 @@
-import { pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core';
+import { boolean, pgTable, text, timestamp } from 'drizzle-orm/pg-core';
 
+/**
+ * Better Auth 호환 users 테이블.
+ * id: Better Auth가 text 타입 ID를 사용 (advanced.generateId로 UUID 형식 생성).
+ * name, emailVerified, image: Better Auth 필수 필드.
+ * nickname, role: additionalFields로 등록한 커스텀 필드.
+ * password는 accounts 테이블에서 관리 (Better Auth 표준).
+ */
 export const users = pgTable('users', {
-  id: uuid('id').primaryKey().defaultRandom(),
+  id: text('id').primaryKey(),
+  name: text('name').notNull(),
   email: text('email').notNull().unique(),
-  nickname: text('nickname').notNull(),
-  passwordHash: text('password_hash'),
+  emailVerified: boolean('email_verified').notNull().default(false),
+  image: text('image'),
+  nickname: text('nickname'),
   role: text('role').notNull().default('student'), // 'student' | 'teacher' | 'admin'
-  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
-  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  createdAt: timestamp('created_at').notNull(),
+  updatedAt: timestamp('updated_at').notNull(),
 });
 
 export type User = typeof users.$inferSelect;
