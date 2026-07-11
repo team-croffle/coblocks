@@ -62,5 +62,5 @@ clientTest
 # yarn v4
 .yarn
 
-# AI generated files (tracked for cross-device continuity)
-# .ai
+# AI generated files
+.ai
