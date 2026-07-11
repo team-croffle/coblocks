@@ -33,11 +33,3 @@ export interface QuestEntity {
   };
 }
 
-// Supabase RPC 응답 타입
-export interface SupabaseRpcResponse<T> {
-  data: T[] | null;
-  error: {
-    message: string;
-    code?: string;
-  } | null;
-}

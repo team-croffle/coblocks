@@ -4,23 +4,17 @@ import { ClassroomService } from 'src/classroom/classroom.service';
 import { SelectProblemDto } from './activityDto/SelectProblem.dto';
 import { WsException } from '@nestjs/websockets';
 import { SubmitSolutionDto } from './activityDto/SubmitSolution.dto';
-import { SupabaseClient } from '@supabase/supabase-js';
-import { SupabaseService } from 'src/database/supabase.service';
 import { events } from 'src/utils/events';
 import { ActivityStateService } from './activity-state.service';
-import { QuestEntity, SupabaseRpcResponse } from 'src/types/quest.types';
+import { QuestEntity } from 'src/types/quest.types';
 import { getSocketUser } from 'src/types/socket.types';
 
 @Injectable()
 export class ActivityService {
-  private readonly supabase: SupabaseClient; // supabase 클라이언트를 담을 변수
   constructor(
     private readonly classroomService: ClassroomService,
     private readonly activityStateService: ActivityStateService,
-    private readonly supabaseService: SupabaseService,
-  ) {
-    this.supabase = this.supabaseService.getClient(); // supabase 클라이언트 초기화
-  }
+  ) {}
 
   private readonly MAX_PARTICIPANT = 4;
 
@@ -32,21 +26,11 @@ export class ActivityService {
       throw new WsException('해당 방을 찾을 수 없습니다.');
     }
 
-    const { data: questDetailsArray, error: rpcError } = (await this.supabase.rpc(
-      'get_quest_for_solving',
-      { p_quest_id: data.questId },
-    )) as SupabaseRpcResponse<QuestEntity>;
-
-    if (rpcError) {
-      console.error(`[Activity Service] Supabase RPC error:`, rpcError.message);
-      throw new WsException('문제를 불러오는 중 오류가 발생했습니다.');
-    }
-
-    if (!questDetailsArray || questDetailsArray.length === 0) {
+    // TODO: Drizzle ORM으로 교체 예정 (quest + quest_detail 조인 쿼리)
+    const questDetails = null as unknown as QuestEntity;
+    if (!questDetails) {
       throw new WsException('해당 ID의 문제를 찾을 수 없습니다.');
     }
-
-    const questDetails = questDetailsArray[0];
     // activityStateService 통해 방의 활동 상태 업데이트
     this.activityStateService.setSelectedQuest(room.id, questDetails);
 

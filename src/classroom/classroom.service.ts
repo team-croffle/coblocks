@@ -3,8 +3,6 @@ import { Classroom } from './classroom.interface';
 import { WsException } from '@nestjs/websockets';
 import { Participant } from './Participant.interface';
 import { Server } from 'socket.io';
-import { SupabaseService } from 'src/database/supabase.service';
-import { SupabaseClient } from '@supabase/supabase-js';
 import { events } from 'src/utils/events';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 
@@ -17,14 +15,9 @@ export class ClassroomService {
   private userRoomMap = new Map<string, string>(); // key: socketId, value: classroomId
   private roomRecoveryTimers = new Map<string, NodeJS.Timeout>(); // key: classroomId, value: timerId
 
-  private readonly supabase: SupabaseClient; // supabase 클라이언트를 담을 변수
-
   constructor(
-    private readonly eventEmitter: EventEmitter2, // 이벤트 발행을 위한 EventEmitter2
-    private readonly supabaseService: SupabaseService,
-  ) {
-    this.supabase = this.supabaseService.getClient(); // Supabase 클라이언트 초기화
-  }
+    private readonly eventEmitter: EventEmitter2,
+  ) {}
 
   // 방 생성
   createRoom(
@@ -356,20 +349,9 @@ export class ClassroomService {
   }
 
   // DB 삭제 전용 메서드
-  private async deleteRoomFromDBAsync(classroomId: string, roomId: string) {
-    try {
-      const { error: rpcError } = await this.supabase.rpc('handle_delete_classroom', {
-        target_classroom_id: classroomId,
-      });
-
-      if (rpcError) {
-        throw rpcError;
-      }
-      console.log(`[ClassroomService] Classroom ${roomId} deleted from DB successfully.`);
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      console.error(`[ClassroomService] DB delete error for ${roomId}: ${errorMessage}`);
-    }
+  // TODO: Drizzle ORM으로 교체 예정
+  private async deleteRoomFromDBAsync(_classroomId: string, _roomId: string) {
+    // placeholder — Drizzle 스키마 작성 후 구현
   }
 
   // --- 활동 관련 메소드 ---
