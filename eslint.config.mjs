@@ -1,34 +1,69 @@
-// @ts-check
 import eslint from '@eslint/js';
+import pluginImport from 'eslint-plugin-import-x';
 import eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended';
-import globals from 'globals';
+import pluginPromise from 'eslint-plugin-promise';
+import pluginUnicorn from 'eslint-plugin-unicorn';
 import tseslint from 'typescript-eslint';
 
-export default tseslint.config(
-  {
-    ignores: ['eslint.config.mjs'],
-  },
+const promisePlugin = /** @type {any} */ (pluginPromise);
+
+export const baseConfig = [
   eslint.configs.recommended,
   ...tseslint.configs.recommendedTypeChecked,
-  eslintPluginPrettierRecommended,
   {
     languageOptions: {
       globals: {
         ...globals.node,
         ...globals.jest,
       },
-      sourceType: 'commonjs',
       parserOptions: {
         projectService: true,
         tsconfigRootDir: import.meta.dirname,
       },
     },
-  },
-  {
+    plugins: {
+      import: pluginImport,
+      promise: promisePlugin,
+      unicorn: pluginUnicorn,
+    },
     rules: {
-      '@typescript-eslint/no-explicit-any': 'off',
-      '@typescript-eslint/no-floating-promises': 'warn',
-      '@typescript-eslint/no-unsafe-argument': 'warn'
+      /* Team Collaboration & NestJS Rules */
+      '@typescript-eslint/explicit-module-boundary-types': 'warn',
+      '@typescript-eslint/no-explicit-any': 'warn',
+      '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
+
+      /* Promise Rules */
+      ...promisePlugin.configs.recommended.rules,
+      'promise/catch-or-return': 'off',
+      'promise/always-return': 'off',
+
+      /* Import Rules */
+      'import/order': [
+        'error',
+        {
+          groups: ['builtin', 'external', 'internal', 'parent', 'sibling', 'index'],
+          'newlines-between': 'always',
+          alphabetize: { order: 'asc', caseInsensitive: true },
+        },
+      ],
+
+      /* Unicorn Rules */
+      'unicorn/filename-case': [
+        'error',
+        {
+          cases: {
+            kebabCase: true,
+            camelCase: true,
+          },
+          ignore: [
+            /.*~\d{8}-\d{6}\..*$/, // Syncthing
+          ],
+        },
+      ],
+      'unicorn/prevent-abbreviations': 'off',
+      'unicorn/no-null': 'off',
+      'unicorn/prefer-top-level-await': 'off',
     },
   },
-);
+  eslintPluginPrettierRecommended,
+];
