@@ -31,6 +31,7 @@
 
     // 전역 타입 및 경로 별칭
     "types": ["node", "jest"],
+    "outDir": "./dist",
     "paths": {
       "@/*": ["./src/*"]
     }
