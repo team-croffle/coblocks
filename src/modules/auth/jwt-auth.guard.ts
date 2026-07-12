@@ -2,7 +2,7 @@ import { ExecutionContext, Injectable } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { WsException } from '@nestjs/websockets';
 import { Socket } from 'socket.io';
-import { AuthenticatedUser } from 'src/types/socket.types';
+import { AuthenticatedUser } from '@/types/socket.types';
 
 @Injectable()
 export class JwtAuthGuard extends AuthGuard('jwt') {

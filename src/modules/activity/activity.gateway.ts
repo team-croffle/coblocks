@@ -7,13 +7,13 @@ import {
   WebSocketServer,
 } from '@nestjs/websockets';
 import { Socket, Server } from 'socket.io';
-import { WebsocketExceptionFilter } from 'src/websocket-exception/websocket-exception.filter';
+import { WebsocketExceptionFilter } from '@/websocket-exception/websocket-exception.filter';
 import { ActivityService } from './activity.service';
-import { ManagerGuard } from 'src/auth/manager/manager.guard';
+import { ManagerGuard } from '@/modules/auth/manager/manager.guard';
 import { SelectProblemDto } from './activityDto/SelectProblem.dto';
 import { SubmitSolutionDto } from './activityDto/SubmitSolution.dto';
-import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
-import { events } from 'src/utils/events';
+import { JwtAuthGuard } from '@/modules/auth/jwt-auth.guard';
+import { events } from '@/utils/events';
 /**
  * UseGuards(JwtAuthGuard) - JWT 인증 가드 사용중
  * UseGuards(ManagerGuard) - 방장 권한 확인 가드 사용중
@@ -30,7 +30,7 @@ export class ActivityGateway {
   constructor(private readonly activityService: ActivityService) {}
 
   @WebSocketServer()
-  server: Server;
+  server!: Server;
 
   // 방장 권한이 필요한 이벤트 핸들러
 

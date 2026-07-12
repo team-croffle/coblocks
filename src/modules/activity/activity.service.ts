@@ -1,13 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { Server, Socket } from 'socket.io';
-import { ClassroomService } from 'src/classroom/classroom.service';
+import { ClassroomService } from '@/modules/classroom/classroom.service';
 import { SelectProblemDto } from './activityDto/SelectProblem.dto';
 import { WsException } from '@nestjs/websockets';
 import { SubmitSolutionDto } from './activityDto/SubmitSolution.dto';
-import { events } from 'src/utils/events';
+import { events } from '@/utils/events';
 import { ActivityStateService } from './activity-state.service';
-import { QuestEntity } from 'src/types/quest.types';
-import { getSocketUser } from 'src/types/socket.types';
+import { QuestEntity } from '@/types/quest.types';
+import { getSocketUser } from '@/types/socket.types';
 
 @Injectable()
 export class ActivityService {
@@ -93,10 +93,7 @@ export class ActivityService {
       } else {
         // 4. 동적 속성 접근을 안전하게
         const playerKey = `player${assignment.partNumber}` as
-          | 'player1'
-          | 'player2'
-          | 'player3'
-          | 'player4';
+          'player1' | 'player2' | 'player3' | 'player4';
         userQuestContent = context[playerKey]?.blocks || {};
 
         if (

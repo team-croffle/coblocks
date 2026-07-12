@@ -1,4 +1,4 @@
-import { QuestEntity } from 'src/types/quest.types';
+import { QuestEntity } from '@/types/quest.types';
 
 export interface Activity {
   classroomId: string; // 강의실 ID

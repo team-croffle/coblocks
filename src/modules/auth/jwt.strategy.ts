@@ -3,10 +3,10 @@ import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { passportJwtSecret } from 'jwks-rsa';
 import { ExtractJwt, Strategy } from 'passport-jwt';
-import { TypedSocket } from 'src/types/socket.types';
+import { TypedSocket } from '@/types/socket.types';
 
 interface JwtPayload {
-  sub: string;  // 사용자 ID
+  sub: string; // 사용자 ID
   name: string; // Better Auth JWT의 사용자 이름 클레임
 }
 
@@ -25,7 +25,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       ignoreExpiration: false,
       // Better Auth JWT 플러그인은 RSA 키쌍으로 서명 → JWKS로 공개키를 검증
       secretOrKeyProvider: passportJwtSecret({
-        cache: true,           // 공개키를 캐시하여 매 요청마다 JWKS 호출 방지
+        cache: true, // 공개키를 캐시하여 매 요청마다 JWKS 호출 방지
         rateLimit: true,
         jwksRequestsPerMinute: 10,
         jwksUri: `${betterAuthUrl}/api/auth/jwks`,

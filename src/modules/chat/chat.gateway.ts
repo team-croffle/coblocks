@@ -9,10 +9,10 @@ import { Server, Socket } from 'socket.io';
 import { WebsocketExceptionFilter } from '../../websocket-exception/websocket-exception.filter';
 import { UseFilters, UseGuards } from '@nestjs/common';
 import { WsException } from '@nestjs/websockets';
-import { ClassroomService } from 'src/classroom/classroom.service';
+import { ClassroomService } from '@/modules/classroom/classroom.service';
 import { SendMessageDto } from './chatDto/sendMessage.dto';
-import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
-import { events } from 'src/utils/events';
+import { JwtAuthGuard } from '@/modules/auth/jwt-auth.guard';
+import { events } from '@/utils/events';
 
 @UseGuards(JwtAuthGuard) // JWT 인증 가드 사용
 @WebSocketGateway({
@@ -25,7 +25,7 @@ export class ChatGateway {
   constructor(private readonly classroomService: ClassroomService) {}
 
   @WebSocketServer()
-  server: Server;
+  server!: Server;
 
   @SubscribeMessage(events.CHAT_SEND_MESSAGE)
   handleMessage(@MessageBody() messageData: SendMessageDto, @ConnectedSocket() client: Socket) {

@@ -1,8 +1,8 @@
+import * as schema from '@/database/schema';
 import { betterAuth } from 'better-auth';
 import { drizzleAdapter } from 'better-auth/adapters/drizzle';
 import { jwt } from 'better-auth/plugins';
 import { PostgresJsDatabase } from 'drizzle-orm/postgres-js';
-import * as schema from 'src/database/schema';
 
 /**
  * Better Auth 인스턴스 팩토리.
@@ -44,10 +44,6 @@ export function createBetterAuth(db: PostgresJsDatabase<typeof schema>) {
           defaultValue: 'student',
         },
       },
-    },
-    advanced: {
-      // UUID 형식의 ID 생성 (DB 스키마 일관성 유지)
-      generateId: () => crypto.randomUUID(),
     },
   });
 }

@@ -2,12 +2,12 @@ import { IsNotEmpty, IsString } from 'class-validator';
 
 export class SendMessageDto {
   @IsString()
-  code: string;
+  code!: string;
 
   @IsString()
-  userName: string;
+  userName!: string;
 
   @IsString()
   @IsNotEmpty()
-  message: string;
+  message!: string;
 }
