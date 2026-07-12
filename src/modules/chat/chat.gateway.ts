@@ -6,7 +6,7 @@ import {
   WebSocketServer,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { WebsocketExceptionFilter } from '../websocket-exception/websocket-exception.filter';
+import { WebsocketExceptionFilter } from '../../websocket-exception/websocket-exception.filter';
 import { UseFilters, UseGuards } from '@nestjs/common';
 import { WsException } from '@nestjs/websockets';
 import { ClassroomService } from 'src/classroom/classroom.service';
