@@ -17,7 +17,7 @@ pnpm lint             # oxlint
 pnpm fmt              # oxfmt (check only: pnpm fmt:check)
 pnpm check            # lint + fmt:check + typecheck — must pass before every commit
 pnpm --filter @coblocks/api test   # interpreter tests
-pnpm db:up && pnpm db:push && pnpm db:seed
+pnpm db:up && pnpm db:push && pnpm db:seed   # db:up 은 docker/docker-compose.dev.yaml 을 쓴다
 ```
 
 ## Code rules
@@ -97,9 +97,14 @@ TanStack Router derives path types from the route tree. If `Link to="..."` gives
 - Hooks (husky, installed by `pnpm install`): `pre-commit` runs lint-staged on staged files,
   `commit-msg` rejects a subject over 72 characters or a missing blank line after it, `pre-push` runs
   `pnpm typecheck`. They are a safety net, not a substitute for running `pnpm check` yourself.
-- CI runs the same checks plus tests and a build on every pull request; a pull request is not done
-  until it is green. Path labels are applied automatically, and `@bluenyang` owns every path via
-  `CODEOWNERS`. Contributor-facing detail lives in `CONTRIBUTING.md`.
+- CI runs the same checks plus tests, a build and a Docker image build on **every branch push** and
+  every pull request; a pull request is not done until it is green. `Security` additionally runs a
+  TruffleHog secret scan and a dependency review.
+- Releases are container images on GHCR, cut by the manual `Release` workflow. Version numbering,
+  release titles and the rc-suffix rule live in `.ai/VERSIONING.md`; the plan → work → branch → PR →
+  release-note procedure lives in `.ai/WORKFLOW.md`. Both are local, like the rest of `.ai/`.
+- Path labels are applied automatically, and `@bluenyang` owns every path via `CODEOWNERS`.
+  Contributor-facing detail lives in `CONTRIBUTING.md`.
 
 ## Work log — `.ai/history`
 
