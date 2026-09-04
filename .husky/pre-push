@@ -1,0 +1,2 @@
+# 푸시 전에 타입 체크. lint/format 은 pre-commit 에서 이미 걸렀다.
+pnpm typecheck
