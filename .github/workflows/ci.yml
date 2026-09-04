@@ -1,16 +1,18 @@
 name: CI
 
+# 어떤 브랜치를 푸시하든 검증한다. PR 은 별도로 한 번 더 돈다.
 on:
   push:
-    branches: [main]
+    branches: ['**']
+    tags-ignore: ['**']
   pull_request:
-    branches: [main]
+  workflow_dispatch:
 
 permissions:
   contents: read
 
 concurrency:
-  group: ci-${{ github.workflow }}-${{ github.ref }}
+  group: ci-${{ github.ref }}
   cancel-in-progress: true
 
 env:
@@ -22,23 +24,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
       # pnpm 버전은 package.json 의 packageManager 필드에서 읽는다.
       - uses: pnpm/action-setup@v4
-
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: pnpm
-
       - run: pnpm install --frozen-lockfile
-
       - name: oxlint
         run: pnpm lint
-
       - name: oxfmt --check
         run: pnpm fmt:check
-
       - name: typecheck
         run: pnpm typecheck
 
@@ -53,7 +49,6 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-
       # 인터프리터 테스트. 채점이 여기에 의존하므로 실패하면 머지하지 않는다.
       - name: interpreter tests
         run: pnpm --filter @coblocks/api test
@@ -70,3 +65,27 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm build
+
+  docker:
+    name: Docker image build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      # 푸시하지 않는다. 릴리스 전에 Dockerfile 이 깨졌는지만 본다.
+      - name: api image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: apps/api/Dockerfile
+          push: false
+          cache-from: type=gha,scope=api
+          cache-to: type=gha,mode=max,scope=api
+      - name: web image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: apps/web/Dockerfile
+          push: false
+          cache-from: type=gha,scope=web
+          cache-to: type=gha,mode=max,scope=web
