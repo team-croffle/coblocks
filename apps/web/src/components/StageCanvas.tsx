@@ -16,8 +16,11 @@ export function StageCanvas({ stage, pose }: Props) {
   });
 
   return (
-    <div className='mx-auto max-w-[420px]'>
-      <div className='relative aspect-square overflow-hidden rounded-xl border border-line bg-surface'>
+    <div className="mx-auto max-w-[420px]">
+      <div
+        className="relative overflow-hidden rounded-xl border border-line bg-surface"
+        style={{ aspectRatio: `${stage.col} / ${stage.row}` }}
+      >
         <div
           className='absolute inset-0 grid'
           style={{
@@ -61,8 +64,8 @@ export function StageCanvas({ stage, pose }: Props) {
           }}
         >
           <span
-            className='grid h-2/3 w-2/3 place-items-center rounded-lg bg-seq text-[13px] text-white transition-transform duration-200'
-            style={{ rotate: `${pose.heading}deg` }}
+            className="grid h-2/3 w-2/3 place-items-center rounded-lg bg-seq text-[13px] text-white transition-transform duration-200"
+            style={{ rotate: `${pose.heading - 90}deg` }}
           >
             ▶
           </span>

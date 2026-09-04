@@ -2,8 +2,13 @@ import { useQuery } from '@tanstack/react-query';
 import { Link, useParams } from '@tanstack/react-router';
 import { useState } from 'react';
 
-import type { BlockProgram, ProgramBlock } from '@coblocks/shared';
-import { DEFAULT_STAGE, LESSON_SEED, STANDARD_TEXT } from '@coblocks/shared';
+import {
+  DEFAULT_STAGE,
+  LESSON_SEED,
+  STANDARD_TEXT,
+  type BlockProgram,
+  type ProgramBlock,
+} from '@coblocks/shared';
 
 import { fetchLesson, submitAttempt } from '@/api/lessons';
 import { BlockPalette } from '@/components/BlockPalette';
