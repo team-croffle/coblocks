@@ -59,6 +59,20 @@ pnpm db:up && pnpm db:push && pnpm db:seed
 **Routing gotcha**
 TanStack Router derives path types from the route tree. If `Link to="..."` gives a type error, the route is usually missing from `addChildren`. Pages with params read them via `route.useParams()`; use `useParams({ strict: false })` only when two routes share one component.
 
+## Documentation and i18n
+
+- Root documents (`README.md`, `CONTRIBUTING.md`) are written in **English**; the Korean
+  translation lives at `docs/<name>.ko.md`. Every other document under `docs/` is written in Korean.
+- **A change to a root document changes both language versions in the same commit.** Editing only
+  one side is an incomplete change. Each version links to the other at the top.
+- Code comments and UI strings stay Korean (see Code rules). The app itself has no runtime i18n yet;
+  if that changes, this section is what has to be updated first.
+- `README.md` is the entry point: what the service teaches, the grade-band learning path, curriculum
+  alignment, structure, setup. `CONTRIBUTING.md` is the process. `AGENTS.md` — this file — is the
+  working contract. Keep each one in its own lane rather than repeating the others.
+- Licensing: the project is Apache-2.0 (`LICENSE`). Curriculum text quoted from Ministry of Education
+  notices is third-party content and is recorded in `NOTICE`; do not relicense or reword it.
+
 ## Git workflow
 
 - **Commit in small units.** One commit = one logical change (a rule change, one feature, one fix, one refactor). Do not bundle unrelated changes, and do not start the next sub-task while a finished one is still uncommitted.
@@ -76,6 +90,12 @@ TanStack Router derives path types from the route tree. If `Link to="..."` gives
 
   A bare title is acceptable only for trivial one-liners (typo, formatting). Everything else gets the summary and bullets.
 - Never commit `.ai/`, `.env*`, or Syncthing files (`.stfolder`, `.stignore`, `.stversions`). They are gitignored; do not undo that.
+- Hooks (husky, installed by `pnpm install`): `pre-commit` runs lint-staged on staged files,
+  `commit-msg` rejects a subject over 72 characters or a missing blank line after it, `pre-push` runs
+  `pnpm typecheck`. They are a safety net, not a substitute for running `pnpm check` yourself.
+- CI runs the same checks plus tests and a build on every pull request; a pull request is not done
+  until it is green. Path labels are applied automatically, and `@bluenyang` owns every path via
+  `CODEOWNERS`. Contributor-facing detail lives in `CONTRIBUTING.md`.
 
 ## Work log — `.ai/history`
 
