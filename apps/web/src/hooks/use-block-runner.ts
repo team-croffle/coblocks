@@ -79,7 +79,7 @@ export function useBlockRunner(stage: StageConfig, stepMs = 430) {
         if (!step) return;
         setActiveIndex(step.sourceIndex);
 
-        const next = applyStep(stage, current, step.kind);
+        const next = applyStep(stage, current, step);
         if (!next) {
           stop();
           setStatus('failed');

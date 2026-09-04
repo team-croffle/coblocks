@@ -46,7 +46,7 @@ function initialFor(id: string | undefined): FormState {
     description: found.description,
     blockLabels: found.blockLabels.join(', '),
     stageNote: found.stage
-      ? `${found.stage.size}x${found.stage.size} · 목표 (${found.stage.goal.x},${found.stage.goal.y})`
+      ? `${found.stage.col}x${found.stage.row} · 목표 (${found.stage.goal.x},${found.stage.goal.y})`
       : '스테이지 없음',
   };
 }

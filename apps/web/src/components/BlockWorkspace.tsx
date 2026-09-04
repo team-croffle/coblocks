@@ -4,20 +4,30 @@
 /* oxlint-disable react/no-array-index-key */
 import type { BlockKind, BlockProgram } from '@coblocks/shared';
 
-const LABEL: Record<BlockKind, string> = {
-  fwd: '앞으로 1칸',
-  right: '오른쪽으로 돌기',
-  left: '왼쪽으로 돌기',
-  rep: '번 반복 시작',
-  end: '반복 끝',
-};
 const COLOR: Record<BlockKind, string> = {
   fwd: '--color-seq',
-  right: '--color-seq',
-  left: '--color-seq',
+  turn: '--color-seq',
   rep: '--color-loop',
   end: '--color-loop',
 };
+
+/** 회전은 각도를 가진 한 종류이므로 라벨을 값에서 만든다. */
+function labelOf(block: ProgramBlock): string {
+  switch (block.kind) {
+    case 'fwd':
+      return '앞으로 1칸';
+    case 'turn': {
+      const deg = block.deg ?? 0;
+      if (deg === 90) return '오른쪽으로 돌기';
+      if (deg === -90) return '왼쪽으로 돌기';
+      return `${deg > 0 ? '오른쪽' : '왼쪽'}으로 ${Math.abs(deg)}도 돌기`;
+    }
+    case 'rep':
+      return '번 반복 시작';
+    case 'end':
+      return '반복 끝';
+  }
+}
 const COUNTS = [2, 3, 4, 5, 6, 8];
 
 interface Props {
@@ -74,7 +84,7 @@ export function BlockWorkspace({ program, activeIndex, onRemove, onSetCount }: P
               ))}
             </select>
           )}
-          <span>{LABEL[block.kind]}</span>
+          <span>{labelOf(block)}</span>
           <button
             type='button'
             className='ml-auto grid h-5 w-5 place-items-center rounded-md bg-white/25 text-[13px] leading-none'

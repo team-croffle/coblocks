@@ -7,10 +7,11 @@ interface Props {
 }
 
 export function StageCanvas({ stage, pose }: Props) {
-  const unit = 100 / stage.size;
-  const cells = Array.from({ length: stage.size * stage.size }, (_, i) => {
-    const x = i % stage.size;
-    const y = Math.floor(i / stage.size);
+  const unitX = 100 / stage.col;
+  const unitY = 100 / stage.row;
+  const cells = Array.from({ length: stage.col * stage.row }, (_, i) => {
+    const x = i % stage.col;
+    const y = Math.floor(i / stage.col);
     return { x, y, wall: isWall(stage, x, y), goal: stage.goal.x === x && stage.goal.y === y };
   });
 
@@ -20,8 +21,8 @@ export function StageCanvas({ stage, pose }: Props) {
         <div
           className='absolute inset-0 grid'
           style={{
-            gridTemplateColumns: `repeat(${stage.size}, 1fr)`,
-            gridTemplateRows: `repeat(${stage.size}, 1fr)`,
+            gridTemplateColumns: `repeat(${stage.col}, 1fr)`,
+            gridTemplateRows: `repeat(${stage.row}, 1fr)`,
           }}
         >
           {cells.map((c) => (
@@ -42,8 +43,8 @@ export function StageCanvas({ stage, pose }: Props) {
         <div
           className='absolute grid place-items-center text-xl text-loop'
           style={{
-            width: `${unit}%`,
-            height: `${unit}%`,
+            width: `${unitX}%`,
+            height: `${unitY}%`,
             transform: `translate(${stage.goal.x * 100}%, ${stage.goal.y * 100}%)`,
           }}
           aria-hidden='true'
@@ -54,8 +55,8 @@ export function StageCanvas({ stage, pose }: Props) {
         <div
           className='absolute grid place-items-center transition-transform duration-200'
           style={{
-            width: `${unit}%`,
-            height: `${unit}%`,
+            width: `${unitX}%`,
+            height: `${unitY}%`,
             transform: `translate(${pose.x * 100}%, ${pose.y * 100}%)`,
           }}
         >
