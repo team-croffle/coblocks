@@ -1,0 +1,63 @@
+name: Labeler
+
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: labeler-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  # .github/labels.yml 에 정의된 라벨 중 저장소에 없는 것을 만든다.
+  # actions/labeler 는 없는 라벨을 만들어 주지 않으므로 라벨링 전에 먼저 돌린다.
+  sync-labels:
+    name: Create missing labels
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    steps:
+      # pull_request_target 이므로 base 브랜치가 체크아웃된다.
+      # PR 브랜치의 labels.yml 을 신뢰하지 않기 위한 것이기도 하다.
+      - uses: actions/checkout@v4
+
+      - name: Install yq if missing
+        run: |
+          if ! command -v yq >/dev/null 2>&1; then
+            sudo curl -fsSL -o /usr/local/bin/yq \
+              https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+            sudo chmod +x /usr/local/bin/yq
+          fi
+          yq --version
+
+      - name: Apply labels.yml
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          yq -o=json '.' .github/labels.yml | jq -c '.[]' | while read -r row; do
+            name=$(jq -r '.name' <<<"$row")
+            color=$(jq -r '.color' <<<"$row")
+            description=$(jq -r '.description // ""' <<<"$row")
+            # --force 는 없으면 만들고 있으면 색·설명을 맞춘다.
+            gh label create "$name" --color "$color" --description "$description" --force
+          done
+
+  label:
+    name: Apply path labels
+    needs: sync-labels
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/labeler@v5
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          configuration-path: .github/labeler.yml
+          # 경로 조건에서 벗어난 라벨은 자동으로 뗀다.
+          sync-labels: true

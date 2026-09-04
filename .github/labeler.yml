@@ -1,0 +1,81 @@
+# actions/labeler v5 설정. 변경된 파일 경로로 PR 라벨을 붙인다.
+# 여기 쓰는 라벨 이름은 .github/labels.yml 에도 있어야 한다 — 없는 라벨은
+# labeler 워크플로의 sync-labels 잡이 먼저 만들어 준다.
+
+web:
+  - changed-files:
+      - any-glob-to-any-file: 'apps/web/**'
+
+api:
+  - changed-files:
+      - any-glob-to-any-file: 'apps/api/**'
+
+shared:
+  - changed-files:
+      - any-glob-to-any-file: 'packages/shared/**'
+
+interpreter:
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'packages/shared/src/blocks/**'
+          - 'apps/api/test/interpreter.spec.ts'
+
+curriculum:
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'packages/shared/src/data/**'
+          - 'docs/04-curriculum.md'
+
+database:
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'apps/api/src/db/**'
+          - 'apps/api/drizzle.config.ts'
+          - 'docker-compose.yml'
+
+security:
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'apps/api/src/auth/**'
+          - 'apps/api/src/common/masking.ts'
+          - 'apps/api/src/common/roles.guard.ts'
+          - 'apps/api/src/common/audit.service.ts'
+
+tests:
+  - changed-files:
+      - any-glob-to-any-file:
+          - '**/*.spec.ts'
+          - '**/*.test.ts'
+          - 'apps/api/vitest.config.ts'
+
+docs:
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'docs/**'
+          - '**/*.md'
+          - 'LICENSE'
+          - 'NOTICE'
+
+i18n:
+  - changed-files:
+      - any-glob-to-any-file: 'docs/*.ko.md'
+
+ci:
+  - changed-files:
+      - any-glob-to-any-file: '.github/**'
+
+tooling:
+  - changed-files:
+      - any-glob-to-any-file:
+          - '.husky/**'
+          - '.oxlintrc.json'
+          - '.oxfmtrc.json'
+          - '.editorconfig'
+          - 'package.json'
+          - 'pnpm-workspace.yaml'
+
+dependencies:
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'pnpm-lock.yaml'
+          - '**/package.json'
