@@ -94,7 +94,8 @@ Missions are teaching material, not just data rows.
 - Elementary 3–4 missions keep `standardCode` as `null`. Do not invent a standard for
   them.
 
-Full rules: [docs/04-curriculum.md](docs/04-curriculum.md).
+The maintainers keep the full mapping rules in the team's private workspace; ask in the
+issue or pull request if a case is not covered here.
 
 ## Documentation
 

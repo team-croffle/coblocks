@@ -43,8 +43,8 @@ principled, not merely effective — so a mission is not only "did you get there
   the lesson; from middle school on, the *shape* of the solution is the lesson.
 
 Structural feedback (block-count and control-flow scoring surfaced in the player) is a
-designed behaviour that is **not implemented yet** — see [docs/05-roadmap.md](docs/05-roadmap.md).
-Grading today is pass/fail, computed on the server.
+designed behaviour that is **not implemented yet**. Grading today is pass/fail, computed on
+the server.
 
 ### Curriculum alignment
 
@@ -56,7 +56,8 @@ Grading today is pass/fail, computed on the server.
 | High | Informatics (general elective) | school-defined | `[12정0X-XX]` |
 
 Standard text is stored verbatim from the Ministry of Education notice and is never
-paraphrased. Mapping rules live in [docs/04-curriculum.md](docs/04-curriculum.md).
+paraphrased, and a mission carries at most one standard code. Elementary 3–4 missions carry
+none at all rather than claiming a standard that does not exist.
 
 ### Concept axes
 
@@ -163,23 +164,22 @@ These are enforced in review and must not be worked around:
 
 | Document | Contents |
 | --- | --- |
-| [docs/01-architecture.md](docs/01-architecture.md) | composition and data flow |
-| [docs/02-data-model.md](docs/02-data-model.md) | tables and relations |
-| [docs/03-api.md](docs/03-api.md) | endpoint specification |
-| [docs/04-curriculum.md](docs/04-curriculum.md) | curriculum mapping rules |
-| [docs/05-roadmap.md](docs/05-roadmap.md) | what is left |
 | [AGENTS.md](AGENTS.md) | working rules for humans and AI agents |
 | [CONTRIBUTING.md](CONTRIBUTING.md) | how to contribute · [한국어](docs/CONTRIBUTING.ko.md) |
+| [docs/README.ko.md](docs/README.ko.md) | this document in Korean |
 
-Root documents are written in English with a Korean translation under `docs/*.ko.md`.
-Both versions are updated in the same change.
+Root documents are written in English with a Korean translation under `docs/*.ko.md`, and
+both versions are updated in the same change. `docs/` holds only published documents that
+settle after a change; working design and analysis notes stay in the team's private
+workspace and are deliberately not part of this repository.
 
 ## Status
 
 Working scaffold, not a product yet: the learner flow (landing → login → dashboard →
 curriculum → block player) and six admin screens run, the API implements auth, missions,
 progress and admin endpoints, and some screens still fall back to seed data before the API
-is wired in. See the roadmap for the ordered plan.
+is wired in. Blockly-based editing, a canvas stage renderer, custom blocks, classrooms and
+code conversion are planned and not started.
 
 ## License
 
