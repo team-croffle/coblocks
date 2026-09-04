@@ -1,0 +1,33 @@
+import { Body, Controller, Get, Param, Post, Req, UseGuards } from '@nestjs/common';
+import type { Request } from 'express';
+import type { AuthUser, BlockProgram } from '@coblocks/shared';
+import { ProgressService } from './progress.service';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { CurrentUser } from '../common/current-user.decorator';
+import { AuditService } from '../common/audit.service';
+
+@UseGuards(JwtAuthGuard)
+@Controller('progress')
+export class ProgressController {
+  constructor(private readonly progress: ProgressService) {}
+
+  @Get('me')
+  mine(@CurrentUser() user: AuthUser) {
+    return this.progress.mine(user.id);
+  }
+
+  @Post(':lessonId/attempt')
+  attempt(
+    @CurrentUser() user: AuthUser,
+    @Param('lessonId') lessonId: string,
+    @Body('program') program: BlockProgram,
+    @Req() req: Request,
+  ) {
+    return this.progress.attempt(
+      { id: user.id, memberNo: user.loginId },
+      lessonId,
+      program ?? [],
+      AuditService.clientIp(req),
+    );
+  }
+}

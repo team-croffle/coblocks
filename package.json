@@ -1,0 +1,29 @@
+{
+  "name": "coblocks",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@11.25.0",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "pnpm -r --parallel dev",
+    "dev:web": "pnpm --filter @coblocks/web dev",
+    "dev:api": "pnpm --filter @coblocks/api start:dev",
+    "build": "pnpm -r build",
+    "typecheck": "pnpm -r typecheck",
+    "lint": "oxlint",
+    "lint:fix": "oxlint --fix",
+    "fmt": "oxfmt",
+    "fmt:check": "oxfmt --check",
+    "check": "pnpm lint && pnpm fmt:check && pnpm typecheck",
+    "db:up": "docker compose up -d db",
+    "db:push": "pnpm --filter @coblocks/api db:push",
+    "db:seed": "pnpm --filter @coblocks/api db:seed"
+  },
+  "devDependencies": {
+    "oxfmt": "^0.66.0",
+    "oxlint": "^1.81.0",
+    "typescript": "6.0.3"
+  }
+}

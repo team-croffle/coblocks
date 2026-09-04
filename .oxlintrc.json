@@ -1,0 +1,28 @@
+{
+  "$schema": "https://raw.githubusercontent.com/oxc-project/oxc/main/npm/oxlint/configuration_schema.json",
+  "plugins": ["typescript", "react", "unicorn", "oxc", "import"],
+  "env": { "browser": true, "es2024": true, "node": true },
+  "categories": {
+    "correctness": "error",
+    "suspicious": "warn",
+    "perf": "warn"
+  },
+  "rules": {
+    "no-console": ["warn", { "allow": ["warn", "error"] }],
+    "typescript/no-explicit-any": "error",
+    "typescript/consistent-type-imports": "error",
+    "react/rules-of-hooks": "error",
+    "react/exhaustive-deps": "warn",
+    "unicorn/no-null": "off",
+    "import/no-default-export": "off"
+  },
+  "ignorePatterns": ["dist", ".output", "node_modules", "apps/api/drizzle"],
+  "overrides": [
+    {
+      "files": ["apps/api/**/*.ts"],
+      "rules": {
+        "typescript/no-extraneous-class": "off"
+      }
+    }
+  ]
+}
