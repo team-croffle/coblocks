@@ -111,6 +111,6 @@ TanStack Router derives path types from the route tree. If `Link to="..."` gives
 
 ## Not done yet
 
-See `.ai/ROADMAP.md` (local). Big items: a Blockly editor over a server-executable IR, a canvas2D stage
+See `.ai/GOALS.md` (what and why) and `.ai/ROADMAP.md` (v0.1 – v1.1 version plan), both local. Big items: a Blockly editor over a server-executable IR, a canvas2D stage
 package, the stage editor, custom blocks and mission constraints, classrooms and assignments, block-to-code
 conversion, solution sharing, and real-time collaboration.
