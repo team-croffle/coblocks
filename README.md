@@ -1,82 +1,189 @@
 # Coblocks
 
-2022 개정 교육과정 기준 초·중·고 블록코딩 학습 서비스.
-블록으로 시작해 순서도·의사코드를 거쳐 텍스트 코드로 넘어가는 학습 경로를 성취기준에 맞춰 제공한다.
+**Block-based algorithm learning for Korean K–12, aligned to the 2022 revised national curriculum.**
 
-## 스택
+> 🇰🇷 [한국어로 읽기](docs/README.ko.md)
 
-| 영역 | 선택 |
+Coblocks teaches computational thinking through algorithms. Learners start by assembling
+blocks, move on to flowcharts and pseudocode, and end up writing text code — and every
+mission is mapped to a published achievement standard so that classroom use is defensible.
+
+---
+
+## What this is for
+
+Blocks are the medium, not the subject. The subject is the **algorithm**: a learner who can
+state a problem, break it down, and express the solution as a structure that a machine can
+follow has learned the thing worth learning. The block editor exists because it removes
+syntax from the path, not because dragging blocks is the goal.
+
+### Learning path
+
+| Stage | Goal | What a mission looks like |
+| --- | --- | --- |
+| Elementary 3–4 | Logical thinking. Order, cause and effect, "say exactly what you mean." | Short sequences, unplugged-style reasoning. No curriculum standard is claimed at this stage. |
+| Elementary 5–6 · Middle | The existing algorithms and the principles under them. Repetition, conditionals, variables, sequential data, functions. | Read, trace, compare and adapt known algorithms; find where each one breaks. |
+| High | Designing algorithms of your own, and judging them. | Decompose an unfamiliar problem, model it, choose between approaches, argue about cost. |
+
+### Reaching the goal is the floor, not the ceiling
+
+Two programs solve the same maze. One is 40 blocks that spell out 30 moves. The other is
+20 blocks that use a loop and a branch. Both reach the goal; only the second one found the
+*structure* of the problem.
+
+That difference is what Coblocks is built to teach. An algorithm should be abstract and
+principled, not merely effective — so a mission is not only "did you get there" but
+"what did your solution say about the problem." Concretely:
+
+- The interpreter records the executed step list, so block count and executed steps are
+  both known after a run and can be shown back to the learner.
+- Missions are authored with a reference solution in mind, so "you reached the goal with
+  40 blocks; this can be done in 20" is a question the platform can ask.
+- Higher grade bands lean on this deliberately: at elementary level, reaching the goal is
+  the lesson; from middle school on, the *shape* of the solution is the lesson.
+
+Structural feedback (block-count and control-flow scoring surfaced in the player) is a
+designed behaviour that is **not implemented yet** — see [docs/05-roadmap.md](docs/05-roadmap.md).
+Grading today is pass/fail, computed on the server.
+
+### Curriculum alignment
+
+| School level | Subject | Hours | Standard code format |
+| --- | --- | --- | --- |
+| Elementary 3–4 | (none) | — | Preparatory, outside the subject |
+| Elementary 5–6 | Practical Arts — "Digital Society and AI" | 34 | `[6실05-XX]` |
+| Middle 1–3 | Informatics | 68 | `[9정0X-XX]` |
+| High | Informatics (general elective) | school-defined | `[12정0X-XX]` |
+
+Standard text is stored verbatim from the Ministry of Education notice and is never
+paraphrased. Mapping rules live in [docs/04-curriculum.md](docs/04-curriculum.md).
+
+### Concept axes
+
+Eight concepts — sequence, repetition, conditionals, variables/data, functions/abstraction,
+data structures, algorithm design, AI — each bound 1:1 to a fixed colour token. A mission
+carries exactly one representative concept; a second colour would break the learner's
+ability to read concepts off the palette.
+
+---
+
+## Stack
+
+| Area | Choice |
 | --- | --- |
-| 프론트 | React 19.2 + React Compiler 1 · Vite · TypeScript 6.0.3 · TanStack Router/Query · Zustand · Tailwind v4 |
-| API | NestJS 10 · Drizzle ORM · PostgreSQL 16 · JWT(Passport) |
-| 공통 | `packages/shared` — 타입, 커리큘럼 시드, 블록 인터프리터 |
-| 툴링 | oxlint · oxfmt (ESLint/Prettier 미사용) |
-| 배포 | 프론트 Netlify, API Render, DB Supabase/자체 Postgres |
+| Web | React 19 + React Compiler · Vite · TypeScript 6 · TanStack Router/Query · Zustand · Tailwind v4 |
+| API | NestJS · Drizzle ORM · PostgreSQL 16 · JWT (Passport) · argon2 |
+| Shared | `packages/shared` — types, curriculum seed data, block interpreter |
+| Tooling | pnpm workspace · oxlint · oxfmt · husky + lint-staged (no ESLint/Prettier) |
+| Deploy | web on Netlify · API on Render · PostgreSQL on Supabase or self-hosted |
 
-## 구조
+## Project structure
 
 ```
 coblocks/
 ├─ apps/
 │  ├─ web/                 React 19 SPA
 │  │  └─ src/
-│  │     ├─ api/           axios 클라이언트 + 엔드포인트별 래퍼
-│  │     ├─ components/    블록 팔레트/워크스페이스/스테이지/확대 패널
-│  │     ├─ hooks/         useBlockRunner — 단계별 실행 애니메이션
-│  │     ├─ layouts/       AppLayout(학습자), AdminLayout(관리자)
-│  │     ├─ pages/         랜딩·로그인·대시보드·커리큘럼·학습 플레이어
-│  │     ├─ pages/admin/   개요·문제등록·문제관리·유저·감사·문의
-│  │     ├─ router.tsx     TanStack Router 라우트 트리 + 인증/역할 가드
+│  │     ├─ api/           axios client + per-endpoint wrappers
+│  │     ├─ components/    palette, workspace, stage canvas, zoom panel
+│  │     ├─ hooks/         useBlockRunner — step-by-step run animation
+│  │     ├─ layouts/       AppLayout (learner), AdminLayout (admin)
+│  │     ├─ pages/         landing, login, dashboard, curriculum, lesson player
+│  │     ├─ pages/admin/   overview, lesson form/manage, users, audit, inquiries
+│  │     ├─ router.tsx     TanStack Router tree + auth/role guards
 │  │     ├─ stores/        auth, theme (zustand)
-│  │     └─ styles/        tokens.css(@theme 토큰), main.css
+│  │     └─ styles/        tokens.css (@theme tokens), main.css
 │  └─ api/                 NestJS
 │     └─ src/
-│        ├─ db/            Drizzle 스키마 · 클라이언트 · 시드
-│        ├─ common/        마스킹 유틸, 감사 서비스, 역할 가드
-│        ├─ auth/          로그인 · JWT 전략
-│        ├─ lessons/       미션 조회
-│        ├─ progress/      학습 진도 · 서버 채점
-│        └─ admin/         관리자 전용 엔드포인트
-├─ packages/shared/        타입 + 커리큘럼 데이터 + 인터프리터
-└─ docs/                   설계 문서
+│        ├─ db/            Drizzle schema · client · seed
+│        ├─ common/        masking utils, audit service, role guard
+│        ├─ auth/          login · JWT strategy
+│        ├─ lessons/       mission queries
+│        ├─ progress/      learner progress · server-side grading
+│        └─ admin/         admin-only endpoints
+├─ packages/shared/        types + curriculum data + interpreter
+├─ docs/                   design documents and Korean translations
+└─ .github/                CI, labeler, CODEOWNERS
 ```
 
-## 시작하기
+### How a run is graded
+
+`packages/shared` compiles a block program into a flat step list (`compile`), then walks the
+stage (`run`). The web app uses this for the animated preview; the API calls the **same**
+function in `progress.attempt()` and stores completion based only on its own result. A
+client-reported success is never trusted.
+
+## Getting started
+
+Requires Node ≥ 22 and pnpm 11 (`corepack enable` picks up the pinned version).
 
 ```bash
 pnpm install
 cp apps/api/.env.example apps/api/.env
 cp apps/web/.env.example apps/web/.env
 
-pnpm db:up        # docker compose 로 Postgres 기동
-pnpm db:push      # Drizzle 스키마 반영
-pnpm db:seed      # 성취기준 · 미션 · 개발 계정 시드
+pnpm db:up        # start PostgreSQL via docker compose
+pnpm db:push      # apply the Drizzle schema
+pnpm db:seed      # seed standards, missions and dev accounts
 
-pnpm dev          # web(:5173) + api(:3000) 동시 실행
-pnpm check        # oxlint + oxfmt --check + 타입 체크
+pnpm dev          # web (:5173) + api (:3000)
 ```
 
-개발 계정(비밀번호 = 아이디): `student1`, `teacher1`, `admin`.
-`admin` 으로 로그인하면 대시보드에 관리자 진입 버튼과 상단 탭이 나타난다.
+Development accounts (password = id): `student1`, `teacher1`, `admin`.
 
-## 설계상 지켜야 할 것
+### Scripts
 
-- **채점은 서버가 한다.** 클라이언트의 실행 결과는 미리보기이고, 완료 처리는 `progress.attempt` 가 `@coblocks/shared` 의 `run()` 으로 다시 계산한 결과로만 정해진다.
-- **개인정보는 마스킹된 형태로만 나간다.** 사용자 데이터를 응답에 담는 모든 경로는 `common/masking.ts` 를 거친다. 원본 열람은 `unmask_requests` 에 사유를 남기고 승인을 받아야 한다.
-- **감사 로그는 추가만 한다.** `audit_logs` 는 수정·삭제하지 않는다. DB 사용자 권한으로도 UPDATE/DELETE 를 막을 것.
-- **개념 색은 고정이다.** 개념 8종의 색은 `tokens.css` 의 `--color-seq … --color-ai` 이고, 순서를 바꾸거나 순환 재사용하지 않는다.
-- **색은 항상 토큰으로 쓴다.** Tailwind v4 는 `@theme` 에 선언한 변수를 그대로 유틸리티로 만든다. 다크 모드는 `prefers-color-scheme` 과 `data-theme` 두 경로로 같은 변수를 덮어쓰는 방식이라, 미디어쿼리 안에서 처음 정의된 색은 시스템 기본 상태에서 적용되지 않는다.
-- **수동 메모이제이션을 넣지 않는다.** React Compiler 가 켜져 있으므로 `useMemo`/`useCallback`/`memo` 는 계측으로 필요성이 확인된 곳에만 쓴다.
+| Command | What it does |
+| --- | --- |
+| `pnpm dev` / `dev:web` / `dev:api` | run both apps, or one |
+| `pnpm check` | `lint` + `fmt:check` + `typecheck` — must pass before every commit |
+| `pnpm lint` / `lint:fix` | oxlint |
+| `pnpm fmt` / `fmt:check` | oxfmt |
+| `pnpm typecheck` | TypeScript across the workspace |
+| `pnpm --filter @coblocks/api test` | interpreter tests (vitest) |
+| `pnpm db:up` / `db:push` / `db:seed` | local database lifecycle |
 
-## 문서
+## Design invariants
 
-- [docs/01-architecture.md](docs/01-architecture.md) — 구성과 데이터 흐름
-- [docs/02-data-model.md](docs/02-data-model.md) — 테이블과 관계
-- [docs/03-api.md](docs/03-api.md) — 엔드포인트 명세
-- [docs/04-curriculum.md](docs/04-curriculum.md) — 교육과정 매핑 규칙
-- [docs/05-roadmap.md](docs/05-roadmap.md) — 남은 작업
+These are enforced in review and must not be worked around:
 
-## 출처
+1. **Grading happens on the server.** Completion is decided only inside `attempt()` in
+   `apps/api/src/progress/progress.service.ts`, by re-running the submitted program.
+2. **Personal data leaves masked.** Every path that returns user data goes through
+   `apps/api/src/common/masking.ts`. Reading the original requires a logged, approved
+   unmask request.
+3. **The audit log is append-only.** No UPDATE or DELETE against `audit_logs`, in code or
+   by database privilege.
+4. **Concept colours are fixed.** The eight tokens in `tokens.css` are not reordered or
+   recycled, and components use tokens rather than raw hex.
+5. **Achievement standards are quoted, not summarised.** If a standard is missing, add the
+   official text before authoring the mission.
 
-성취기준 원문은 2022 개정 교육과정 실과(기술·가정)/정보과 고시를 따른다.
-미션 구성과 차시는 성취기준을 근거로 만든 예시안이며 교과서 단원과 1:1 대응하지 않는다.
+## Documentation
+
+| Document | Contents |
+| --- | --- |
+| [docs/01-architecture.md](docs/01-architecture.md) | composition and data flow |
+| [docs/02-data-model.md](docs/02-data-model.md) | tables and relations |
+| [docs/03-api.md](docs/03-api.md) | endpoint specification |
+| [docs/04-curriculum.md](docs/04-curriculum.md) | curriculum mapping rules |
+| [docs/05-roadmap.md](docs/05-roadmap.md) | what is left |
+| [AGENTS.md](AGENTS.md) | working rules for humans and AI agents |
+| [CONTRIBUTING.md](CONTRIBUTING.md) | how to contribute · [한국어](docs/CONTRIBUTING.ko.md) |
+
+Root documents are written in English with a Korean translation under `docs/*.ko.md`.
+Both versions are updated in the same change.
+
+## Status
+
+Working scaffold, not a product yet: the learner flow (landing → login → dashboard →
+curriculum → block player) and six admin screens run, the API implements auth, missions,
+progress and admin endpoints, and some screens still fall back to seed data before the API
+is wired in. See the roadmap for the ordered plan.
+
+## License
+
+[Apache License 2.0](LICENSE) — Copyright 2026 Team Croffle.
+
+Achievement standard text quoted in this repository originates from Ministry of Education
+notices and is subject to its own terms.
