@@ -20,11 +20,18 @@ export interface Standard {
 }
 
 export interface StageConfig {
-  /** 정사각 격자 한 변의 칸 수 */
-  size: number;
-  start: { x: number; y: number; dir: 0 | 1 | 2 | 3 };
+  /** 가로 칸 수 */
+  col: number;
+  /** 세로 칸 수 — col 과 달라도 된다. v0.1 렌더러는 정사각만 그리지만 저장 형식은 이미 비정사각이다. */
+  row: number;
+  /**
+   * heading 은 도(度)로 저장한다. 0=위, 90=오른쪽, 180=아래, 270=왼쪽.
+   * v0.1 은 90 의 배수만 허용하고 v0.9 에서 임의 각도를 연다 — 그때 데이터 마이그레이션이 없도록
+   * 저장 형식을 처음부터 각도로 둔다.
+   */
+  start: { x: number; y: number; heading: number };
   goal: { x: number; y: number };
-  /** [x, y] 좌표 목록 */
+  /** [x, y] 좌표 목록. y 는 아래로 증가한다. */
   walls: Array<[number, number]>;
 }
 

@@ -1,9 +1,10 @@
 import type { Lesson, StageConfig } from '../types/curriculum';
 
-/** 기본 스테이지: 8×8, 좌하단에서 출발해 우상단 별까지. */
+/** 기본 스테이지: 8×8, 좌하단에서 오른쪽(heading 90)을 보고 출발해 별까지. */
 export const DEFAULT_STAGE: StageConfig = {
-  size: 8,
-  start: { x: 0, y: 7, dir: 0 },
+  col: 8,
+  row: 8,
+  start: { x: 0, y: 7, heading: 90 },
   goal: { x: 6, y: 1 },
   walls: [
     [2, 7],
