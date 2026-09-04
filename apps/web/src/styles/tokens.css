@@ -1,0 +1,102 @@
+/*
+ * 디자인 토큰. Tailwind v4 는 CSS-first 라서 @theme 안에 선언한 커스텀 프로퍼티가
+ * 그대로 유틸리티(bg-paper, text-ink …)로 만들어진다.
+ *
+ * 다크 모드는 두 경로로 들어온다.
+ *   1) OS 설정(prefers-color-scheme) — 사용자가 앱에서 라이트를 고르면 무시
+ *   2) <html data-theme="dark"> — 앱 토글이 직접 찍는다
+ * 아래 두 블록은 @theme 에서 만든 것과 "같은 이름"의 변수를 다시 정의한다.
+ * 유틸리티가 var(--color-*) 를 참조하므로 값만 갈아끼우면 그대로 반영된다.
+ */
+@theme {
+  --color-paper: #ffffff;
+  --color-surface: #f3f5fa;
+  --color-surface-2: #e9edf5;
+  --color-ink: #161a26;
+  --color-ink-soft: #3b4257;
+  --color-muted: #68708a;
+  --color-line: #dee3ee;
+  --color-line-strong: #c6cddd;
+  --color-brand: #1b2650;
+  --color-brand-soft: #e8ebf6;
+  --color-accent: #ffc53d;
+  --color-accent-ink: #3d2c00;
+
+  /* 개념 = 블록 색. 고정 순서이며 순환 재사용하지 않는다. */
+  --color-seq: #e8863a;
+  --color-loop: #2f9a63;
+  --color-cond: #d94f56;
+  --color-data: #3866de;
+  --color-func: #8151d6;
+  --color-ds: #0f8c86;
+  --color-algo: #b84a86;
+  --color-ai: #0b8ba3;
+
+  /* 상태색은 개념색과 분리해서 쓴다. */
+  --color-ok: #2f9a63;
+  --color-warn: #e8863a;
+  --color-bad: #d94f56;
+
+  --font-display: 'Jua', 'IBM Plex Sans KR', system-ui, sans-serif;
+  --font-sans: 'IBM Plex Sans KR', 'Apple SD Gothic Neo', system-ui, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+
+  --radius-card: 14px;
+  --shadow-card: 0 1px 2px rgb(22 26 38 / 0.06), 0 8px 24px -14px rgb(22 26 38 / 0.28);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --color-paper: #12141c;
+    --color-surface: #181b25;
+    --color-surface-2: #212635;
+    --color-ink: #eef1f8;
+    --color-ink-soft: #c3cadb;
+    --color-muted: #8e97b0;
+    --color-line: #2a3040;
+    --color-line-strong: #3a4257;
+    --color-brand: #c9d3ff;
+    --color-brand-soft: #1e2438;
+    --color-accent: #ffcf5c;
+    --color-accent-ink: #2a1e00;
+    --color-seq: #f0a05e;
+    --color-loop: #4fbd83;
+    --color-cond: #ef7379;
+    --color-data: #6b90f5;
+    --color-func: #a880f0;
+    --color-ds: #2eb0a9;
+    --color-algo: #d873a8;
+    --color-ai: #2eafc6;
+    --color-ok: #4fbd83;
+    --color-warn: #f0a05e;
+    --color-bad: #ef7379;
+    --shadow-card: 0 1px 2px rgb(0 0 0 / 0.4), 0 10px 28px -16px rgb(0 0 0 / 0.8);
+  }
+}
+
+:root[data-theme='dark'] {
+  --color-paper: #12141c;
+  --color-surface: #181b25;
+  --color-surface-2: #212635;
+  --color-ink: #eef1f8;
+  --color-ink-soft: #c3cadb;
+  --color-muted: #8e97b0;
+  --color-line: #2a3040;
+  --color-line-strong: #3a4257;
+  --color-brand: #c9d3ff;
+  --color-brand-soft: #1e2438;
+  --color-accent: #ffcf5c;
+  --color-accent-ink: #2a1e00;
+  --color-seq: #f0a05e;
+  --color-loop: #4fbd83;
+  --color-cond: #ef7379;
+  --color-data: #6b90f5;
+  --color-func: #a880f0;
+  --color-ds: #2eb0a9;
+  --color-algo: #d873a8;
+  --color-ai: #2eafc6;
+  --color-ok: #4fbd83;
+  --color-warn: #f0a05e;
+  --color-bad: #ef7379;
+  --shadow-card: 0 1px 2px rgb(0 0 0 / 0.4), 0 10px 28px -16px rgb(0 0 0 / 0.8);
+}
