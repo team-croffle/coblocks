@@ -1,0 +1,18 @@
+Coblocks
+Copyright 2026 Team Croffle
+
+This product includes software developed by Team Croffle
+(https://github.com/team-croffle).
+
+Licensed under the Apache License, Version 2.0. See LICENSE for the full text.
+
+--------------------------------------------------------------------------------
+Third-party content
+
+Achievement standard text ("성취기준") quoted in this repository — in
+`packages/shared/src/data/concepts.ts` and in the documents under `docs/` — is
+reproduced verbatim from the 2022 revised national curriculum notices published
+by the Ministry of Education of the Republic of Korea. That text is not covered
+by the Apache License above and remains subject to its own terms of use. It is
+quoted for the purpose of mapping learning content to the published standards
+and is never paraphrased or presented as this project's own wording.
