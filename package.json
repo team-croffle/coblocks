@@ -1,5 +1,6 @@
 {
   "name": "coblocks",
+  "version": "0.1.0",
   "private": true,
   "type": "module",
   "packageManager": "pnpm@11.25.0",
@@ -17,10 +18,12 @@
     "fmt": "oxfmt",
     "fmt:check": "oxfmt --check",
     "check": "pnpm lint && pnpm fmt:check && pnpm typecheck",
-    "db:up": "docker compose up -d db",
+    "db:up": "docker compose -f docker/docker-compose.dev.yaml up -d db",
     "db:push": "pnpm --filter @coblocks/api db:push",
     "db:seed": "pnpm --filter @coblocks/api db:seed",
-    "prepare": "husky"
+    "prepare": "husky",
+    "db:down": "docker compose -f docker/docker-compose.dev.yaml down",
+    "docker:build": "docker build -f apps/api/Dockerfile -t coblocks-api:dev . && docker build -f apps/web/Dockerfile -t coblocks-web:dev ."
   },
   "devDependencies": {
     "husky": "^9.1.7",

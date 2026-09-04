@@ -1,0 +1,49 @@
+# 운영용 — GHCR 에 올라간 릴리스 이미지를 그대로 띄운다.
+#   docker compose -f docker/docker-compose.yaml up -d
+# 태그 규칙은 .ai/VERSIONING.md 5절.
+
+name: coblocks
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-coblocks}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD 를 설정할 것}
+      POSTGRES_DB: ${POSTGRES_DB:-coblocks}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER:-coblocks}']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    image: ghcr.io/team-croffle/coblocks-api:${COBLOCKS_TAG:-latest}
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgres://${POSTGRES_USER:-coblocks}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-coblocks}
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET 를 설정할 것}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-8h}
+      PORT: 3000
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:8080}
+    expose:
+      - '3000'
+
+  web:
+    image: ghcr.io/team-croffle/coblocks-web:${COBLOCKS_TAG:-latest}
+    restart: unless-stopped
+    depends_on:
+      - api
+    environment:
+      API_UPSTREAM: http://api:3000
+    ports:
+      - '${WEB_PORT:-8080}:80'
+
+volumes:
+  pgdata:
