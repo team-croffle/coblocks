@@ -1,8 +1,9 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { and, eq } from 'drizzle-orm';
-
 import {
   run,
+  validateProgram,
+  validateStage,
   type BlockProgram,
   type LessonProgress,
   type RunResult,
@@ -46,10 +47,20 @@ export class ProgressService {
     const [lesson] = await this.db.select().from(lessons).where(eq(lessons.id, lessonId)).limit(1);
     if (!lesson) throw new NotFoundException('미션을 찾을 수 없습니다.');
 
+    // 클라이언트가 보낸 것은 형태부터 믿지 않는다. 검증을 통과한 것만 실행한다.
+    const programIssue = validateProgram(program);
     const stage = lesson.stage as StageConfig | null;
-    const result: RunResult = stage
-      ? run(stage, program)
-      : { outcome: 'missed_goal', steps: [], failedAt: null };
+    const stageIssue = stage ? validateStage(stage) : null;
+
+    let result: RunResult;
+    if (programIssue) {
+      result = { outcome: 'invalid', steps: [], failedAt: programIssue.index };
+    } else if (!stage || stageIssue) {
+      // 스테이지가 없는 활동형 미션이거나, 등록된 스테이지가 깨진 경우.
+      result = { outcome: stageIssue ? 'invalid' : 'missed_goal', steps: [], failedAt: null };
+    } else {
+      result = run(stage, program);
+    }
 
     const succeeded = result.outcome === 'success';
     const [existing] = await this.db
@@ -80,7 +91,12 @@ export class ProgressService {
       target: lesson.title,
       outcome: succeeded ? 'success' : 'pending',
       ip,
-      meta: { outcome: result.outcome, steps: result.steps.length },
+      meta: {
+        outcome: result.outcome,
+        steps: result.steps.length,
+        ...(programIssue ? { invalidReason: programIssue.reason } : {}),
+        ...(stageIssue ? { stageIssue: stageIssue.reason } : {}),
+      },
     });
 
     return result;
