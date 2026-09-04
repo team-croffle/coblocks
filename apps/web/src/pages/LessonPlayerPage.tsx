@@ -1,10 +1,11 @@
 import { useQuery } from '@tanstack/react-query';
-import { Link, useParams } from '@tanstack/react-router';
-import { useState } from 'react';
-
-import { DEFAULT_STAGE, LESSON_SEED, STANDARD_TEXT } from '@coblocks/shared';
-import type { BlockKind, BlockProgram } from '@coblocks/shared';
-
+import {
+  DEFAULT_STAGE,
+  LESSON_SEED,
+  STANDARD_TEXT,
+  type BlockProgram,
+  type ProgramBlock,
+} from '@coblocks/shared';
 import { fetchLesson, submitAttempt } from '@/api/lessons';
 import { BlockPalette } from '@/components/BlockPalette';
 import { BlockWorkspace } from '@/components/BlockWorkspace';
@@ -51,8 +52,8 @@ function Player({
   const [program, setProgram] = useState<BlockProgram>([]);
   const runner = useBlockRunner(stage);
 
-  function add(kind: BlockKind) {
-    setProgram((prev) => [...prev, kind === 'rep' ? { kind, count: 3 } : { kind }]);
+  function add(block: ProgramBlock) {
+    setProgram((prev) => [...prev, block]);
     runner.reset('블록을 추가했어요. 실행해 볼까요?');
   }
 
