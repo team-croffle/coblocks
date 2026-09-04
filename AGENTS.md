@@ -61,6 +61,10 @@ TanStack Router derives path types from the route tree. If `Link to="..."` gives
 
 ## Documentation and i18n
 
+- `docs/` is **published documentation only**: material that is settled, meant for people outside the
+  team, and stable between major changes. Working design and analysis notes — architecture, data model,
+  API drafts, curriculum mapping rules, the roadmap — live in `.ai/`, which is local and never committed.
+  If a document is still moving, it does not belong in `docs/`.
 - Root documents (`README.md`, `CONTRIBUTING.md`) are written in **English**; the Korean
   translation lives at `docs/<name>.ko.md`. Every other document under `docs/` is written in Korean.
 - **A change to a root document changes both language versions in the same commit.** Editing only
@@ -107,4 +111,6 @@ TanStack Router derives path types from the route tree. If `Link to="..."` gives
 
 ## Not done yet
 
-See `docs/05-roadmap.md`. Big items: stage editor, unmask-approval screen, class management, real-time online-user counting (Redis), refresh tokens.
+See `.ai/ROADMAP.md` (local). Big items: a Blockly editor over a server-executable IR, a canvas2D stage
+package, the stage editor, custom blocks and mission constraints, classrooms and assignments, block-to-code
+conversion, solution sharing, and real-time collaboration.

@@ -22,9 +22,7 @@ interpreter:
 
 curriculum:
   - changed-files:
-      - any-glob-to-any-file:
-          - 'packages/shared/src/data/**'
-          - 'docs/04-curriculum.md'
+      - any-glob-to-any-file: 'packages/shared/src/data/**'
 
 database:
   - changed-files:
