@@ -19,11 +19,23 @@
     "check": "pnpm lint && pnpm fmt:check && pnpm typecheck",
     "db:up": "docker compose up -d db",
     "db:push": "pnpm --filter @coblocks/api db:push",
-    "db:seed": "pnpm --filter @coblocks/api db:seed"
+    "db:seed": "pnpm --filter @coblocks/api db:seed",
+    "prepare": "husky"
   },
   "devDependencies": {
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.0",
     "oxfmt": "^0.66.0",
     "oxlint": "^1.81.0",
     "typescript": "6.0.3"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx,mjs,cjs}": [
+      "oxlint --fix",
+      "oxfmt"
+    ],
+    "*.json": [
+      "oxfmt"
+    ]
   }
 }
