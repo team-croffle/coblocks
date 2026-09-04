@@ -71,7 +71,7 @@ Coblocks 는 알고리즘을 통해 컴퓨팅 사고력을 기르는 것을 목�
 | API | NestJS · Drizzle ORM · PostgreSQL 16 · JWT(Passport) · argon2 |
 | 공통 | `packages/shared` — 타입, 커리큘럼 시드, 블록 인터프리터 |
 | 툴링 | pnpm 워크스페이스 · oxlint · oxfmt · husky + lint-staged (ESLint/Prettier 미사용) |
-| 배포 | 프론트 Netlify · API Render · DB Supabase 또는 자체 PostgreSQL |
+| 배포 | GHCR 컨테이너 이미지(`coblocks-web`, `coblocks-api`) · compose 파일은 `docker/` |
 
 ## 프로젝트 구조
 
