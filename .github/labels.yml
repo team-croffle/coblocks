@@ -35,6 +35,9 @@
 - name: ci
   color: '64748b'
   description: GitHub Actions 및 저장소 설정
+- name: docker
+  color: '2496ed'
+  description: Dockerfile · compose · 이미지 빌드
 - name: tooling
   color: '94a3b8'
   description: 린터·포매터·hook·워크스페이스 설정

@@ -1,0 +1,60 @@
+# 개발용 — 기본은 DB 만 띄우고 앱은 호스트에서 pnpm dev 로 돌린다.
+#   docker compose -f docker/docker-compose.dev.yaml up -d db
+#
+# 컨테이너로 전체를 돌려보고 싶으면 app 프로파일을 켠다(이미지를 로컬에서 빌드).
+#   docker compose -f docker/docker-compose.dev.yaml --profile app up --build
+
+name: coblocks-dev
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: coblocks-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: coblocks
+      POSTGRES_PASSWORD: coblocks
+      POSTGRES_DB: coblocks
+    ports:
+      - '5432:5432'
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U coblocks']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    profiles: ['app']
+    build:
+      context: ..
+      dockerfile: apps/api/Dockerfile
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgres://coblocks:coblocks@db:5432/coblocks
+      JWT_SECRET: dev-only-not-a-secret
+      JWT_EXPIRES_IN: 8h
+      PORT: 3000
+      CORS_ORIGIN: http://localhost:8080
+    ports:
+      - '3000:3000'
+
+  web:
+    profiles: ['app']
+    build:
+      context: ..
+      dockerfile: apps/web/Dockerfile
+      args:
+        VITE_API_BASE_URL: /api
+    depends_on:
+      - api
+    environment:
+      API_UPSTREAM: http://api:3000
+    ports:
+      - '8080:80'
+
+volumes:
+  pgdata:

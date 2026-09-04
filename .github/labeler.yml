@@ -62,6 +62,14 @@ ci:
   - changed-files:
       - any-glob-to-any-file: '.github/**'
 
+docker:
+  - changed-files:
+      - any-glob-to-any-file:
+          - '**/Dockerfile'
+          - '.dockerignore'
+          - 'docker/**'
+          - 'apps/web/nginx.conf.template'
+
 tooling:
   - changed-files:
       - any-glob-to-any-file:
