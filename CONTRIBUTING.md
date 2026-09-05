@@ -34,10 +34,10 @@ If hooks do not run, `pnpm install` was skipped or `core.hooksPath` was overridd
    edits, and do not leave a finished sub-task uncommitted while starting the next.
 4. **Run `pnpm check` before every commit** — lint, format check and typecheck. The
    pre-commit hook runs lint-staged on your staged files, but it does not replace this.
-5. **Write the commit message as title + summary + bullets:**
+5. **Write the commit message as `type(scope): subject`, then summary, then bullets:**
 
    ```
-   <title: imperative, ≤ 72 chars, what changed>
+   <type>(<scope>): <subject: imperative, whole line ≤ 72 chars>
 
    <summary: 1–3 sentences — why this change, what it affects>
 
@@ -45,7 +45,12 @@ If hooks do not run, `pnpm install` was skipped or `core.hooksPath` was overridd
    - <bullet: decisions made, alternatives rejected, what a reviewer should check>
    ```
 
-   A bare title is acceptable only for a trivial one-liner such as a typo fix.
+   `type` is one of `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `build`, `ci`,
+   `chore`, `release`; `!` before the colon marks a breaking change. `scope` is optional and names
+   the area — `api`, `web`, `shared`, `db`, `auth`, `docker`, `deps`. The `commit-msg` hook enforces
+   the subject line.
+
+   A bare subject line is acceptable only for a trivial one-liner such as a typo fix.
 
 ## Code style
 

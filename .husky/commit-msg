@@ -1,4 +1,4 @@
-# 커밋 메시지 형식 검사 — 제목 + 빈 줄 + 본문(요약/불릿).
+# 커밋 메시지 형식 검사 — `타입(범위): 제목` + 빈 줄 + 본문(요약/불릿).
 # 규칙 전문은 AGENTS.md 의 "Git workflow" 를 볼 것.
 
 msg_file="$1"
@@ -11,6 +11,15 @@ esac
 
 if [ -z "$(printf '%s' "$subject" | tr -d '[:space:]')" ]; then
   echo "commit-msg: 커밋 제목이 비어 있다." >&2
+  exit 1
+fi
+
+# Conventional Commits: type(scope)!: subject
+if ! printf '%s' "$subject" | grep -Eq '^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|release)(\([a-z0-9./-]+\))?!?: .+'; then
+  echo "commit-msg: 제목은 '타입(범위): 설명' 형식이어야 한다." >&2
+  echo "  타입: feat fix docs style refactor perf test build ci chore release" >&2
+  echo "  예:   fix(api): 가입 실패 응답 코드를 400/409/500 으로 나눔" >&2
+  echo "  받은 제목: $subject" >&2
   exit 1
 fi
 
