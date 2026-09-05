@@ -18,7 +18,8 @@ pnpm lint             # oxlint
 pnpm fmt              # oxfmt (check only: pnpm fmt:check)
 pnpm check            # lint + fmt:check + typecheck — must pass before every commit
 pnpm --filter @coblocks/api test   # interpreter tests
-pnpm db:up && pnpm db:push && pnpm db:seed   # db:up 은 docker/docker-compose.dev.yaml 을 쓴다
+pnpm db:up && pnpm db:migrate && pnpm db:seed   # db:up 은 docker/docker-compose.dev.yaml 을 쓴다
+pnpm db:generate      # 스키마를 바꿨으면 마이그레이션을 만든다. db:push 는 버릴 DB 에만
 ```
 
 ## Code rules

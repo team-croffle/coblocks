@@ -124,7 +124,7 @@ cp apps/api/.env.example apps/api/.env
 cp apps/web/.env.example apps/web/.env
 
 pnpm db:up        # start PostgreSQL via docker compose
-pnpm db:push      # apply the Drizzle schema
+pnpm db:migrate   # apply the Drizzle migrations (never `db:push` outside a scratch database)
 pnpm db:seed      # seed standards, missions and dev accounts
 
 pnpm dev          # web (:5173) + api (:3000)
@@ -142,7 +142,8 @@ Development accounts (password = id): `student1`, `teacher1`, `admin`.
 | `pnpm fmt` / `fmt:check` | oxfmt |
 | `pnpm typecheck` | TypeScript across the workspace |
 | `pnpm --filter @coblocks/api test` | interpreter tests (vitest) |
-| `pnpm db:up` / `db:push` / `db:seed` | local database lifecycle |
+| `pnpm db:up` / `db:migrate` / `db:seed` | local database lifecycle |
+| `pnpm db:generate` / `db:push` | write a migration from the schema / push it straight onto a scratch database |
 
 ## Design invariants
 

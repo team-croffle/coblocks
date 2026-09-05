@@ -118,7 +118,7 @@ cp apps/api/.env.example apps/api/.env
 cp apps/web/.env.example apps/web/.env
 
 pnpm db:up        # docker compose 로 PostgreSQL 기동
-pnpm db:push      # Drizzle 스키마 반영
+pnpm db:migrate   # Drizzle 마이그레이션 적용 (버릴 DB 가 아니면 db:push 를 쓰지 않는다)
 pnpm db:seed      # 성취기준 · 미션 · 개발 계정 시드
 
 pnpm dev          # web(:5173) + api(:3000)
@@ -136,7 +136,8 @@ pnpm dev          # web(:5173) + api(:3000)
 | `pnpm fmt` / `fmt:check` | oxfmt |
 | `pnpm typecheck` | 워크스페이스 전체 타입 체크 |
 | `pnpm --filter @coblocks/api test` | 인터프리터 테스트(vitest) |
-| `pnpm db:up` / `db:push` / `db:seed` | 로컬 DB 수명주기 |
+| `pnpm db:up` / `db:migrate` / `db:seed` | 로컬 DB 수명주기 |
+| `pnpm db:generate` / `db:push` | 스키마에서 마이그레이션 생성 / 버릴 DB 에 바로 반영 |
 
 ## 설계상 지켜야 할 것
 
