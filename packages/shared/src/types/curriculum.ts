@@ -91,8 +91,10 @@ export type ProgressState = 'not_started' | 'in_progress' | 'completed';
 export interface LessonProgress {
   lessonId: string;
   state: ProgressState;
-  /** 마지막으로 저장한 블록 프로그램 */
+  /** 마지막으로 저장한 블록 프로그램(IR) — 채점은 이것으로만 한다 */
   program: unknown;
+  /** 마지막으로 저장한 에디터 워크스페이스. 다시 열 때 화면을 복원하는 용도다. */
+  workspace: unknown;
   attempts: number;
   completedAt: string | null;
   updatedAt: string;

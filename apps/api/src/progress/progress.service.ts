@@ -33,6 +33,7 @@ export class ProgressService {
       lessonId: r.lessonId,
       state: r.state,
       program: r.program,
+      workspace: r.workspace,
       attempts: r.attempts,
       completedAt: r.completedAt?.toISOString() ?? null,
       updatedAt: r.updatedAt.toISOString(),
@@ -47,6 +48,7 @@ export class ProgressService {
     user: { id: string; label: string },
     lessonId: string,
     program: BlockProgram,
+    workspace: unknown,
     ip: string,
   ): Promise<AttemptResult> {
     const [lesson] = await this.db.select().from(lessons).where(eq(lessons.id, lessonId)).limit(1);
@@ -89,6 +91,7 @@ export class ProgressService {
       const values = {
         state: succeeded ? ('completed' as const) : ('in_progress' as const),
         program,
+        workspace,
         attempts: (existing?.attempts ?? 0) + 1,
         completedAt: succeeded
           ? (existing?.completedAt ?? new Date())
