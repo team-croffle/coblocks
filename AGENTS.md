@@ -122,6 +122,11 @@ TanStack Router derives path types from the route tree. If `Link to="..."` gives
   ```
 
   A bare title is acceptable only for trivial one-liners (typo, formatting). Everything else gets the summary and bullets.
+- **Trailers: `Co-Authored-By` only.** When an AI agent wrote the change, close the message with a
+  single `Co-Authored-By:` line. Do not append session links or any other trailer — the message
+  should stay readable in `git log` a year from now.
+- **Every branch ends in a pull request.** Nothing is pushed straight to an integration branch, and
+  the pull request body is written to `.ai/pr/` first (see `.ai/WORKFLOW.md`).
 - Never commit `.ai/`, `.env*`, or Syncthing files (`.stfolder`, `.stignore`, `.stversions`). They are gitignored; do not undo that.
 - Hooks (husky, installed by `pnpm install`): `pre-commit` runs lint-staged on staged files,
   `commit-msg` rejects a subject over 72 characters or a missing blank line after it, `pre-push` runs
