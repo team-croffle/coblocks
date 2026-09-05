@@ -1,6 +1,6 @@
-# actions/labeler v5 설정. 변경된 파일 경로로 PR 라벨을 붙인다.
-# 여기 쓰는 라벨 이름은 .github/labels.yml 에도 있어야 한다 — 없는 라벨은
-# labeler 워크플로의 sync-labels 잡이 먼저 만들어 준다.
+# actions/labeler v5 configuration. Labels a pull request by the paths it touches.
+# Every label named here must also exist in .github/labels.yml; the sync-labels job
+# in the labeler workflow creates the missing ones before this runs.
 
 web:
   - changed-files:

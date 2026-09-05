@@ -1,48 +1,51 @@
 name: Release
 
-# 기본은 수동 배포다. Actions 탭에서 Run workflow.
-# 자동화(Claude 포함)는 repository_dispatch 로 같은 입력을 넘긴다:
+# Releases are cut by hand from the Actions tab. Automation starts one through
+# repository_dispatch with the same inputs:
 #   gh api repos/team-croffle/coblocks/dispatches -f event_type=release \
 #     -F 'client_payload[release_type]=rc' -F 'client_payload[draft]=true'
-# 어느 경로로 들어오든 릴리스는 draft 에서 멈춘다. 공개는 사람이 누른다.
+# Either path stops at a draft release. Publishing stays a human act.
+#
+# One version covers both apps (see .ai/VERSIONING.md). A release candidate may
+# ship only the app that changed via the `apps` input; a final release syncs both.
 on:
   workflow_dispatch:
     inputs:
       release_type:
-        description: 'version 을 직접 넣으면 무시된다'
+        description: 'Ignored when an exact version is given'
         required: true
         type: choice
         options: [patch, minor, major, rc]
         default: rc
       version:
-        description: 'v 없는 정확한 버전 (예: 0.1.0). 비우면 자동 증가'
+        description: 'Exact version without the leading v (e.g. 0.1.0). Empty = auto bump'
         required: false
         type: string
         default: ''
       version_suffix:
-        description: '앞 하이픈 없는 프리릴리스 suffix (예: rc.1, beta.2). 비우면 없음'
+        description: 'Prerelease suffix without the leading hyphen (e.g. rc.1, beta.2). Empty = none'
         required: false
         type: string
         default: ''
       prerelease:
-        description: 'auto = suffix 유무로 판단 / true = 베타 기능 포함이므로 강제 프리릴리스'
+        description: 'auto = decided by the suffix / true = force, the version carries beta work'
         required: true
         type: choice
         options: [auto, 'true', 'false']
         default: auto
       apps:
-        description: '빌드·푸시할 이미지. 버전은 어느 쪽을 고르든 하나로 움직인다'
+        description: 'Images to build and push. The version moves as one either way'
         required: true
         type: choice
         options: [all, api, web]
         default: all
       draft:
-        description: '업로드 후에도 draft 로 둔다'
+        description: 'Keep the release as a draft after the images are pushed'
         required: true
         type: boolean
         default: true
       dry_run:
-        description: '이미지 빌드만 (커밋·태그·푸시·발행 없음)'
+        description: 'Build images only: no commit, tag, push or release'
         required: true
         type: boolean
         default: false
@@ -70,9 +73,9 @@ jobs:
       tag: ${{ steps.calc.outputs.tag }}
       title: ${{ steps.calc.outputs.title }}
       is_prerelease: ${{ steps.calc.outputs.is_prerelease }}
-      apps: ${{ steps.input.outputs.apps }}
       dry_run: ${{ steps.calc.outputs.dry_run }}
       draft: ${{ steps.calc.outputs.draft }}
+      apps: ${{ steps.input.outputs.apps }}
       ref: ${{ steps.commit.outputs.ref }}
     steps:
       - uses: actions/checkout@v4
@@ -84,7 +87,8 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
 
-      # workflow_dispatch 와 repository_dispatch 의 입력을 한 곳에서 합친다.
+      # workflow_dispatch and repository_dispatch inputs are merged here so the
+      # rest of the workflow reads one set of values.
       - name: Normalize inputs
         id: input
         shell: bash
@@ -109,7 +113,7 @@ jobs:
             echo "dry_run=$(get dry_run false)"
           } >> "$GITHUB_OUTPUT"
 
-          # 이미지 선택을 매트릭스가 바로 쓸 수 있는 JSON 배열로 바꾼다.
+          # Turn the image selection into a JSON array the matrix can consume.
           case "$(get apps all)" in
             api) echo 'apps=["api"]' >> "$GITHUB_OUTPUT" ;;
             web) echo 'apps=["web"]' >> "$GITHUB_OUTPUT" ;;
@@ -129,10 +133,10 @@ jobs:
         run: |
           set -euo pipefail
           CURRENT=$(node -p "require('./package.json').version")
-          echo "현재 버전: $CURRENT"
+          echo "Current version: $CURRENT"
 
           core_of() {
-            node -e "const v=process.argv[1].replace(/^v/,'').split(/[-+]/)[0]; if(!/^\d+\.\d+\.\d+$/.test(v)){console.error('semver core 아님:',process.argv[1]);process.exit(1)}; console.log(v)" "$1"
+            node -e "const v=process.argv[1].replace(/^v/,'').split(/[-+]/)[0]; if(!/^\d+\.\d+\.\d+$/.test(v)){console.error('Not a semver core:',process.argv[1]);process.exit(1)}; console.log(v)" "$1"
           }
           bump_core() {
             node -e "
@@ -151,7 +155,7 @@ jobs:
             CORE="$(core_of "$CURRENT")"
             case "$RELEASE_TYPE" in
               major|minor|patch) NEXT="$(bump_core "$CORE" "$RELEASE_TYPE")" ;;
-              # 같은 버전을 여러 브랜치로 나눠 작업할 때 병합마다 rc.N 을 올린다.
+              # One version line split across branches: each merge bumps rc.N.
               rc)
                 if [[ "$CURRENT" =~ ^([0-9]+\.[0-9]+\.[0-9]+)-rc\.([0-9]+)$ ]]; then
                   NEXT="${BASH_REMATCH[1]}-rc.$(( BASH_REMATCH[2] + 1 ))"
@@ -159,7 +163,7 @@ jobs:
                   NEXT="${CORE}-rc.1"
                 fi
                 ;;
-              *) echo "알 수 없는 release_type: $RELEASE_TYPE" >&2; exit 1 ;;
+              *) echo "Unknown release_type: $RELEASE_TYPE" >&2; exit 1 ;;
             esac
           fi
 
@@ -168,10 +172,11 @@ jobs:
           fi
 
           if [[ ! "$NEXT" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$ ]]; then
-            echo "버전 형식이 이상하다: $NEXT" >&2; exit 1
+            echo "Computed version looks wrong: $NEXT" >&2; exit 1
           fi
 
-          # suffix 가 있으면 무조건 프리릴리스. 없어도 베타 기능이 섞였으면 강제로 켠다.
+          # A suffix always means prerelease. Without one it can still be forced on
+          # when the version carries beta work.
           IS_PRE=false
           [[ "$NEXT" == *-* ]] && IS_PRE=true
           [[ "$FORCE_PRE" == "true" ]] && IS_PRE=true
@@ -184,10 +189,10 @@ jobs:
           fi
 
           TAG="v${NEXT}"
-          echo "→ $TITLE (tag $TAG, prerelease=$IS_PRE, draft=$DRAFT, dry_run=$DRY_RUN)"
+          echo "-> $TITLE (tag $TAG, prerelease=$IS_PRE, draft=$DRAFT, dry_run=$DRY_RUN)"
 
           if [[ "$DRY_RUN" != "true" ]] && git ls-remote --tags origin "refs/tags/${TAG}" | grep -q .; then
-            echo "::error::태그 ${TAG} 가 이미 origin 에 있다."
+            echo "::error::Tag ${TAG} already exists on origin."
             exit 1
           fi
 
@@ -215,11 +220,11 @@ jobs:
             const pkg = JSON.parse(fs.readFileSync(file, 'utf8'));
             pkg.version = version;
             fs.writeFileSync(file, JSON.stringify(pkg, null, 2) + '\n');
-            console.log(`${file} → ${version}`);
+            console.log(`${file} -> ${version}`);
           }
           NODE
 
-      - name: Commit, tag, push
+      - name: Commit, tag and push
         id: commit
         shell: bash
         env:
@@ -229,7 +234,7 @@ jobs:
         run: |
           set -euo pipefail
           if [[ "$DRY_RUN" == "true" ]]; then
-            echo "dry_run — 커밋·태그·푸시 생략"
+            echo "dry_run: skipping commit, tag and push"
             echo "ref=${GITHUB_SHA}" >> "$GITHUB_OUTPUT"
             exit 0
           fi
@@ -241,8 +246,8 @@ jobs:
 
           for attempt in 1 2 3; do
             if git push origin "HEAD:${GITHUB_REF_NAME}"; then break; fi
-            if [[ $attempt -eq 3 ]]; then echo "브랜치 푸시 3회 실패" >&2; exit 1; fi
-            echo "푸시 거절 (시도 $attempt/3) — rebase 후 재시도"
+            if [[ $attempt -eq 3 ]]; then echo "Branch push failed after 3 attempts" >&2; exit 1; fi
+            echo "Push rejected (attempt $attempt/3), rebasing and retrying"
             git pull --rebase origin "${GITHUB_REF_NAME}"
           done
 
@@ -262,7 +267,7 @@ jobs:
           ARGS=(--draft --title "$TITLE" --generate-notes)
           [[ "$IS_PRE" == "true" ]] && ARGS+=(--prerelease)
           gh release create "$TAG" "${ARGS[@]}" --repo "$GITHUB_REPOSITORY"
-          echo "draft 릴리스 생성: $TITLE"
+          echo "Draft release created: $TITLE"
 
   images:
     name: Image (${{ matrix.app }})
@@ -271,7 +276,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # 버전은 하나지만 이미지는 따로 밀 수 있다 — 한쪽만 고쳐 다시 낼 때 쓴다.
+        # One version, but images can be pushed separately when only one app changed.
         app: ${{ fromJSON(needs.version.outputs.apps) }}
     steps:
       - uses: actions/checkout@v4
@@ -288,7 +293,8 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      # 정식이면 X.Y.Z / X.Y / latest, 프리릴리스면 X.Y.Z-suffix / edge
+      # A release tags X.Y.Z, X.Y and latest. A prerelease tags X.Y.Z-suffix and
+      # edge, so latest never moves to a beta.
       - name: Compose tags
         id: tags
         shell: bash
@@ -342,4 +348,4 @@ jobs:
           if [[ "$KEEP_DRAFT" == "true" ]]; then ARGS+=(--draft); else ARGS+=(--draft=false); fi
           if [[ "$IS_PRE" == "true" ]]; then ARGS+=(--prerelease); else ARGS+=(--prerelease=false); fi
           gh release edit "$TAG" "${ARGS[@]}" --repo "$GITHUB_REPOSITORY"
-          echo "릴리스 $TAG 갱신 (draft=$KEEP_DRAFT, prerelease=$IS_PRE)"
+          echo "Release $TAG updated (draft=$KEEP_DRAFT, prerelease=$IS_PRE)"
