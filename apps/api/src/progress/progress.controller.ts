@@ -1,10 +1,12 @@
 import { Body, Controller, Get, Param, Post, Req, UseGuards } from '@nestjs/common';
 import type { Request } from 'express';
+
 import type { AuthUser, BlockProgram } from '@coblocks/shared';
-import { ProgressService } from './progress.service';
+
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { CurrentUser } from '../common/current-user.decorator';
 import { AuditService } from '../common/audit.service';
+import { CurrentUser } from '../common/current-user.decorator';
+import { ProgressService } from './progress.service';
 
 @UseGuards(JwtAuthGuard)
 @Controller('progress')

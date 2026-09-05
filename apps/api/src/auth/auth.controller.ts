@@ -1,11 +1,13 @@
 import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
-import type { Request } from 'express';
 import { IsString, MinLength } from 'class-validator';
+import type { Request } from 'express';
+
 import type { AuthUser } from '@coblocks/shared';
+
+import { AuditService } from '../common/audit.service';
+import { CurrentUser } from '../common/current-user.decorator';
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './jwt-auth.guard';
-import { CurrentUser } from '../common/current-user.decorator';
-import { AuditService } from '../common/audit.service';
 
 class LoginDto {
   @IsString()

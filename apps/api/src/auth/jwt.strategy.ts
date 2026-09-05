@@ -1,10 +1,12 @@
 import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
-import { ExtractJwt, Strategy } from 'passport-jwt';
 import { eq } from 'drizzle-orm';
+import { ExtractJwt, Strategy } from 'passport-jwt';
+
 import type { AuthUser } from '@coblocks/shared';
-import { DB } from '../db/database.module';
+
 import type { Db } from '../db/client';
+import { DB } from '../db/database.module';
 import { users } from '../db/schema';
 
 export interface JwtPayload {

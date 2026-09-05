@@ -1,8 +1,10 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { and, asc, eq, ilike, inArray, or, sql, type SQL } from 'drizzle-orm';
+
 import type { Lesson, LessonQuery, LessonSummary, Paginated } from '@coblocks/shared';
-import { DB } from '../db/database.module';
+
 import type { Db } from '../db/client';
+import { DB } from '../db/database.module';
 import { lessons } from '../db/schema';
 
 @Injectable()

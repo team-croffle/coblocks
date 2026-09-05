@@ -1,10 +1,18 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { and, eq } from 'drizzle-orm';
-import { run, type BlockProgram, type LessonProgress, type RunResult, type StageConfig } from '@coblocks/shared';
-import { DB } from '../db/database.module';
-import type { Db } from '../db/client';
-import { lessons, progress } from '../db/schema';
+
+import {
+  run,
+  type BlockProgram,
+  type LessonProgress,
+  type RunResult,
+  type StageConfig,
+} from '@coblocks/shared';
+
 import { AuditService } from '../common/audit.service';
+import type { Db } from '../db/client';
+import { DB } from '../db/database.module';
+import { lessons, progress } from '../db/schema';
 
 @Injectable()
 export class ProgressService {

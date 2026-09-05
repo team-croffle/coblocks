@@ -1,10 +1,11 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { DatabaseModule } from './db/database.module';
+
+import { AdminModule } from './admin/admin.module';
 import { AuthModule } from './auth/auth.module';
+import { DatabaseModule } from './db/database.module';
 import { LessonsModule } from './lessons/lessons.module';
 import { ProgressModule } from './progress/progress.module';
-import { AdminModule } from './admin/admin.module';
 
 @Module({
   imports: [

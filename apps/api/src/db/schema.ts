@@ -15,7 +15,16 @@ import {
 export const userRole = pgEnum('user_role', ['student', 'teacher', 'admin']);
 export const accountState = pgEnum('account_state', ['active', 'dormant', 'suspended']);
 export const gradeBand = pgEnum('grade_band', ['e34', 'e56', 'm', 'h']);
-export const conceptKey = pgEnum('concept_key', ['seq', 'loop', 'cond', 'data', 'func', 'ds', 'algo', 'ai']);
+export const conceptKey = pgEnum('concept_key', [
+  'seq',
+  'loop',
+  'cond',
+  'data',
+  'func',
+  'ds',
+  'algo',
+  'ai',
+]);
 export const lessonStatus = pgEnum('lesson_status', ['draft', 'published', 'archived']);
 export const progressState = pgEnum('progress_state', ['not_started', 'in_progress', 'completed']);
 export const auditCategory = pgEnum('audit_category', ['access', 'activity', 'admin']);
