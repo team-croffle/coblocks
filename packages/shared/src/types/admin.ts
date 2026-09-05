@@ -1,4 +1,4 @@
-import type { UserRole } from './auth';
+import type { AccountType, UserRole } from './auth';
 
 export type AuditCategory = 'access' | 'activity' | 'admin';
 export type AuditOutcome = 'success' | 'failure' | 'pending';
@@ -17,16 +17,19 @@ export interface AuditLog {
 
 export type AccountState = 'active' | 'dormant' | 'suspended';
 
-/** 목록 API가 돌려주는 형태 — 개인정보는 서버에서 이미 마스킹된 값이다. */
+/**
+ * 목록 API가 돌려주는 형태.
+ * 실명·이메일은 애초에 저장하지 않으므로 여기에도 없다. 닉네임과 학번만 있고,
+ * 그나마도 마스킹된 값이 기본이다.
+ */
 export interface MaskedUser {
   id: string;
-  memberNo: string;
-  /** 예: 김O수 */
-  maskedName: string;
-  /** 예: ki****@sc****.kr */
-  maskedEmail: string;
+  /** 예: 코O이 */
+  maskedNickname: string;
+  accountType: AccountType;
+  /** 교육 계정의 학번을 마스킹한 값. 일반 계정은 null. 예: **-**-07 */
+  maskedStudentNo: string | null;
   role: UserRole;
-  schoolLabel: string;
   lastSeenAt: string | null;
   state: AccountState;
 }
