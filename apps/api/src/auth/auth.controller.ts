@@ -2,7 +2,7 @@ import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
 import { IsString, MinLength } from 'class-validator';
 import type { Request } from 'express';
 
-import type { AuthUser } from '@coblocks/shared';
+import { PASSWORD_MIN, type AuthUser } from '@coblocks/shared';
 
 import { AuditService } from '../common/audit.service';
 import { CurrentUser } from '../common/current-user.decorator';
@@ -12,11 +12,35 @@ import { JwtAuthGuard } from './jwt-auth.guard';
 class LoginDto {
   @IsString()
   @MinLength(1)
-  loginId!: string;
+  nickname!: string;
 
   @IsString()
   @MinLength(1)
   password!: string;
+}
+
+class SignupDto {
+  @IsString()
+  @MinLength(1)
+  nickname!: string;
+
+  @IsString()
+  @MinLength(PASSWORD_MIN)
+  password!: string;
+}
+
+class RecoverDto {
+  @IsString()
+  @MinLength(1)
+  nickname!: string;
+
+  @IsString()
+  @MinLength(1)
+  code!: string;
+
+  @IsString()
+  @MinLength(PASSWORD_MIN)
+  newPassword!: string;
 }
 
 @Controller('auth')
@@ -26,9 +50,19 @@ export class AuthController {
     private readonly audit: AuditService,
   ) {}
 
+  @Post('signup')
+  signup(@Body() dto: SignupDto, @Req() req: Request) {
+    return this.auth.signup(dto.nickname, dto.password, AuditService.clientIp(req));
+  }
+
   @Post('login')
   login(@Body() dto: LoginDto, @Req() req: Request) {
-    return this.auth.login(dto.loginId, dto.password, AuditService.clientIp(req));
+    return this.auth.login(dto.nickname, dto.password, AuditService.clientIp(req));
+  }
+
+  @Post('recover')
+  recover(@Body() dto: RecoverDto, @Req() req: Request) {
+    return this.auth.recover(dto.nickname, dto.code, dto.newPassword, AuditService.clientIp(req));
   }
 
   @UseGuards(JwtAuthGuard)
@@ -45,7 +79,7 @@ export class AuthController {
     await this.audit.record({
       category: 'access',
       actorId: user.id,
-      actorLabel: user.loginId,
+      actorLabel: user.nickname,
       action: '로그아웃',
       target: 'web',
       ip: AuditService.clientIp(req),
