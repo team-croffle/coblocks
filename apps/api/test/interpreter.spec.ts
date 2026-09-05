@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+
 import {
   DEFAULT_STAGE,
   compile,
@@ -104,7 +105,9 @@ describe('각도 기반 방향', () => {
 
 describe('제출 검증', () => {
   it('올바른 프로그램은 통과한다', () => {
-    expect(validateProgram([fwd(), turn(90), { kind: 'rep', count: 2 }, { kind: 'end' }])).toBeNull();
+    expect(
+      validateProgram([fwd(), turn(90), { kind: 'rep', count: 2 }, { kind: 'end' }]),
+    ).toBeNull();
   });
 
   it('배열이 아니면 거부한다', () => {

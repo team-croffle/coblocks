@@ -1,8 +1,4 @@
-// 이 화면에서는 배열 인덱스가 곧 블록의 정체성이다. 인터프리터가 돌려주는
-// ExecStep.sourceIndex, 하이라이트용 activeIndex, onRemove(i)/onSetCount(i) 가
-// 모두 같은 인덱스를 가리키므로 별도의 id 를 만들면 오히려 두 체계가 갈린다.
-/* oxlint-disable react/no-array-index-key */
-import type { BlockKind, BlockProgram } from '@coblocks/shared';
+import type { BlockKind, BlockProgram, ProgramBlock } from '@coblocks/shared';
 
 const COLOR: Record<BlockKind, string> = {
   fwd: '--color-seq',
@@ -61,7 +57,7 @@ export function BlockWorkspace({ program, activeIndex, onRemove, onSetCount }: P
 
       {program.map((block, i) => (
         <div
-          key={i}
+          key={block.id}
           className='flex min-w-[190px] items-center gap-2.5 rounded-[9px] py-2 pr-2.5 pl-3 text-[13.5px] font-semibold text-white'
           style={{
             background: `var(${COLOR[block.kind]})`,
