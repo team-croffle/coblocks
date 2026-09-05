@@ -1,3 +1,4 @@
+import type { QueryClient } from '@tanstack/react-query';
 import {
   createRootRouteWithContext,
   createRoute,
@@ -8,6 +9,16 @@ import {
 
 import type { AuthUser } from '@coblocks/shared';
 
+import {
+  adminAuditQuery,
+  adminInquiriesQuery,
+  adminLessonsQuery,
+  adminOverviewQuery,
+  adminUsersQuery,
+  lessonQuery,
+  lessonsQuery,
+  myProgressQuery,
+} from '@/api/queries';
 import { AdminLayout } from '@/layouts/AdminLayout';
 import { AppLayout } from '@/layouts/AppLayout';
 import { AuditPage } from '@/pages/admin/AuditPage';
@@ -23,6 +34,7 @@ import { LessonPlayerPage } from '@/pages/LessonPlayerPage';
 import { LoginPage } from '@/pages/LoginPage';
 import { NotFoundPage } from '@/pages/NotFoundPage';
 import { RecoverPage } from '@/pages/RecoverPage';
+import { queryClient } from '@/query';
 import { useAuthStore } from '@/stores/auth';
 
 import { SignupPage } from './pages/SignupPage';
@@ -30,6 +42,7 @@ import { SignupPage } from './pages/SignupPage';
 export interface RouterContext {
   /** 가드에서 최신 상태를 읽어야 하므로 값이 아니라 함수를 넘긴다. */
   getUser: () => AuthUser | null;
+  queryClient: QueryClient;
 }
 
 const rootRoute = createRootRouteWithContext<RouterContext>()({
@@ -80,20 +93,38 @@ const appRoute = createRoute({
   },
 });
 
+/**
+ * 아래 loader 들은 프리페치만 한다 — `prefetchQuery` 는 실패해도 던지지 않는다.
+ * `ensureQueryData` 로 기다리면 API 가 죽었을 때 라우트 자체가 에러로 떨어져,
+ * 페이지가 준비해 둔 재시도 UI 를 보여 줄 기회가 사라진다.
+ * 공통 헬퍼로 묶지 않는 이유는 제네릭이다 — 옵션을 배열로 받으면 타입이 unknown 으로 뭉개진다.
+ */
 const dashboardRoute = createRoute({
   getParentRoute: () => appRoute,
   path: 'dashboard',
   component: DashboardPage,
+  loader: ({ context }) => {
+    void context.queryClient.prefetchQuery(lessonsQuery());
+    void context.queryClient.prefetchQuery(myProgressQuery());
+  },
 });
 const curriculumRoute = createRoute({
   getParentRoute: () => appRoute,
   path: 'curriculum',
   component: CurriculumPage,
+  loader: ({ context }) => {
+    void context.queryClient.prefetchQuery(lessonsQuery());
+    void context.queryClient.prefetchQuery(myProgressQuery());
+  },
 });
 const lessonRoute = createRoute({
   getParentRoute: () => appRoute,
   path: 'learn/$slug',
   component: LessonPlayerPage,
+  loader: ({ context, params }) => {
+    void context.queryClient.prefetchQuery(lessonQuery(params.slug));
+    void context.queryClient.prefetchQuery(myProgressQuery());
+  },
 });
 const appIndexRoute = createRoute({
   getParentRoute: () => appRoute,
@@ -125,11 +156,17 @@ const adminOverviewRoute = createRoute({
   getParentRoute: () => adminRoute,
   path: 'overview',
   component: OverviewPage,
+  loader: ({ context }) => {
+    void context.queryClient.prefetchQuery(adminOverviewQuery());
+  },
 });
 const adminLessonsRoute = createRoute({
   getParentRoute: () => adminRoute,
   path: 'lessons',
   component: LessonManagePage,
+  loader: ({ context }) => {
+    void context.queryClient.prefetchQuery(adminLessonsQuery());
+  },
 });
 const adminLessonNewRoute = createRoute({
   getParentRoute: () => adminRoute,
@@ -140,21 +177,33 @@ const adminLessonEditRoute = createRoute({
   getParentRoute: () => adminRoute,
   path: 'lessons/$id/edit',
   component: LessonFormPage,
+  loader: ({ context }) => {
+    void context.queryClient.prefetchQuery(adminLessonsQuery());
+  },
 });
 const adminUsersRoute = createRoute({
   getParentRoute: () => adminRoute,
   path: 'users',
   component: UsersPage,
+  loader: ({ context }) => {
+    void context.queryClient.prefetchQuery(adminUsersQuery(''));
+  },
 });
 const adminAuditRoute = createRoute({
   getParentRoute: () => adminRoute,
   path: 'audit',
   component: AuditPage,
+  loader: ({ context }) => {
+    void context.queryClient.prefetchQuery(adminAuditQuery('', []));
+  },
 });
 const adminInquiriesRoute = createRoute({
   getParentRoute: () => adminRoute,
   path: 'inquiries',
   component: InquiryPage,
+  loader: ({ context }) => {
+    void context.queryClient.prefetchQuery(adminInquiriesQuery());
+  },
 });
 
 const routeTree = rootRoute.addChildren([
@@ -177,7 +226,7 @@ const routeTree = rootRoute.addChildren([
 
 export const router = createRouter({
   routeTree,
-  context: { getUser: () => useAuthStore.getState().user },
+  context: { getUser: () => useAuthStore.getState().user, queryClient },
   defaultPreload: 'intent',
 });
 
