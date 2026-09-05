@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { Link } from '@tanstack/react-router';
+import { Link, useParams } from '@tanstack/react-router';
 import { useState } from 'react';
 
 import { DEFAULT_STAGE, LESSON_SEED, STANDARD_TEXT } from '@coblocks/shared';
@@ -11,7 +11,6 @@ import { BlockWorkspace } from '@/components/BlockWorkspace';
 import { StageCanvas } from '@/components/StageCanvas';
 import { ZoomPanel } from '@/components/ZoomPanel';
 import { useBlockRunner } from '@/hooks/use-block-runner';
-import { lessonRoute } from '@/router';
 
 const GOALS = [
   '오른쪽 블록 스페이스에서 블록을 눌러 순서대로 쌓습니다.',
@@ -20,12 +19,19 @@ const GOALS = [
 ];
 
 export function LessonPlayerPage() {
-  const { slug } = lessonRoute.useParams();
+  // 라우트 객체를 import 하면 router.tsx 와 순환이 생긴다. 라우트 ID 로 읽는다.
+  const { slug } = useParams({ from: '/app/learn/$slug' });
 
   const { data: lesson } = useQuery({
     queryKey: ['lesson', slug],
     queryFn: () => fetchLesson(slug),
-    initialData: () => LESSON_SEED.find((l) => l.slug === slug) ?? LESSON_SEED[0]!,
+    initialData: () => {
+      // noUncheckedIndexedAccess 때문에 LESSON_SEED[0] 도 undefined 가 될 수 있다.
+      // 시드는 빌드 시점에 고정이라 실제로는 비지 않지만, 단언 대신 좁혀서 쓴다.
+      const seeded = LESSON_SEED.find((l) => l.slug === slug) ?? LESSON_SEED[0];
+      if (!seeded) throw new Error('LESSON_SEED 가 비어 있습니다.');
+      return seeded;
+    },
   });
 
   /** 스테이지가 없는 미션(토론·언플러그드)은 기본 스테이지로 대체한다. */

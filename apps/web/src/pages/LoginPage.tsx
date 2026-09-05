@@ -1,13 +1,13 @@
-import { Link, useNavigate } from '@tanstack/react-router';
+import { Link, useNavigate, useSearch } from '@tanstack/react-router';
 import { useState } from 'react';
 import type { FormEvent } from 'react';
 
 import { ThemeToggle } from '@/components/ThemeToggle';
-import { loginRoute } from '@/router';
 import { useAuthStore } from '@/stores/auth';
 
 export function LoginPage() {
-  const { redirect } = loginRoute.useSearch();
+  // 라우트 객체를 import 하면 router.tsx 와 순환이 생긴다. 라우트 ID 로 읽는다.
+  const { redirect } = useSearch({ from: '/login' });
   const login = useAuthStore((s) => s.login);
   const loading = useAuthStore((s) => s.loading);
   const navigate = useNavigate();

@@ -5,22 +5,24 @@ import {
   Outlet,
   redirect,
 } from '@tanstack/react-router';
+
 import type { AuthUser } from '@coblocks/shared';
-import { useAuthStore } from '@/stores/auth';
-import { AppLayout } from '@/layouts/AppLayout';
+
 import { AdminLayout } from '@/layouts/AdminLayout';
-import { LandingPage } from '@/pages/LandingPage';
-import { LoginPage } from '@/pages/LoginPage';
-import { DashboardPage } from '@/pages/DashboardPage';
-import { CurriculumPage } from '@/pages/CurriculumPage';
-import { LessonPlayerPage } from '@/pages/LessonPlayerPage';
-import { NotFoundPage } from '@/pages/NotFoundPage';
-import { OverviewPage } from '@/pages/admin/OverviewPage';
-import { LessonFormPage } from '@/pages/admin/LessonFormPage';
-import { LessonManagePage } from '@/pages/admin/LessonManagePage';
-import { UsersPage } from '@/pages/admin/UsersPage';
+import { AppLayout } from '@/layouts/AppLayout';
 import { AuditPage } from '@/pages/admin/AuditPage';
 import { InquiryPage } from '@/pages/admin/InquiryPage';
+import { LessonFormPage } from '@/pages/admin/LessonFormPage';
+import { LessonManagePage } from '@/pages/admin/LessonManagePage';
+import { OverviewPage } from '@/pages/admin/OverviewPage';
+import { UsersPage } from '@/pages/admin/UsersPage';
+import { CurriculumPage } from '@/pages/CurriculumPage';
+import { DashboardPage } from '@/pages/DashboardPage';
+import { LandingPage } from '@/pages/LandingPage';
+import { LessonPlayerPage } from '@/pages/LessonPlayerPage';
+import { LoginPage } from '@/pages/LoginPage';
+import { NotFoundPage } from '@/pages/NotFoundPage';
+import { useAuthStore } from '@/stores/auth';
 
 export interface RouterContext {
   /** 가드에서 최신 상태를 읽어야 하므로 값이 아니라 함수를 넘긴다. */
@@ -32,7 +34,11 @@ const rootRoute = createRootRouteWithContext<RouterContext>()({
   notFoundComponent: NotFoundPage,
 });
 
-const landingRoute = createRoute({ getParentRoute: () => rootRoute, path: '/', component: LandingPage });
+const landingRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/',
+  component: LandingPage,
+});
 
 const loginRoute = createRoute({
   getParentRoute: () => rootRoute,
@@ -55,8 +61,16 @@ const appRoute = createRoute({
   },
 });
 
-const dashboardRoute = createRoute({ getParentRoute: () => appRoute, path: 'dashboard', component: DashboardPage });
-const curriculumRoute = createRoute({ getParentRoute: () => appRoute, path: 'curriculum', component: CurriculumPage });
+const dashboardRoute = createRoute({
+  getParentRoute: () => appRoute,
+  path: 'dashboard',
+  component: DashboardPage,
+});
+const curriculumRoute = createRoute({
+  getParentRoute: () => appRoute,
+  path: 'curriculum',
+  component: CurriculumPage,
+});
 const lessonRoute = createRoute({
   getParentRoute: () => appRoute,
   path: 'learn/$slug',
@@ -88,8 +102,16 @@ const adminIndexRoute = createRoute({
     throw redirect({ to: '/admin/overview' });
   },
 });
-const adminOverviewRoute = createRoute({ getParentRoute: () => adminRoute, path: 'overview', component: OverviewPage });
-const adminLessonsRoute = createRoute({ getParentRoute: () => adminRoute, path: 'lessons', component: LessonManagePage });
+const adminOverviewRoute = createRoute({
+  getParentRoute: () => adminRoute,
+  path: 'overview',
+  component: OverviewPage,
+});
+const adminLessonsRoute = createRoute({
+  getParentRoute: () => adminRoute,
+  path: 'lessons',
+  component: LessonManagePage,
+});
 const adminLessonNewRoute = createRoute({
   getParentRoute: () => adminRoute,
   path: 'lessons/new',
@@ -100,9 +122,21 @@ const adminLessonEditRoute = createRoute({
   path: 'lessons/$id/edit',
   component: LessonFormPage,
 });
-const adminUsersRoute = createRoute({ getParentRoute: () => adminRoute, path: 'users', component: UsersPage });
-const adminAuditRoute = createRoute({ getParentRoute: () => adminRoute, path: 'audit', component: AuditPage });
-const adminInquiriesRoute = createRoute({ getParentRoute: () => adminRoute, path: 'inquiries', component: InquiryPage });
+const adminUsersRoute = createRoute({
+  getParentRoute: () => adminRoute,
+  path: 'users',
+  component: UsersPage,
+});
+const adminAuditRoute = createRoute({
+  getParentRoute: () => adminRoute,
+  path: 'audit',
+  component: AuditPage,
+});
+const adminInquiriesRoute = createRoute({
+  getParentRoute: () => adminRoute,
+  path: 'inquiries',
+  component: InquiryPage,
+});
 
 const routeTree = rootRoute.addChildren([
   landingRoute,
@@ -126,7 +160,8 @@ export const router = createRouter({
   defaultPreload: 'intent',
 });
 
-export { lessonRoute, adminLessonEditRoute, loginRoute };
+// 라우트 객체는 내보내지 않는다. 페이지가 다시 import 하면 순환이 생긴다.
+// 페이지는 useParams({ from })/useSearch({ from }) 로 라우트 ID 를 써서 읽는다.
 
 declare module '@tanstack/react-router' {
   interface Register {
