@@ -10,9 +10,7 @@ import type {
   Paginated,
   SystemOverview,
 } from '@coblocks/shared';
-
 import { AuditService } from '../common/audit.service';
-import { maskEmail, maskName, maskSchool } from '../common/masking';
 import type { Db } from '../db/client';
 import { DB } from '../db/database.module';
 import {
@@ -137,8 +135,9 @@ export class AdminService {
     const page = Math.max(1, params.page ?? 1);
     const pageSize = 20;
 
+    // 검색도 닉네임과 학번까지만. 실명·이메일은 애초에 저장하지 않는다.
     const where = params.q
-      ? or(ilike(users.memberNo, `%${params.q}%`), ilike(users.schoolName, `%${params.q}%`))
+      ? or(ilike(users.nickname, `%${params.q}%`), ilike(users.studentNo, `%${params.q}%`))
       : undefined;
 
     const rows = await this.db
@@ -156,11 +155,10 @@ export class AdminService {
     return {
       items: rows.map((r) => ({
         id: r.id,
-        memberNo: r.memberNo,
-        maskedName: maskName(r.name),
-        maskedEmail: maskEmail(r.email),
+        maskedNickname: maskNickname(r.nickname),
+        accountType: r.type,
+        maskedStudentNo: maskStudentNo(r.studentNo),
         role: r.role,
-        schoolLabel: maskSchool(r.schoolName),
         lastSeenAt: r.lastSeenAt?.toISOString().slice(0, 16).replace('T', ' ') ?? null,
         state: r.state,
       })),

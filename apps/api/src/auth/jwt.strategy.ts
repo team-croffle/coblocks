@@ -11,7 +11,7 @@ import { users } from '../db/schema';
 
 export interface JwtPayload {
   sub: string;
-  loginId: string;
+  nickname: string;
   role: AuthUser['role'];
 }
 
@@ -30,6 +30,12 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     const [row] = await this.db.select().from(users).where(eq(users.id, payload.sub)).limit(1);
     if (!row || row.state === 'suspended') throw new UnauthorizedException();
 
-    return { id: row.id, loginId: row.loginId, displayName: row.name, role: row.role };
+    return {
+      id: row.id,
+      nickname: row.nickname,
+      role: row.role,
+      accountType: row.type,
+      studentNo: row.studentNo,
+    };
   }
 }

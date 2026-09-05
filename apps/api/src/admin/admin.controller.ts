@@ -69,7 +69,7 @@ export class AdminController {
 
   @Post('lessons')
   createLesson(@CurrentUser() me: AuthUser, @Body() body: Partial<Lesson>, @Req() req: Request) {
-    return this.admin.createLesson(me.id, me.loginId, body, AuditService.clientIp(req));
+    return this.admin.createLesson(me.id, me.nickname, body, AuditService.clientIp(req));
   }
 
   @Patch('lessons/:id')
@@ -79,7 +79,7 @@ export class AdminController {
     @Body() body: Partial<Lesson>,
     @Req() req: Request,
   ) {
-    return this.admin.updateLesson(me.id, me.loginId, id, body, AuditService.clientIp(req));
+    return this.admin.updateLesson(me.id, me.nickname, id, body, AuditService.clientIp(req));
   }
 
   @Get('inquiries')
@@ -99,6 +99,6 @@ export class AdminController {
 
   @Post('inquiries/:id/hold')
   hold(@CurrentUser() me: AuthUser, @Param('id') id: string, @Req() req: Request) {
-    return this.admin.holdInquiry(me.id, me.loginId, id, AuditService.clientIp(req));
+    return this.admin.holdInquiry(me.id, me.nickname, id, AuditService.clientIp(req));
   }
 }

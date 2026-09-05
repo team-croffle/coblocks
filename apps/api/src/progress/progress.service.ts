@@ -38,7 +38,7 @@ export class ProgressService {
    * 클라이언트 결과를 믿지 않는 것이 핵심 — 완료 여부는 여기서만 정해진다.
    */
   async attempt(
-    user: { id: string; memberNo: string },
+    user: { id: string; label: string },
     lessonId: string,
     program: BlockProgram,
     ip: string,
@@ -85,7 +85,7 @@ export class ProgressService {
     await this.audit.record({
       category: 'activity',
       actorId: user.id,
-      actorLabel: user.memberNo,
+      actorLabel: user.label,
       action: succeeded ? '미션 완료' : '미션 실행',
       target: lesson.title,
       outcome: succeeded ? 'success' : 'pending',

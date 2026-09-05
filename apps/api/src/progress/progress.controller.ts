@@ -26,7 +26,7 @@ export class ProgressController {
     @Req() req: Request,
   ) {
     return this.progress.attempt(
-      { id: user.id, memberNo: user.loginId },
+      { id: user.id, label: user.nickname },
       lessonId,
       program ?? [],
       AuditService.clientIp(req),
