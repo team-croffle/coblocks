@@ -1,6 +1,13 @@
 import { randomInt } from 'node:crypto';
 
-import { ConflictException, Inject, Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Inject,
+  Injectable,
+  InternalServerErrorException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as argon2 from 'argon2';
 import { and, eq, isNull } from 'drizzle-orm';
@@ -28,6 +35,16 @@ async function verifyPassword(hash: string, password: string): Promise<boolean> 
   } catch {
     return false;
   }
+}
+
+/** postgres 의 unique_violation. 닉네임 선점 경합을 500 이 아니라 409 로 돌려주기 위해 본다. */
+function isUniqueViolation(error: unknown): boolean {
+  return (
+    typeof error === 'object' &&
+    error !== null &&
+    'code' in error &&
+    (error as { code?: unknown }).code === '23505'
+  );
 }
 
 /** 발급하는 복구 코드 개수 */
@@ -81,9 +98,12 @@ export class AuthService {
    */
   async signup(nickname: string, password: string, ip: string): Promise<SignupResponse> {
     const trimmed = nickname.trim();
+    // 형식 위반은 400 이고, 닉네임 선점은 409 다. 둘을 같은 코드로 묶으면 화면이 구분하지 못한다.
     const reason = validateNickname(trimmed) ?? validatePassword(password);
-    if (reason) throw new ConflictException(reason);
+    if (reason) throw new BadRequestException(reason);
 
+    // 미리 보는 것은 흔한 경우의 메시지를 좋게 하기 위한 것이고,
+    // 진짜 방어는 아래 unique 인덱스다 — 확인과 삽입 사이에 남이 같은 닉네임을 채갈 수 있다.
     const [existing] = await this.db
       .select({ id: users.id })
       .from(users)
@@ -91,11 +111,17 @@ export class AuthService {
       .limit(1);
     if (existing) throw new ConflictException('이미 쓰고 있는 닉네임입니다.');
 
-    const [row] = await this.db
-      .insert(users)
-      .values({ nickname: trimmed, passwordHash: await argon2.hash(password), type: 'personal' })
-      .returning();
-    if (!row) throw new ConflictException('가입에 실패했습니다. 다시 시도해 주세요.');
+    let row: UserRow | undefined;
+    try {
+      [row] = await this.db
+        .insert(users)
+        .values({ nickname: trimmed, passwordHash: await argon2.hash(password), type: 'personal' })
+        .returning();
+    } catch (error) {
+      if (isUniqueViolation(error)) throw new ConflictException('이미 쓰고 있는 닉네임입니다.');
+      throw error;
+    }
+    if (!row) throw new InternalServerErrorException('가입에 실패했습니다. 다시 시도해 주세요.');
 
     const codes = await this.issueRecoveryCodes(row.id);
 
@@ -168,7 +194,7 @@ export class AuthService {
     const trimmed = nickname.trim();
     const normalized = code.trim().toUpperCase();
     const reason = validatePassword(newPassword);
-    if (reason) throw new ConflictException(reason);
+    if (reason) throw new BadRequestException(reason);
 
     const [row] = await this.db.select().from(users).where(eq(users.nickname, trimmed)).limit(1);
 
