@@ -30,10 +30,14 @@ export function AdminLayout() {
     <div>
       <header className='sticky top-0 z-40 border-b border-line bg-paper'>
         <div className='mx-auto flex max-w-[1180px] flex-wrap items-center gap-4 px-6 py-2.5'>
-          <span className='flex items-center gap-2.5 font-display text-[19px]'>
+          <Link
+            to='/app/dashboard'
+            className='flex items-center gap-2.5 font-display text-[19px]'
+            aria-label='학습자 대시보드로'
+          >
             <BrandMark />
             Coblocks
-          </span>
+          </Link>
           <span className='rounded-md bg-algo px-2 py-0.5 text-[11.5px] font-semibold text-white'>
             ADMIN
           </span>
