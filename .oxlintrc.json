@@ -1,28 +1,234 @@
 {
-  "$schema": "https://raw.githubusercontent.com/oxc-project/oxc/main/npm/oxlint/configuration_schema.json",
-  "plugins": ["typescript", "react", "unicorn", "oxc", "import"],
-  "env": { "browser": true, "es2024": true, "node": true },
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+
+  // 루트 설정은 모든 패키지가 공유하는 "공통 계약"만 담는다.
+  // 패키지별 규칙은 apps/*/.oxlintrc.json, packages/*/.oxlintrc.json 에 두고 여기를 extends 한다.
+  // oxlint 는 파일마다 가장 가까운 .oxlintrc.json 을 쓰고, 가까운 설정이 루트를 자동 상속하지는
+  // 않는다. 그래서 하위 설정에는 extends 가 반드시 있어야 하고, pnpm lint 는 --config 없이
+  // 실행해야 한다 (플래그를 주면 중첩 설정 탐색이 꺼진다).
+
+  "plugins": ["eslint", "typescript", "unicorn", "oxc", "import", "promise"],
+
+  // builtin = 최신 ECMAScript 전역. browser/node 는 각 패키지 설정에서 켠다.
+  "env": { "builtin": true },
+
   "categories": {
     "correctness": "error",
     "suspicious": "warn",
     "perf": "warn"
   },
-  "rules": {
-    "no-console": ["warn", { "allow": ["warn", "error"] }],
-    "typescript/no-explicit-any": "error",
-    "typescript/consistent-type-imports": "error",
-    "react/rules-of-hooks": "error",
-    "react/exhaustive-deps": "warn",
-    "unicorn/no-null": "off",
-    "import/no-default-export": "off"
+
+  "options": {
+    // 필요 없어진 oxlint-disable 주석은 남겨두지 않는다.
+    "reportUnusedDisableDirectives": "warn"
   },
-  "ignorePatterns": ["dist", ".output", "node_modules", "apps/api/drizzle"],
+
+  "rules": {
+    // ── 기본 위생 ──────────────────────────────────────────────────────────
+    "no-var": "error",
+    "prefer-const": ["error", { "destructuring": "all" }],
+    "eqeqeq": ["error", "always", { "null": "ignore" }],
+    "no-console": ["warn", { "allow": ["warn", "error"] }],
+    "no-debugger": "error",
+    // 관리자 화면에 아직 window.prompt 로 된 임시 UI가 남아 있다.
+    // 커스텀 모달로 바꾸기 전까지는 막지 말고 눈에 띄게만 둔다.
+    "no-alert": "warn",
+    "no-eval": "error",
+    "no-implied-eval": "error",
+    "no-new-func": "error",
+    "no-return-assign": "error",
+    "no-sequences": "error",
+    "no-useless-rename": "error",
+    "no-useless-concat": "error",
+    "no-lone-blocks": "error",
+    "no-multi-str": "error",
+    "no-object-constructor": "error",
+    "no-proto": "error",
+    "no-script-url": "error",
+    "no-throw-literal": "error",
+    "no-unneeded-ternary": "error",
+    "no-param-reassign": ["error", { "props": false }],
+    "default-case-last": "error",
+    "object-shorthand": ["error", "always"],
+    "prefer-arrow-callback": "error",
+    "prefer-object-has-own": "error",
+    "prefer-object-spread": "error",
+    "prefer-rest-params": "error",
+    "prefer-spread": "error",
+    "prefer-template": "error",
+    "prefer-exponentiation-operator": "error",
+    "prefer-promise-reject-errors": "error",
+    "prefer-numeric-literals": "error",
+    "radix": "error",
+    "symbol-description": "error",
+
+    // ── TypeScript ─────────────────────────────────────────────────────────
+    "typescript/no-explicit-any": "error",
+    "typescript/consistent-type-imports": [
+      "error",
+      {
+        "prefer": "type-imports",
+        "fixStyle": "separate-type-imports",
+        "disallowTypeAnnotations": true
+      }
+    ],
+    "typescript/no-import-type-side-effects": "error",
+    "typescript/no-non-null-assertion": "warn",
+    "typescript/no-empty-object-type": "error",
+    "typescript/no-unsafe-function-type": "error",
+    "typescript/no-wrapper-object-types": "error",
+    "typescript/prefer-as-const": "error",
+    "typescript/prefer-literal-enum-member": "error",
+    "typescript/consistent-type-definitions": ["error", "interface"],
+    "typescript/array-type": ["error", { "default": "array-simple" }],
+    "typescript/ban-ts-comment": ["error", { "ts-expect-error": "allow-with-description" }],
+    "typescript/prefer-ts-expect-error": "error",
+
+    // ── import ─────────────────────────────────────────────────────────────
+    // 정렬과 그룹 분리 자체는 oxfmt 의 sortImports 가 담당한다 (oxlint 1.81 에는
+    // import/order 가 없다). 여기에는 그 결과가 흐트러지지 않게 지키는 규칙만 둔다.
+    "import/first": "error",
+    "import/newline-after-import": ["error", { "count": 1, "considerComments": true }],
+    "import/no-duplicates": ["error", { "considerQueryString": true }],
+    "import/consistent-type-specifier-style": ["error", "prefer-top-level"],
+    "import/no-empty-named-blocks": "error",
+    "import/no-mutable-exports": "error",
+    "import/no-self-import": "error",
+    "import/no-absolute-path": "error",
+    "import/no-webpack-loader-syntax": "error",
+    "import/no-amd": "error",
+    "import/no-anonymous-default-export": "error",
+    "import/no-cycle": ["error", { "ignoreTypes": true, "maxDepth": 8 }],
+    "import/no-unassigned-import": [
+      "error",
+      { "allow": ["**/*.css", "**/*.scss", "reflect-metadata"] }
+    ],
+    "import/no-named-as-default-member": "off",
+
+    // ── promise ────────────────────────────────────────────────────────────
+    // 최신 스타일: then/catch 체인 대신 async/await.
+    "promise/prefer-await-to-then": ["error", { "strict": true }],
+    "promise/prefer-catch": "error",
+    "promise/prefer-await-to-callbacks": "warn",
+    "promise/catch-or-return": ["error", { "allowFinally": true }],
+    "promise/always-return": ["error", { "ignoreAssignmentVariable": ["globalThis"] }],
+    "promise/no-return-wrap": ["error", { "allowReject": true }],
+    "promise/no-return-in-finally": "error",
+    "promise/no-multiple-resolved": "error",
+    "promise/no-new-statics": "error",
+    "promise/no-nesting": "warn",
+    "promise/no-promise-in-callback": "warn",
+    "promise/no-callback-in-promise": "warn",
+    "promise/param-names": "error",
+    "promise/valid-params": "error",
+    "promise/spec-only": "error",
+
+    // ── unicorn ────────────────────────────────────────────────────────────
+    // filename-case 는 확장자에 따라 갈리므로 overrides 에서 지정한다.
+    "unicorn/no-null": "off",
+    "unicorn/no-array-reduce": "off",
+    "unicorn/no-array-for-each": "off",
+    "unicorn/prefer-node-protocol": "error",
+    "unicorn/prefer-global-this": "error",
+    "unicorn/prefer-string-slice": "error",
+    "unicorn/prefer-string-replace-all": "error",
+    "unicorn/prefer-string-starts-ends-with": "error",
+    "unicorn/prefer-string-raw": "error",
+    "unicorn/prefer-string-trim-start-end": "error",
+    "unicorn/prefer-array-flat": "error",
+    "unicorn/prefer-array-flat-map": "error",
+    "unicorn/prefer-array-find": "error",
+    "unicorn/prefer-array-index-of": "error",
+    "unicorn/prefer-array-some": "error",
+    "unicorn/prefer-includes": "error",
+    "unicorn/prefer-set-has": "error",
+    "unicorn/prefer-set-size": "error",
+    "unicorn/prefer-at": "error",
+    "unicorn/prefer-date-now": "error",
+    "unicorn/prefer-number-properties": ["error", { "checkInfinity": true }],
+    "unicorn/prefer-math-min-max": "error",
+    "unicorn/prefer-math-trunc": "error",
+    "unicorn/prefer-modern-math-apis": "error",
+    "unicorn/prefer-logical-operator-over-ternary": "error",
+    "unicorn/prefer-optional-catch-binding": "error",
+    "unicorn/prefer-regexp-test": "error",
+    "unicorn/prefer-structured-clone": "error",
+    "unicorn/prefer-object-from-entries": "error",
+    "unicorn/prefer-native-coercion-functions": "error",
+    "unicorn/prefer-type-error": "error",
+    "unicorn/prefer-single-call": "error",
+    "unicorn/prefer-class-fields": "error",
+    "unicorn/require-module-specifiers": "error",
+    "unicorn/new-for-builtins": "error",
+    "unicorn/throw-new-error": "error",
+    "unicorn/error-message": "error",
+    "unicorn/catch-error-name": ["error", { "name": "error" }],
+    "unicorn/consistent-date-clone": "error",
+    "unicorn/consistent-empty-array-spread": "error",
+    "unicorn/consistent-existence-index-check": "error",
+    "unicorn/escape-case": "error",
+    "unicorn/number-literal-case": "error",
+    "unicorn/text-encoding-identifier-case": ["error", { "withDash": true }],
+    "unicorn/no-abusive-eslint-disable": "error",
+    "unicorn/no-await-in-promise-methods": "error",
+    "unicorn/no-single-promise-in-promise-methods": "error",
+    "unicorn/no-useless-promise-resolve-reject": "error",
+    "unicorn/no-unnecessary-await": "error",
+    "unicorn/no-instanceof-builtins": "error",
+    "unicorn/no-typeof-undefined": "error",
+    "unicorn/no-negated-condition": "error",
+    "unicorn/no-lonely-if": "error",
+    "unicorn/no-useless-fallback-in-spread": "error",
+    "unicorn/no-useless-length-check": "error",
+    "unicorn/no-useless-spread": "error",
+    "unicorn/no-useless-switch-case": "error",
+    "unicorn/no-zero-fractions": "error",
+    "unicorn/no-hex-escape": "error",
+    "unicorn/no-new-array": "error",
+    "unicorn/no-static-only-class": "error",
+    "unicorn/no-thenable": "error",
+    "unicorn/no-this-assignment": "error",
+    "unicorn/no-unreadable-array-destructuring": "error",
+    "unicorn/no-unreadable-iife": "error",
+    "unicorn/switch-case-braces": ["error", "avoid"],
+    "unicorn/require-array-join-separator": "error",
+    "unicorn/require-number-to-fixed-digits-argument": "error"
+  },
+
   "overrides": [
     {
-      "files": ["apps/api/**/*.ts"],
+      // ts/js 는 kebab-case 만. admin.controller.ts 처럼 점으로 나뉜 이름은 통과한다.
+      "files": ["**/*.{ts,mts,cts,js,mjs,cjs}"],
       "rules": {
-        "typescript/no-extraneous-class": "off"
+        "unicorn/filename-case": ["error", { "case": "kebabCase" }]
+      }
+    },
+    {
+      // tsx/jsx 는 PascalCase 만. 파일 이름 = 그 파일이 내보내는 컴포넌트 이름.
+      "files": ["**/*.{tsx,jsx}"],
+      "rules": {
+        "unicorn/filename-case": ["error", { "case": "pascalCase" }]
+      }
+    },
+    {
+      // 스크립트·시드·테스트에서는 콘솔 출력이 결과물이다.
+      "files": [
+        "**/scripts/**",
+        "**/test/**",
+        "**/tests/**",
+        "**/__tests__/**",
+        "**/*.{spec,test}.{ts,tsx,js,jsx}",
+        "**/*.config.{ts,js,mts,mjs,cts,cjs}",
+        "**/seed.ts"
+      ],
+      "rules": {
+        "no-console": "off",
+        "no-await-in-loop": "off",
+        "typescript/no-explicit-any": "warn",
+        "typescript/no-non-null-assertion": "off"
       }
     }
-  ]
+  ],
+
+  "ignorePatterns": ["**/dist", "**/.output", "**/node_modules", "apps/api/drizzle", "**/*.d.ts"]
 }

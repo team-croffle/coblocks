@@ -1,0 +1,22 @@
+{
+  "$schema": "../../node_modules/oxlint/configuration_schema.json",
+
+  // 웹과 서버가 함께 쓰는 패키지. 어느 쪽 런타임에도 기대지 않는다.
+  "extends": ["../../.oxlintrc.json"],
+
+  "plugins": ["eslint", "typescript", "unicorn", "oxc", "import", "promise", "node"],
+
+  // browser 도 node 도 켜지 않는다. 플랫폼 전역을 쓰면 no-undef 로 걸린다.
+  "env": { "builtin": true },
+
+  "rules": {
+    // 브라우저에서도 그대로 실행되어야 하므로 Node 내장 모듈은 금지한다.
+    "import/no-nodejs-modules": "error",
+    "import/no-default-export": "error",
+    "import/no-cycle": "error",
+
+    // 인터프리터는 순수 함수 묶음이다. 전역/부수효과를 쓰지 않는다.
+    "unicorn/prefer-global-this": "error",
+    "no-undef": "error"
+  }
+}

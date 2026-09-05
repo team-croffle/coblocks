@@ -28,6 +28,18 @@ pnpm db:up && pnpm db:push && pnpm db:seed   # db:up 은 docker/docker-compose.d
 - React components are function components with named exports only. No `export default` (the router imports by name).
 - **React Compiler is enabled.** Do not add `useMemo`/`useCallback`/`memo` by habit. Use them only where the compiler cannot help (e.g. a stable reference handed to an external library) and leave a comment saying why. Rules-of-hooks violations make the compiler bail out, so `pnpm lint` must pass.
 - Linter/formatter are oxlint + oxfmt. Do not add ESLint or Prettier config files.
+- **Lint config is nested.** The root `.oxlintrc.json` holds the shared contract; each package has its
+  own `.oxlintrc.json` that `extends` it (`apps/web` = React 19 + browser, `apps/api` = Nest + node,
+  `packages/shared` = platform-neutral). oxlint picks the nearest config per file and a nested config
+  does **not** inherit the root automatically, so `extends` is mandatory and `plugins` must be listed
+  in full (it replaces, not merges). Run `oxlint` without `--config`; the flag turns nested lookup off.
+  Put a rule in the root only when it is true for every package.
+- **File names.** `.tsx`/`.jsx` are PascalCase (file name = the component it exports); every other
+  source file is kebab-case. Enforced by `unicorn/filename-case` in the root overrides. Framework
+  entry points (`main.tsx`, `router.tsx`) are exempt.
+- Import order and group separation come from oxfmt's `sortImports`
+  (side-effect → builtin → external → `@coblocks/*` → `@/*` → relative → style), not from oxlint —
+  oxlint has no `import/order`. Never hand-sort imports; run `pnpm fmt`.
 - Colors go through Tailwind token utilities (`bg-loop`, `text-ink-soft`) or `var(--color-loop)`. No raw hex in components. Only when the value is decided at runtime use `style={{ background: \`var(${cssVar})\` }}`.
 - API response types are defined in `@coblocks/shared` and imported by both web and api. No duplicate definitions.
 
