@@ -21,9 +21,10 @@ import { DashboardPage } from '@/pages/DashboardPage';
 import { LandingPage } from '@/pages/LandingPage';
 import { LessonPlayerPage } from '@/pages/LessonPlayerPage';
 import { LoginPage } from '@/pages/LoginPage';
-import { SignupPage } from './pages/SignupPage';
 import { NotFoundPage } from '@/pages/NotFoundPage';
 import { useAuthStore } from '@/stores/auth';
+
+import { SignupPage } from './pages/SignupPage';
 
 export interface RouterContext {
   /** 가드에서 최신 상태를 읽어야 하므로 값이 아니라 함수를 넘긴다. */

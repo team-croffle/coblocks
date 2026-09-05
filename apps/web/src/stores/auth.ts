@@ -1,7 +1,13 @@
 import { create } from 'zustand';
 
 import type { AuthUser } from '@coblocks/shared';
-import { login as loginRequest, logout as logoutRequest, me, signup as signupRequest } from '@/api/auth';
+
+import {
+  login as loginRequest,
+  logout as logoutRequest,
+  me,
+  signup as signupRequest,
+} from '@/api/auth';
 
 const TOKEN_KEY = 'coblocks.token';
 
@@ -14,7 +20,10 @@ interface AuthState {
   restore: () => Promise<void>;
   login: (nickname: string, password: string) => Promise<AuthUser>;
   /** 가입 응답의 복구 코드는 이때 한 번만 볼 수 있다. 저장하지 않고 화면에 넘긴다. */
-  signup: (nickname: string, password: string) => Promise<{ user: AuthUser; recoveryCodes: string[] }>;
+  signup: (
+    nickname: string,
+    password: string,
+  ) => Promise<{ user: AuthUser; recoveryCodes: string[] }>;
   logout: () => Promise<void>;
   clear: () => void;
 }

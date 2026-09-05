@@ -19,6 +19,6 @@ export function maskStudentNo(studentNo: string | null): string | null {
   if (!studentNo) return null;
   const parts = studentNo.split('-');
   if (parts.length <= 1) return `**${studentNo.slice(-2)}`;
-  const tail = parts[parts.length - 1] ?? '';
+  const tail = parts.at(-1) ?? '';
   return [...parts.slice(0, -1).map(() => '**'), tail].join('-');
 }
