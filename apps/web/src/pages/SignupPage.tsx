@@ -140,11 +140,7 @@ export function SignupPage() {
 
             <p className='mt-4 text-[13.5px] text-muted'>
               이미 계정이 있나요?{' '}
-              <Link
-                to='/login'
-                search={{ redirect: undefined }}
-                className='underline underline-offset-4'
-              >
+              <Link to='/login' className='underline underline-offset-4'>
                 로그인
               </Link>
             </p>
