@@ -1,4 +1,5 @@
-import { useEffect, useState, type ReactNode } from 'react';
+import { useEffect, useState } from 'react';
+import type { ReactNode } from 'react';
 
 interface Props {
   title: string;
@@ -26,21 +27,23 @@ export function ZoomPanel({ title, children }: Props) {
     <section
       className={`panel flex min-w-0 flex-col ${expanded ? 'fixed inset-0 z-[80] overflow-auto rounded-none bg-paper' : ''}`}
     >
-      <div className="flex items-center gap-2.5 border-b border-line px-3.5 py-2.5">
-        <span className="font-display text-[16px]">{title}</span>
-        <span className="flex-1" />
+      <div className='flex items-center gap-2.5 border-b border-line px-3.5 py-2.5'>
+        <span className='font-display text-[16px]'>{title}</span>
+        <span className='flex-1' />
         <button
-          type="button"
-          className="inline-flex items-center gap-1.5 rounded-lg border border-line-strong bg-surface px-2.5 py-1 text-[12.5px] text-ink-soft"
+          type='button'
+          className='inline-flex items-center gap-1.5 rounded-lg border border-line-strong bg-surface px-2.5 py-1 text-[12.5px] text-ink-soft'
           aria-expanded={expanded}
           onClick={() => setExpanded((v) => !v)}
         >
-          <span aria-hidden="true">{expanded ? '⤡' : '⤢'}</span>
+          <span aria-hidden='true'>{expanded ? '⤡' : '⤢'}</span>
           {expanded ? '작게 보기' : '크게 보기'}
         </button>
       </div>
 
-      <div className={`min-w-0 ${expanded ? 'mx-auto w-full max-w-[1000px] p-5' : 'p-3.5'}`}>{children}</div>
+      <div className={`min-w-0 ${expanded ? 'mx-auto w-full max-w-[1000px] p-5' : 'p-3.5'}`}>
+        {children}
+      </div>
     </section>
   );
 }

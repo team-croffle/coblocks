@@ -1,20 +1,17 @@
-import { useState } from 'react';
-import { Link } from '@tanstack/react-router';
 import { useQuery } from '@tanstack/react-query';
-import {
-  DEFAULT_STAGE,
-  LESSON_SEED,
-  STANDARD_TEXT,
-  type BlockKind,
-  type BlockProgram,
-} from '@coblocks/shared';
+import { Link } from '@tanstack/react-router';
+import { useState } from 'react';
+
+import { DEFAULT_STAGE, LESSON_SEED, STANDARD_TEXT } from '@coblocks/shared';
+import type { BlockKind, BlockProgram } from '@coblocks/shared';
+
 import { fetchLesson, submitAttempt } from '@/api/lessons';
-import { lessonRoute } from '@/router';
-import { useBlockRunner } from '@/hooks/useBlockRunner';
 import { BlockPalette } from '@/components/BlockPalette';
 import { BlockWorkspace } from '@/components/BlockWorkspace';
 import { StageCanvas } from '@/components/StageCanvas';
 import { ZoomPanel } from '@/components/ZoomPanel';
+import { useBlockRunner } from '@/hooks/use-block-runner';
+import { lessonRoute } from '@/router';
 
 const GOALS = [
   '오른쪽 블록 스페이스에서 블록을 눌러 순서대로 쌓습니다.',
@@ -74,7 +71,11 @@ function Player({
   }
 
   const statusClass =
-    runner.status === 'success' ? 'text-ok' : runner.status === 'failed' ? 'text-bad' : 'text-muted';
+    runner.status === 'success'
+      ? 'text-ok'
+      : runner.status === 'failed'
+        ? 'text-bad'
+        : 'text-muted';
 
   const standardText = lesson.standardCode
     ? (STANDARD_TEXT[lesson.standardCode] ?? '성취기준 원문이 등록되지 않았습니다.')
@@ -82,44 +83,49 @@ function Player({
 
   return (
     <div>
-      <div className="mb-4 flex flex-wrap items-center gap-3.5">
-        <Link to="/app/curriculum" className="text-[13.5px] text-muted underline underline-offset-4">
+      <div className='mb-4 flex flex-wrap items-center gap-3.5'>
+        <Link
+          to='/app/curriculum'
+          className='text-[13.5px] text-muted underline underline-offset-4'
+        >
           ← 미션 목록
         </Link>
-        <h2 className="text-[25px]">{lesson.title}</h2>
-        <span className="mono rounded-md border border-line-strong px-1.5 py-0.5 text-ink-soft">
+        <h2 className='text-[25px]'>{lesson.title}</h2>
+        <span className='mono rounded-md border border-line-strong px-1.5 py-0.5 text-ink-soft'>
           {lesson.standardCode ?? '교과 외 준비'}
         </span>
       </div>
 
-      <div className="grid items-start gap-4 lg:grid-cols-2">
-        <div className="flex flex-col gap-4">
-          <ZoomPanel title="스테이지">
+      <div className='grid items-start gap-4 lg:grid-cols-2'>
+        <div className='flex flex-col gap-4'>
+          <ZoomPanel title='스테이지'>
             <StageCanvas stage={stage} pose={runner.pose} />
-            <p className={`mt-3 min-h-[1.5em] text-center text-[13.5px] font-semibold ${statusClass}`}>
+            <p
+              className={`mt-3 min-h-[1.5em] text-center text-[13.5px] font-semibold ${statusClass}`}
+            >
               {runner.message}
             </p>
-            <div className="mt-3 flex flex-wrap justify-center gap-2">
-              <button type="button" className="btn btn-primary" onClick={onRun}>
+            <div className='mt-3 flex flex-wrap justify-center gap-2'>
+              <button type='button' className='btn btn-primary' onClick={onRun}>
                 ▶ 실행하기
               </button>
-              <button type="button" className="btn btn-ghost" onClick={() => runner.reset()}>
+              <button type='button' className='btn btn-ghost' onClick={() => runner.reset()}>
                 처음으로
               </button>
             </div>
           </ZoomPanel>
 
-          <ZoomPanel title="문제 설명">
-            <p className="text-[14.5px] text-ink-soft">{lesson.description}</p>
-            <ul className="mt-2.5 list-disc pl-5 text-sm text-ink-soft">
+          <ZoomPanel title='문제 설명'>
+            <p className='text-[14.5px] text-ink-soft'>{lesson.description}</p>
+            <ul className='mt-2.5 list-disc pl-5 text-sm text-ink-soft'>
               {GOALS.map((g) => (
-                <li key={g} className="mb-1">
+                <li key={g} className='mb-1'>
                   {g}
                 </li>
               ))}
             </ul>
-            <div className="mt-3.5 border-l-[3px] border-line-strong py-0.5 pl-3 text-[13.5px] text-ink-soft">
-              <b className="mono block font-medium text-muted">
+            <div className='mt-3.5 border-l-[3px] border-line-strong py-0.5 pl-3 text-[13.5px] text-ink-soft'>
+              <b className='mono block font-medium text-muted'>
                 {lesson.standardCode ? `성취기준 ${lesson.standardCode}` : '교과 외 준비 단계'}
               </b>
               {standardText}
@@ -127,7 +133,7 @@ function Player({
           </ZoomPanel>
         </div>
 
-        <ZoomPanel title="블록 코딩 스페이스">
+        <ZoomPanel title='블록 코딩 스페이스'>
           <BlockPalette onAdd={add} />
           <BlockWorkspace
             program={program}
@@ -135,10 +141,10 @@ function Player({
             onRemove={remove}
             onSetCount={setCount}
           />
-          <div className="mt-3.5 flex flex-wrap gap-2">
+          <div className='mt-3.5 flex flex-wrap gap-2'>
             <button
-              type="button"
-              className="btn btn-ghost"
+              type='button'
+              className='btn btn-ghost'
               onClick={() => {
                 setProgram([]);
                 runner.reset();

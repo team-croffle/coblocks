@@ -1,0 +1,61 @@
+{
+  "$schema": "../../node_modules/oxlint/configuration_schema.json",
+
+  // NestJS 서버 전용 설정. 루트 계약 + Node 환경 + 데코레이터 기반 DI 예외.
+  "extends": ["../../.oxlintrc.json"],
+
+  // plugins 는 병합이 아니라 교체다. 루트 목록 + node/vitest 를 모두 적는다.
+  "plugins": ["eslint", "typescript", "unicorn", "oxc", "import", "promise", "node", "vitest"],
+
+  "env": { "builtin": true, "node": true },
+
+  "rules": {
+    // Nest 의 DI 는 emitDecoratorMetadata 가 남긴 런타임 타입으로 동작한다.
+    // 생성자 파라미터 타입을 `import type` 으로 바꾸면 메타데이터가 지워져
+    // 주입이 깨지므로, 이 앱에서는 타입 전용 import 를 강제하지 않는다.
+    "typescript/consistent-type-imports": "off",
+    "import/consistent-type-specifier-style": "off",
+
+    // @Module() 만 붙은 빈 클래스는 Nest 의 정상적인 표현이다.
+    "typescript/no-extraneous-class": "off",
+    "typescript/parameter-properties": "off",
+
+    // 서버는 CommonJS 로 빌드된다(tsconfig module: commonjs).
+    "unicorn/prefer-module": "off",
+    "unicorn/prefer-top-level-await": "off",
+
+    // node 플러그인: 최신 런타임 API 를 쓰도록.
+    "node/no-exports-assign": "error",
+    "node/no-new-require": "error",
+
+    // 서버에서는 순환 참조를 허용할 이유가 없다.
+    "import/no-cycle": "error",
+    "import/no-default-export": "error"
+  },
+
+  "overrides": [
+    {
+      // drizzle-kit / nest-cli 설정 파일은 default export 가 규격이다.
+      "files": ["**/*.config.ts", "**/drizzle.config.ts"],
+      "rules": {
+        "import/no-default-export": "off"
+      }
+    },
+    {
+      // 인터프리터 테스트. vitest 규칙은 여기에서만 켠다.
+      "files": ["test/**/*.ts", "**/*.spec.ts"],
+      "rules": {
+        "vitest/expect-expect": "error",
+        "vitest/no-identical-title": "error",
+        "vitest/no-focused-tests": "error",
+        "vitest/no-disabled-tests": "warn",
+        "vitest/no-conditional-expect": "error",
+        "vitest/no-standalone-expect": "error",
+        "vitest/prefer-to-be": "error",
+        "vitest/prefer-to-have-length": "error",
+        "vitest/valid-expect": "error",
+        "vitest/consistent-test-it": ["error", { "fn": "it" }]
+      }
+    }
+  ]
+}

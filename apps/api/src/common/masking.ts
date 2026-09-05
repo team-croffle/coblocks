@@ -8,7 +8,7 @@ export function maskName(name: string): string {
   const chars = [...name.trim()];
   if (chars.length <= 1) return name;
   if (chars.length === 2) return `${chars[0]}O`;
-  return `${chars[0]}${'O'.repeat(chars.length - 2)}${chars[chars.length - 1]}`;
+  return `${chars[0]}${'O'.repeat(chars.length - 2)}${chars.at(-1)}`;
 }
 
 /** kimsoo@school.kr → ki****@sc****.kr */

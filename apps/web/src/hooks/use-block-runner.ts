@@ -1,11 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import {
-  applyStep,
-  compile,
-  type BlockProgram,
-  type Pose,
-  type StageConfig,
-} from '@coblocks/shared';
+
+import { applyStep, compile } from '@coblocks/shared';
+import type { BlockProgram, Pose, StageConfig } from '@coblocks/shared';
 
 export type RunStatus = 'idle' | 'running' | 'success' | 'failed';
 

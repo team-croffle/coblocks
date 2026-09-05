@@ -1,0 +1,132 @@
+{
+  "$schema": "../../node_modules/oxlint/configuration_schema.json",
+
+  // React 19 SPA 전용 설정. 루트 계약을 그대로 물려받고 브라우저/React 쪽만 얹는다.
+  // (중첩 설정은 루트를 자동 상속하지 않으므로 extends 가 필수다.)
+  "extends": ["../../.oxlintrc.json"],
+
+  // plugins 는 병합이 아니라 교체다. 루트 목록 + React 계열을 모두 적는다.
+  // react-perf 는 넣지 않는다. "props 로 새 객체를 넘기지 마라"는 지적은 React
+  // Compiler 가 이미 해결하는 문제라, 켜두면 고칠 필요 없는 경고만 쌓인다.
+  "plugins": ["eslint", "typescript", "unicorn", "oxc", "import", "promise", "react", "jsx-a11y"],
+
+  "env": { "builtin": true, "browser": true },
+
+  "settings": {
+    "react": { "version": "19.2" }
+  },
+
+  "rules": {
+    // ── React 19 기본 ──────────────────────────────────────────────────────
+    "react/react-in-jsx-scope": "off",
+    "react/jsx-key": "error",
+    "react/jsx-no-duplicate-props": "error",
+    "react/jsx-no-target-blank": "error",
+    "react/jsx-no-script-url": "error",
+    "react/jsx-no-constructed-context-values": "error",
+    "react/jsx-no-useless-fragment": "error",
+    "react/jsx-fragments": ["error", "syntax"],
+    "react/jsx-boolean-value": ["error", "never"],
+    "react/jsx-curly-brace-presence": ["error", "never"],
+    "react/jsx-pascal-case": "error",
+    "react/self-closing-comp": "error",
+    "react/no-danger": "error",
+    "react/no-danger-with-children": "error",
+    "react/no-unknown-property": "error",
+    "react/no-unescaped-entities": "error",
+    "react/no-unstable-nested-components": "error",
+    "react/no-array-index-key": "warn",
+    "react/no-object-type-as-default-prop": "error",
+    "react/void-dom-elements-no-children": "error",
+    "react/style-prop-object": "error",
+    "react/iframe-missing-sandbox": "error",
+    "react/button-has-type": "error",
+    "react/checked-requires-onchange-or-readonly": "error",
+
+    // AGENTS.md 규칙: 함수 컴포넌트 + 네임드 export 만.
+    "react/prefer-function-component": "error",
+    "react/no-multi-comp": ["warn", { "ignoreStateless": true }],
+    "react/prefer-es6-class": "error",
+    "react/no-string-refs": "error",
+    "react/no-find-dom-node": "error",
+    "react/no-is-mounted": "error",
+    "react/no-render-return-value": "error",
+    "react/no-this-in-sfc": "error",
+    "react/no-clone-element": "warn",
+    "react/no-react-children": "warn",
+    "react/forward-ref-uses-ref": "error",
+
+    // ── React Compiler 진단 (eslint-plugin-react-hooks v6 계열) ────────────
+    // 컴파일러가 bail out 하면 최적화가 통째로 사라지므로 전부 error 로 둔다.
+    // 이 규칙들이 통과하는 한 useMemo/useCallback 을 손으로 넣을 이유가 없다.
+    "react/rules-of-hooks": "error",
+    "react/exhaustive-deps": "error",
+    "react/hooks": "error",
+    "react/purity": "error",
+    "react/immutability": "error",
+    "react/globals": "error",
+    "react/refs": "error",
+    "react/static-components": "error",
+    "react/set-state-in-render": "error",
+    "react/set-state-in-effect": "error",
+    "react/no-deriving-state-in-effects": "warn",
+    "react/preserve-manual-memoization": "error",
+    "react/use-memo": "error",
+    "react/void-use-memo": "error",
+    "react/error-boundaries": "error",
+    "react/incompatible-library": "error",
+    "react/unsupported-syntax": "warn",
+    "react/exhaustive-effect-dependencies": "off",
+
+    // Fast Refresh: 한 모듈에서 컴포넌트와 비컴포넌트를 같이 내보내면 갱신이 깨진다.
+    "react/only-export-components": ["warn", { "allowConstantExport": true }],
+
+    // ── 접근성 ─────────────────────────────────────────────────────────────
+    "jsx-a11y/alt-text": "error",
+    "jsx-a11y/anchor-has-content": "error",
+    "jsx-a11y/anchor-is-valid": "error",
+    "jsx-a11y/aria-props": "error",
+    "jsx-a11y/aria-role": "error",
+    "jsx-a11y/aria-unsupported-elements": "error",
+    "jsx-a11y/heading-has-content": "error",
+    "jsx-a11y/html-has-lang": "error",
+    "jsx-a11y/iframe-has-title": "error",
+    "jsx-a11y/img-redundant-alt": "error",
+    "jsx-a11y/label-has-associated-control": "warn",
+    "jsx-a11y/no-autofocus": "warn",
+    "jsx-a11y/no-redundant-roles": "error",
+    // 네이티브 <dialog> 는 showModal() 수명주기와 UA 기본 스타일을 함께 가져온다.
+    // 이 앱의 모달은 직접 그린 배경 위에 올리는 구조라 role="dialog" 가 의도된 선택이다.
+    "jsx-a11y/prefer-tag-over-role": "off",
+    "jsx-a11y/role-has-required-aria-props": "error",
+    "jsx-a11y/role-supports-aria-props": "error",
+    "jsx-a11y/tabindex-no-positive": "error",
+
+    // ── 브라우저 전용이므로 조정하는 것들 ──────────────────────────────────
+    // 이 앱은 SSR 없이 브라우저에서만 돈다. window.setInterval 처럼 DOM 타입을
+    // 쓰는 자리가 많아 globalThis 로 바꾸면 오히려 타입이 흐려진다.
+    "unicorn/prefer-global-this": "off",
+    // 라우트 트리 특성상 router.tsx ↔ 페이지 사이 순환이 구조적으로 생긴다
+    // (페이지는 route.useParams() 를 위해 router 를 import 한다). 막지 말고 지켜본다.
+    "import/no-cycle": "warn",
+    // AGENTS.md: 라우터가 이름으로 import 하므로 export default 를 쓰지 않는다.
+    "import/no-default-export": "error"
+  },
+
+  "overrides": [
+    {
+      // 프레임워크 진입점은 컴포넌트 파일이 아니다. PascalCase 규칙에서 제외한다.
+      "files": ["**/main.tsx", "**/router.tsx"],
+      "rules": {
+        "unicorn/filename-case": "off"
+      }
+    },
+    {
+      // vite.config.ts 는 default export 가 규격이다.
+      "files": ["**/*.config.{ts,js,mts,mjs}"],
+      "rules": {
+        "import/no-default-export": "off"
+      }
+    }
+  ]
+}

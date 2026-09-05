@@ -13,12 +13,16 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "outDir": "./dist",
-    "baseUrl": "./",
     "paths": {
       "@/*": ["src/*"],
       "@coblocks/shared": ["../../packages/shared/src/index.ts"]
     }
   },
-  "include": ["src/**/*.ts", "test/**/*.ts", "drizzle.config.ts", "../../packages/shared/src/**/*.ts"],
+  "include": [
+    "src/**/*.ts",
+    "test/**/*.ts",
+    "drizzle.config.ts",
+    "../../packages/shared/src/**/*.ts"
+  ],
   "exclude": ["node_modules", "dist"]
 }

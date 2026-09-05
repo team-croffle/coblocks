@@ -1,17 +1,10 @@
-import { useState } from 'react';
-import { useNavigate } from '@tanstack/react-router';
 import { useQuery } from '@tanstack/react-query';
-import {
-  CONCEPT_ORDER,
-  CONCEPTS,
-  GRADE_BANDS,
-  LESSON_SEED,
-  LEVELS,
-  type ConceptKey,
-  type GradeBand,
-  type LessonLevel,
-  type LessonSummary,
-} from '@coblocks/shared';
+import { useNavigate } from '@tanstack/react-router';
+import { useState } from 'react';
+
+import { CONCEPT_ORDER, CONCEPTS, GRADE_BANDS, LESSON_SEED, LEVELS } from '@coblocks/shared';
+import type { ConceptKey, GradeBand, LessonLevel, LessonSummary } from '@coblocks/shared';
+
 import { fetchLessons, fetchMyProgress } from '@/api/lessons';
 import { LessonCard } from '@/components/LessonCard';
 import { LessonDetailModal } from '@/components/LessonDetailModal';
@@ -41,7 +34,11 @@ export function CurriculumPage() {
     },
   });
 
-  const { data: progress } = useQuery({ queryKey: ['progress', 'me'], queryFn: fetchMyProgress, initialData: [] });
+  const { data: progress } = useQuery({
+    queryKey: ['progress', 'me'],
+    queryFn: fetchMyProgress,
+    initialData: [],
+  });
   const doneIds = new Set(progress.filter((p) => p.state === 'completed').map((p) => p.lessonId));
 
   /**
@@ -76,31 +73,31 @@ export function CurriculumPage() {
 
   return (
     <div>
-      <div className="mb-6">
-        <h2 className="text-[28px]">학습하기</h2>
-        <p className="text-[14.5px] text-muted">
+      <div className='mb-6'>
+        <h2 className='text-[28px]'>학습하기</h2>
+        <p className='text-[14.5px] text-muted'>
           학년군과 개념으로 좁히거나, 미션 이름·성취기준 코드로 바로 검색해 보세요.
         </p>
       </div>
 
-      <div className="mb-5 flex flex-col gap-3.5">
+      <div className='mb-5 flex flex-col gap-3.5'>
         <input
-          type="search"
-          className="field-input max-w-[520px]"
-          placeholder="미션 이름, 개념, 성취기준 코드로 검색 (예: 반복, 9정03)"
-          aria-label="커리큘럼 검색"
+          type='search'
+          className='field-input max-w-[520px]'
+          placeholder='미션 이름, 개념, 성취기준 코드로 검색 (예: 반복, 9정03)'
+          aria-label='커리큘럼 검색'
           value={q}
           onChange={(e) => setQ(e.target.value)}
         />
 
-        <div className="flex flex-wrap items-baseline gap-3">
-          <span className="mono w-16 tracking-widest text-muted">학년군</span>
-          <div className="flex flex-wrap gap-2">
+        <div className='flex flex-wrap items-baseline gap-3'>
+          <span className='mono w-16 tracking-widest text-muted'>학년군</span>
+          <div className='flex flex-wrap gap-2'>
             {(Object.keys(GRADE_BANDS) as GradeBand[]).map((key) => (
               <button
                 key={key}
-                type="button"
-                className="chip"
+                type='button'
+                className='chip'
                 aria-pressed={bands.includes(key)}
                 onClick={() => setBands((prev) => toggle(prev, key))}
               >
@@ -110,21 +107,21 @@ export function CurriculumPage() {
           </div>
         </div>
 
-        <div className="flex flex-wrap items-baseline gap-3">
-          <span className="mono w-16 tracking-widest text-muted">개념</span>
-          <div className="flex flex-wrap gap-2">
+        <div className='flex flex-wrap items-baseline gap-3'>
+          <span className='mono w-16 tracking-widest text-muted'>개념</span>
+          <div className='flex flex-wrap gap-2'>
             {CONCEPT_ORDER.map((key) => (
               <button
                 key={key}
-                type="button"
-                className="chip"
+                type='button'
+                className='chip'
                 aria-pressed={concepts.includes(key)}
                 onClick={() => setConcepts((prev) => toggle(prev, key))}
               >
                 <span
-                  className="h-2.5 w-2.5 rounded"
+                  className='h-2.5 w-2.5 rounded'
                   style={{ background: `var(${CONCEPTS[key].cssVar})` }}
-                  aria-hidden="true"
+                  aria-hidden='true'
                 />
                 {CONCEPTS[key].label}
               </button>
@@ -132,14 +129,14 @@ export function CurriculumPage() {
           </div>
         </div>
 
-        <div className="flex flex-wrap items-baseline gap-3">
-          <span className="mono w-16 tracking-widest text-muted">난이도</span>
-          <div className="flex flex-wrap gap-2">
+        <div className='flex flex-wrap items-baseline gap-3'>
+          <span className='mono w-16 tracking-widest text-muted'>난이도</span>
+          <div className='flex flex-wrap gap-2'>
             {([1, 2, 3] as LessonLevel[]).map((lv) => (
               <button
                 key={lv}
-                type="button"
-                className="chip"
+                type='button'
+                className='chip'
                 aria-pressed={levels.includes(lv)}
                 onClick={() => setLevels((prev) => toggle(prev, lv))}
               >
@@ -150,17 +147,22 @@ export function CurriculumPage() {
         </div>
       </div>
 
-      <div className="mb-5 flex flex-wrap items-center justify-between gap-3 border-t border-line pt-3.5">
-        <span className="text-sm text-muted">
-          전체 {data.items.length}개 미션 중 <b className="text-ink tabular-nums">{filtered.length}</b>개
+      <div className='mb-5 flex flex-wrap items-center justify-between gap-3 border-t border-line pt-3.5'>
+        <span className='text-sm text-muted'>
+          전체 {data.items.length}개 미션 중{' '}
+          <b className='text-ink tabular-nums'>{filtered.length}</b>개
         </span>
-        <button type="button" className="text-[13.5px] text-muted underline underline-offset-4" onClick={reset}>
+        <button
+          type='button'
+          className='text-[13.5px] text-muted underline underline-offset-4'
+          onClick={reset}
+        >
           필터 초기화
         </button>
       </div>
 
       {filtered.length > 0 ? (
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        <div className='grid gap-4 sm:grid-cols-2 xl:grid-cols-3'>
           {filtered.map((lesson) => (
             <LessonCard
               key={lesson.id}
@@ -171,8 +173,10 @@ export function CurriculumPage() {
           ))}
         </div>
       ) : (
-        <div className="rounded-card border border-dashed border-line-strong p-11 text-center text-muted">
-          <strong className="mb-1.5 block font-display text-[19px] text-ink">조건에 맞는 미션이 없습니다</strong>
+        <div className='rounded-card border border-dashed border-line-strong p-11 text-center text-muted'>
+          <strong className='mb-1.5 block font-display text-[19px] text-ink'>
+            조건에 맞는 미션이 없습니다
+          </strong>
           검색어를 줄이거나 필터를 하나 풀어 보세요.
         </div>
       )}

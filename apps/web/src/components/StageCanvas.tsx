@@ -1,4 +1,5 @@
-import { isWall, type Pose, type StageConfig } from '@coblocks/shared';
+import { isWall } from '@coblocks/shared';
+import type { Pose, StageConfig } from '@coblocks/shared';
 
 interface Props {
   stage: StageConfig;
@@ -14,10 +15,10 @@ export function StageCanvas({ stage, pose }: Props) {
   });
 
   return (
-    <div className="mx-auto max-w-[420px]">
-      <div className="relative aspect-square overflow-hidden rounded-xl border border-line bg-surface">
+    <div className='mx-auto max-w-[420px]'>
+      <div className='relative aspect-square overflow-hidden rounded-xl border border-line bg-surface'>
         <div
-          className="absolute inset-0 grid"
+          className='absolute inset-0 grid'
           style={{
             gridTemplateColumns: `repeat(${stage.size}, 1fr)`,
             gridTemplateRows: `repeat(${stage.size}, 1fr)`,
@@ -26,7 +27,7 @@ export function StageCanvas({ stage, pose }: Props) {
           {cells.map((c) => (
             <div
               key={`${c.x}-${c.y}`}
-              className="border-r border-b border-line"
+              className='border-r border-b border-line'
               style={{
                 background: c.wall
                   ? 'var(--color-line-strong)'
@@ -39,19 +40,19 @@ export function StageCanvas({ stage, pose }: Props) {
         </div>
 
         <div
-          className="absolute grid place-items-center text-xl text-loop"
+          className='absolute grid place-items-center text-xl text-loop'
           style={{
             width: `${unit}%`,
             height: `${unit}%`,
             transform: `translate(${stage.goal.x * 100}%, ${stage.goal.y * 100}%)`,
           }}
-          aria-hidden="true"
+          aria-hidden='true'
         >
           ★
         </div>
 
         <div
-          className="absolute grid place-items-center transition-transform duration-200"
+          className='absolute grid place-items-center transition-transform duration-200'
           style={{
             width: `${unit}%`,
             height: `${unit}%`,
@@ -59,7 +60,7 @@ export function StageCanvas({ stage, pose }: Props) {
           }}
         >
           <span
-            className="grid h-2/3 w-2/3 place-items-center rounded-lg bg-seq text-[13px] text-white transition-transform duration-200"
+            className='grid h-2/3 w-2/3 place-items-center rounded-lg bg-seq text-[13px] text-white transition-transform duration-200'
             style={{ rotate: `${pose.dir * 90}deg` }}
           >
             ▶
