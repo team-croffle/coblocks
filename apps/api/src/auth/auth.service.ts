@@ -69,6 +69,7 @@ export class AuthService {
       role: row.role,
       accountType: row.type,
       studentNo: row.studentNo,
+      xp: row.xp,
     };
   }
 

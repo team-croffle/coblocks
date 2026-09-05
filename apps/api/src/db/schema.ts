@@ -49,11 +49,37 @@ export const users = pgTable(
     /** 교육 계정에서 교사가 지정한다. 일반 계정은 null. */
     studentNo: text('student_no'),
     state: accountState('state').notNull().default('active'),
+    /** 누적 XP. 지급 근거는 lesson_awards 에 미션 단위로 남는다. */
+    xp: integer('xp').notNull().default(0),
     lastSeenAt: timestamp('last_seen_at', { withTimezone: true }),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => ({
     nicknameIdx: uniqueIndex('users_nickname_idx').on(t.nickname),
+  }),
+);
+
+/**
+ * XP 지급 원장. 미션 하나당 한 줄이고, `awardedXp` 는 **지금까지 준 총액**이다.
+ * 다시 풀 때는 `max(0, 목표 - 이미 준 양)` 만 더 주므로 몇 번을 풀어도 총액이 늘지 않는다.
+ * v0.8 의 제약 보너스도 목표만 올리면 같은 식으로 부족분이 채워진다.
+ */
+export const lessonAwards = pgTable(
+  'lesson_awards',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    lessonId: uuid('lesson_id')
+      .notNull()
+      .references(() => lessons.id, { onDelete: 'cascade' }),
+    awardedXp: integer('awarded_xp').notNull().default(0),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({
+    uniq: uniqueIndex('lesson_awards_user_lesson_idx').on(t.userId, t.lessonId),
   }),
 );
 

@@ -1,7 +1,14 @@
 import { useQuery } from '@tanstack/react-query';
 import { Link } from '@tanstack/react-router';
 
-import { CONCEPT_ORDER, CONCEPTS, LESSON_SEED } from '@coblocks/shared';
+import {
+  accountLevel,
+  CONCEPT_ORDER,
+  CONCEPTS,
+  LESSON_SEED,
+  XP_PER_ACCOUNT_LEVEL,
+  xpIntoLevel,
+} from '@coblocks/shared';
 
 import { fetchMyProgress } from '@/api/lessons';
 import { useAuthStore } from '@/stores/auth';
@@ -47,6 +54,15 @@ export function DashboardPage() {
           <p className='text-[14.5px] text-muted'>
             완료한 미션 {completedIds.size}개 / 전체 {LESSON_SEED.length}개
           </p>
+          <div className='mt-2 flex items-center gap-2.5'>
+            <span className='rounded-full bg-seq px-2.5 py-0.5 text-xs font-semibold text-white'>
+              Lv.{accountLevel(user?.xp ?? 0)}
+            </span>
+            <span className='text-[13px] text-muted'>
+              {user?.xp ?? 0} XP · 다음 레벨까지 {XP_PER_ACCOUNT_LEVEL - xpIntoLevel(user?.xp ?? 0)}{' '}
+              XP
+            </span>
+          </div>
         </div>
         <div className='flex flex-wrap gap-3'>
           {user?.role === 'admin' && (

@@ -14,6 +14,8 @@ export interface AuthUser {
   accountType: AccountType;
   /** 교육 계정에서 교사가 지정한 학번. 일반 계정은 null. */
   studentNo: string | null;
+  /** 누적 XP. 레벨은 여기서 계산한다(`accountLevel`). */
+  xp: number;
 }
 
 export interface LoginRequest {

@@ -8,6 +8,13 @@
       "when": 1788606678413,
       "tag": "0000_high_fixer",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1788630569079,
+      "tag": "0001_cold_millenium_guard",
+      "breakpoints": true
     }
   ]
 }

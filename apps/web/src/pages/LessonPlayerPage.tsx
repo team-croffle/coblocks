@@ -11,6 +11,7 @@ import { BlockWorkspace } from '@/components/BlockWorkspace';
 import { StageCanvas } from '@/components/StageCanvas';
 import { ZoomPanel } from '@/components/ZoomPanel';
 import { useBlockRunner } from '@/hooks/use-block-runner';
+import { useAuthStore } from '@/stores/auth';
 
 const GOALS = [
   '오른쪽 블록 스페이스에서 블록을 눌러 순서대로 쌓습니다.',
@@ -49,6 +50,8 @@ function Player({
   stage: NonNullable<(typeof LESSON_SEED)[number]['stage']>;
 }) {
   const [program, setProgram] = useState<BlockProgram>([]);
+  const [award, setAward] = useState<number | null>(null);
+  const refreshUser = useAuthStore((s) => s.refresh);
   const runner = useBlockRunner(stage);
 
   function add(block: ProgramBlock) {
@@ -67,10 +70,14 @@ function Player({
   }
 
   async function onRun() {
+    setAward(null);
     runner.run(program);
     // 채점 근거는 서버가 다시 계산한다. 실패해도 학습 흐름은 막지 않는다.
     try {
-      await submitAttempt(lesson.id, program);
+      const result = await submitAttempt(lesson.id, program);
+      setAward(result.awardedXp);
+      // 이미 완료한 미션은 XP 가 0 이라 헤더를 다시 읽을 필요가 없다.
+      if (result.awardedXp > 0) await refreshUser();
     } catch {
       /* API 연결 전이면 무시 */
     }
@@ -110,6 +117,10 @@ function Player({
               className={`mt-3 min-h-[1.5em] text-center text-[13.5px] font-semibold ${statusClass}`}
             >
               {runner.message}
+              {award !== null && award > 0 && <span className='ml-2 text-ok'>+{award} XP</span>}
+              {award === 0 && runner.status === 'success' && (
+                <span className='ml-2 text-muted'>이미 완료한 미션이라 XP 는 오르지 않아요</span>
+              )}
             </p>
             <div className='mt-3 flex flex-wrap justify-center gap-2'>
               <button type='button' className='btn btn-primary' onClick={onRun}>
