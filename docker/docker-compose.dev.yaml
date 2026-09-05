@@ -25,6 +25,20 @@ services:
       timeout: 5s
       retries: 5
 
+  # 마이그레이션 워커. api 와 같은 Dockerfile 의 migrate 스테이지에서 나온다.
+  migrate:
+    profiles: ['app']
+    build:
+      context: ..
+      dockerfile: apps/api/Dockerfile
+      target: migrate
+    restart: 'no'
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgres://coblocks:coblocks@db:5432/coblocks
+
   api:
     profiles: ['app']
     build:
@@ -33,6 +47,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
     environment:
       DATABASE_URL: postgres://coblocks:coblocks@db:5432/coblocks
       JWT_SECRET: dev-only-not-a-secret
@@ -50,7 +66,10 @@ services:
       args:
         VITE_API_BASE_URL: /api
     depends_on:
-      - api
+      api:
+        condition: service_started
+      migrate:
+        condition: service_completed_successfully
     environment:
       API_UPSTREAM: http://api:3000
     ports:

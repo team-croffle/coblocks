@@ -119,12 +119,8 @@
           "name": "audit_logs_actor_id_users_id_fk",
           "tableFrom": "audit_logs",
           "tableTo": "users",
-          "columnsFrom": [
-            "actor_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["actor_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -210,12 +206,8 @@
           "name": "inquiries_author_id_users_id_fk",
           "tableFrom": "inquiries",
           "tableTo": "users",
-          "columnsFrom": [
-            "author_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["author_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -223,12 +215,8 @@
           "name": "inquiries_answered_by_id_users_id_fk",
           "tableFrom": "inquiries",
           "tableTo": "users",
-          "columnsFrom": [
-            "answered_by_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["answered_by_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -282,12 +270,8 @@
           "name": "lesson_revisions_lesson_id_lessons_id_fk",
           "tableFrom": "lesson_revisions",
           "tableTo": "lessons",
-          "columnsFrom": [
-            "lesson_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["lesson_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -295,12 +279,8 @@
           "name": "lesson_revisions_editor_id_users_id_fk",
           "tableFrom": "lesson_revisions",
           "tableTo": "users",
-          "columnsFrom": [
-            "editor_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["editor_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -458,12 +438,8 @@
           "name": "lessons_standard_code_standards_code_fk",
           "tableFrom": "lessons",
           "tableTo": "standards",
-          "columnsFrom": [
-            "standard_code"
-          ],
-          "columnsTo": [
-            "code"
-          ],
+          "columnsFrom": ["standard_code"],
+          "columnsTo": ["code"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -560,12 +536,8 @@
           "name": "progress_user_id_users_id_fk",
           "tableFrom": "progress",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -573,12 +545,8 @@
           "name": "progress_lesson_id_lessons_id_fk",
           "tableFrom": "progress",
           "tableTo": "lessons",
-          "columnsFrom": [
-            "lesson_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["lesson_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -648,12 +616,8 @@
           "name": "recovery_codes_user_id_users_id_fk",
           "tableFrom": "recovery_codes",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -758,12 +722,8 @@
           "name": "unmask_requests_target_user_id_users_id_fk",
           "tableFrom": "unmask_requests",
           "tableTo": "users",
-          "columnsFrom": [
-            "target_user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["target_user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -771,12 +731,8 @@
           "name": "unmask_requests_requester_id_users_id_fk",
           "tableFrom": "unmask_requests",
           "tableTo": "users",
-          "columnsFrom": [
-            "requester_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["requester_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -784,12 +740,8 @@
           "name": "unmask_requests_approver_id_users_id_fk",
           "tableFrom": "unmask_requests",
           "tableTo": "users",
-          "columnsFrom": [
-            "approver_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["approver_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -896,98 +848,52 @@
     "public.account_state": {
       "name": "account_state",
       "schema": "public",
-      "values": [
-        "active",
-        "dormant",
-        "suspended"
-      ]
+      "values": ["active", "dormant", "suspended"]
     },
     "public.account_type": {
       "name": "account_type",
       "schema": "public",
-      "values": [
-        "personal",
-        "edu"
-      ]
+      "values": ["personal", "edu"]
     },
     "public.audit_category": {
       "name": "audit_category",
       "schema": "public",
-      "values": [
-        "access",
-        "activity",
-        "admin"
-      ]
+      "values": ["access", "activity", "admin"]
     },
     "public.audit_outcome": {
       "name": "audit_outcome",
       "schema": "public",
-      "values": [
-        "success",
-        "failure",
-        "pending"
-      ]
+      "values": ["success", "failure", "pending"]
     },
     "public.concept_key": {
       "name": "concept_key",
       "schema": "public",
-      "values": [
-        "seq",
-        "loop",
-        "cond",
-        "data",
-        "func",
-        "ds",
-        "algo",
-        "ai"
-      ]
+      "values": ["seq", "loop", "cond", "data", "func", "ds", "algo", "ai"]
     },
     "public.grade_band": {
       "name": "grade_band",
       "schema": "public",
-      "values": [
-        "e34",
-        "e56",
-        "m",
-        "h"
-      ]
+      "values": ["e34", "e56", "m", "h"]
     },
     "public.inquiry_state": {
       "name": "inquiry_state",
       "schema": "public",
-      "values": [
-        "open",
-        "in_progress",
-        "answered",
-        "held"
-      ]
+      "values": ["open", "in_progress", "answered", "held"]
     },
     "public.lesson_status": {
       "name": "lesson_status",
       "schema": "public",
-      "values": [
-        "draft",
-        "published",
-        "archived"
-      ]
+      "values": ["draft", "published", "archived"]
     },
     "public.progress_state": {
       "name": "progress_state",
       "schema": "public",
-      "values": [
-        "not_started",
-        "in_progress",
-        "completed"
-      ]
+      "values": ["not_started", "in_progress", "completed"]
     },
     "public.user_role": {
       "name": "user_role",
       "schema": "public",
-      "values": [
-        "student",
-        "teacher",
-        "admin"
-      ]
+      "values": ["student", "teacher", "admin"]
     }
   },
   "schemas": {},
