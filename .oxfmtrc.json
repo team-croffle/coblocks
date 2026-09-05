@@ -28,5 +28,5 @@
   },
   "jsxSingleQuote": true,
   "useTabs": false,
-  "ignorePatterns": [".github/**", ".vscode/**", "docs/**", "*.md"]
+  "ignorePatterns": [".github/**", ".vscode/**", "docs/**", "*.md", "apps/api/drizzle/**"]
 }

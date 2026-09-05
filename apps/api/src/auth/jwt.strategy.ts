@@ -36,6 +36,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       role: row.role,
       accountType: row.type,
       studentNo: row.studentNo,
+      xp: row.xp,
     };
   }
 }

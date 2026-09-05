@@ -1,11 +1,11 @@
 import type {
+  AttemptResult,
   BlockProgram,
   Lesson,
   LessonProgress,
   LessonQuery,
   LessonSummary,
   Paginated,
-  RunResult,
 } from '@coblocks/shared';
 
 import { http } from './client';
@@ -29,4 +29,4 @@ export const fetchMyProgress = async () => (await http.get<LessonProgress[]>('/p
 
 /** 서버가 shared 인터프리터로 다시 채점한다 — 클라이언트 결과는 미리보기일 뿐이다. */
 export const submitAttempt = async (lessonId: string, program: BlockProgram) =>
-  (await http.post<RunResult>(`/progress/${lessonId}/attempt`, { program })).data;
+  (await http.post<AttemptResult>(`/progress/${lessonId}/attempt`, { program })).data;

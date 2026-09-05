@@ -18,6 +18,8 @@ interface AuthState {
   /** 새로고침 직후 me() 응답을 기다리는 동안 라우터가 로그인으로 튕기지 않게 하는 플래그 */
   restoring: boolean;
   restore: () => Promise<void>;
+  /** XP 처럼 서버에서 바뀐 값을 다시 읽어 온다. */
+  refresh: () => Promise<void>;
   login: (nickname: string, password: string) => Promise<AuthUser>;
   /** 가입 응답의 복구 코드는 이때 한 번만 볼 수 있다. 저장하지 않고 화면에 넘긴다. */
   signup: (
@@ -44,6 +46,15 @@ export const useAuthStore = create<AuthState>((set) => ({
       set({ user: null, token: null });
     } finally {
       set({ restoring: false });
+    }
+  },
+
+  async refresh() {
+    if (!localStorage.getItem(TOKEN_KEY)) return;
+    try {
+      set({ user: await me() });
+    } catch {
+      // 실패해도 화면을 막지 않는다. 다음 요청이 401 이면 인터셉터가 정리한다.
     }
   },
 
