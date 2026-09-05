@@ -14,7 +14,9 @@ const expiresIn = (process.env.JWT_EXPIRES_IN ?? '8h') as JwtSignOptions['expire
 
 @Module({
   imports: [
-    PassportModule,
+    // 맨몸 PassportModule 은 @Module({}) 라 아무것도 제공하지 않는다.
+    // register() 를 거쳐야 AuthGuard 가 주입받는 AuthModuleOptions 가 생긴다.
+    PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.register({
       secret: process.env.JWT_SECRET ?? 'change-me-in-production',
       signOptions: { expiresIn },
@@ -22,6 +24,8 @@ const expiresIn = (process.env.JWT_EXPIRES_IN ?? '8h') as JwtSignOptions['expire
   ],
   controllers: [AuthController],
   providers: [AuthService, JwtStrategy, AuditService],
-  exports: [AuthService],
+  // JwtAuthGuard 는 AuthGuard('jwt') 상속이라 AuthModuleOptions 주입이 필요하다.
+  // 가드를 쓰는 모듈이 AuthModule 만 import 하면 되도록 PassportModule 을 함께 내보낸다.
+  exports: [AuthService, PassportModule],
 })
 export class AuthModule {}
