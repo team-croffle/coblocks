@@ -76,7 +76,7 @@ ability to read concepts off the palette.
 | API | NestJS · Drizzle ORM · PostgreSQL 16 · JWT (Passport) · argon2 |
 | Shared | `packages/shared` — types, curriculum seed data, block interpreter |
 | Tooling | pnpm workspace · oxlint · oxfmt · husky + lint-staged (no ESLint/Prettier) |
-| Deploy | container images on GHCR (`coblocks-web`, `coblocks-api`) · compose files under `docker/` |
+| Deploy | container images on GHCR (`coblocks-web`, `coblocks-api`, `coblocks-migrate`) · compose files under `docker/` |
 
 ## Project structure
 

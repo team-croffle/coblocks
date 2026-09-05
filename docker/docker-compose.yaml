@@ -20,12 +20,24 @@ services:
       timeout: 5s
       retries: 5
 
+  # 스키마를 적용하고 끝나는 일회성 워커. api/web 은 이게 성공해야 뜬다.
+  migrate:
+    image: ghcr.io/team-croffle/coblocks-migrate:${COBLOCKS_TAG:-latest}
+    restart: 'no'
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgres://${POSTGRES_USER:-coblocks}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-coblocks}
+
   api:
     image: ghcr.io/team-croffle/coblocks-api:${COBLOCKS_TAG:-latest}
     restart: unless-stopped
     depends_on:
       db:
         condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
     environment:
       DATABASE_URL: postgres://${POSTGRES_USER:-coblocks}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-coblocks}
       JWT_SECRET: ${JWT_SECRET:?JWT_SECRET 를 설정할 것}
@@ -39,7 +51,10 @@ services:
     image: ghcr.io/team-croffle/coblocks-web:${COBLOCKS_TAG:-latest}
     restart: unless-stopped
     depends_on:
-      - api
+      api:
+        condition: service_started
+      migrate:
+        condition: service_completed_successfully
     environment:
       API_UPSTREAM: http://api:3000
     ports:

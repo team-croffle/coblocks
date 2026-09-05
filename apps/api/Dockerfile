@@ -34,6 +34,22 @@ COPY apps/api apps/api
 # api 는 이제 shared 의 소스가 아니라 packages/shared/dist 를 참조하므로 이게 없으면 실패한다.
 RUN pnpm --filter "@coblocks/api..." build
 
+# ── 마이그레이션 워커 (coblocks-migrate)
+# 서버와 같은 빌드에서 나온다 — 마이그레이션과 코드가 어긋나면 안 되기 때문이다.
+# runtime 보다 앞에 두어야 --target 없이 빌드했을 때 서버 이미지가 나온다.
+FROM base AS migrate
+ENV NODE_ENV=production
+COPY --from=prod-deps /app/node_modules ./node_modules
+COPY --from=prod-deps /app/apps/api/node_modules ./apps/api/node_modules
+COPY --from=build /app/packages/shared/dist ./packages/shared/dist
+COPY packages/shared/package.json packages/shared/package.json
+COPY --from=build /app/apps/api/dist ./apps/api/dist
+COPY apps/api/package.json apps/api/package.json
+# SQL 파일과 저널이 이미지 안에 있어야 한다. 없으면 적용할 것을 찾지 못한다.
+COPY apps/api/drizzle ./apps/api/drizzle
+USER node
+CMD ["node", "apps/api/dist/db/migrate.js"]
+
 # ── 런타임
 FROM base AS runtime
 ENV NODE_ENV=production \

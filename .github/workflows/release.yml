@@ -34,7 +34,7 @@ on:
         options: [auto, 'true', 'false']
         default: auto
       apps:
-        description: 'Images to build and push. The version moves as one either way'
+        description: 'Images to build and push (api also builds the migration worker)'
         required: true
         type: choice
         options: [all, api, web]
@@ -114,10 +114,16 @@ jobs:
           } >> "$GITHUB_OUTPUT"
 
           # Turn the image selection into a JSON array the matrix can consume.
+          # The migration worker is built from the api Dockerfile, so it ships
+          # whenever the api does: the schema it applies is the schema that build
+          # expects, and letting them drift is how a deploy breaks.
+          API='{"image":"api","file":"apps/api/Dockerfile","target":"runtime"}'
+          MIGRATE='{"image":"migrate","file":"apps/api/Dockerfile","target":"migrate"}'
+          WEB='{"image":"web","file":"apps/web/Dockerfile","target":"runtime"}'
           case "$(get apps all)" in
-            api) echo 'apps=["api"]' >> "$GITHUB_OUTPUT" ;;
-            web) echo 'apps=["web"]' >> "$GITHUB_OUTPUT" ;;
-            *)   echo 'apps=["api","web"]' >> "$GITHUB_OUTPUT" ;;
+            api) echo "apps=[$API,$MIGRATE]" >> "$GITHUB_OUTPUT" ;;
+            web) echo "apps=[$WEB]" >> "$GITHUB_OUTPUT" ;;
+            *)   echo "apps=[$API,$MIGRATE,$WEB]" >> "$GITHUB_OUTPUT" ;;
           esac
 
       - name: Calculate version
@@ -270,14 +276,14 @@ jobs:
           echo "Draft release created: $TITLE"
 
   images:
-    name: Image (${{ matrix.app }})
+    name: Image (${{ matrix.entry.image }})
     needs: version
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
         # One version, but images can be pushed separately when only one app changed.
-        app: ${{ fromJSON(needs.version.outputs.apps) }}
+        entry: ${{ fromJSON(needs.version.outputs.apps) }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -301,7 +307,7 @@ jobs:
         env:
           VERSION: ${{ needs.version.outputs.version }}
           IS_PRE: ${{ needs.version.outputs.is_prerelease }}
-          IMAGE: ${{ env.REGISTRY }}/${{ github.repository_owner }}/coblocks-${{ matrix.app }}
+          IMAGE: ${{ env.REGISTRY }}/${{ github.repository_owner }}/coblocks-${{ matrix.entry.image }}
         run: |
           set -euo pipefail
           IMAGE="$(echo "$IMAGE" | tr '[:upper:]' '[:lower:]')"
@@ -318,16 +324,17 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
-          file: apps/${{ matrix.app }}/Dockerfile
+          file: ${{ matrix.entry.file }}
+          target: ${{ matrix.entry.target }}
           push: ${{ needs.version.outputs.dry_run != 'true' }}
           tags: ${{ steps.tags.outputs.tags }}
           labels: |
-            org.opencontainers.image.title=coblocks-${{ matrix.app }}
+            org.opencontainers.image.title=coblocks-${{ matrix.entry.image }}
             org.opencontainers.image.version=${{ needs.version.outputs.version }}
             org.opencontainers.image.revision=${{ needs.version.outputs.ref }}
             org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
-          cache-from: type=gha,scope=${{ matrix.app }}
-          cache-to: type=gha,mode=max,scope=${{ matrix.app }}
+          cache-from: type=gha,scope=${{ matrix.entry.image }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.entry.image }}
 
   finalize:
     name: Finalize release

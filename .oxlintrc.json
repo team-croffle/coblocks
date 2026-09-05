@@ -219,7 +219,8 @@
         "**/__tests__/**",
         "**/*.{spec,test}.{ts,tsx,js,jsx}",
         "**/*.config.{ts,js,mts,mjs,cts,cjs}",
-        "**/seed.ts"
+        "**/seed.ts",
+        "**/migrate.ts"
       ],
       "rules": {
         "no-console": "off",

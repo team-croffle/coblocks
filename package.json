@@ -17,6 +17,7 @@
     "check": "pnpm lint && pnpm fmt:check && pnpm typecheck",
     "db:up": "docker compose -f docker/docker-compose.dev.yaml up -d db",
     "db:push": "pnpm --filter @coblocks/api db:push",
+    "db:migrate": "pnpm --filter @coblocks/api db:migrate",
     "db:seed": "pnpm --filter @coblocks/api db:seed",
     "prepare": "husky || echo 'husky 없음 — git hook 설치를 건너뜁니다 (--prod / CI 설치)'",
     "db:down": "docker compose -f docker/docker-compose.dev.yaml down",
