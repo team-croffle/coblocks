@@ -2,6 +2,7 @@ import { Link, useNavigate, useSearch } from '@tanstack/react-router';
 import { useState } from 'react';
 import type { FormEvent } from 'react';
 
+import { BrandMark } from '@/components/BrandMark';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { useAuthStore } from '@/stores/auth';
 
@@ -34,7 +35,7 @@ export function LoginPage() {
       <nav className='border-b border-line bg-paper'>
         <div className='mx-auto flex max-w-[1180px] items-center px-6 py-3'>
           <span className='flex items-center gap-2.5 font-display text-[19px]'>
-            <span className='h-6 w-6 rounded-lg bg-seq' aria-hidden='true' />
+            <BrandMark />
             Coblocks
           </span>
           <span className='flex-1' />
@@ -98,6 +99,13 @@ export function LoginPage() {
           </p>
 
           <p className='mt-4 text-[13.5px] text-muted'>
+            비밀번호를 잊었나요?{' '}
+            <Link to='/recover' className='underline underline-offset-4'>
+              복구 코드로 다시 정하기
+            </Link>
+          </p>
+
+          <p className='mt-2 text-[13.5px] text-muted'>
             아직 계정이 없나요?{' '}
             <Link to='/signup' className='underline underline-offset-4'>
               닉네임으로 시작하기
