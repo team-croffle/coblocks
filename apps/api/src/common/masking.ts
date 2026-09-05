@@ -1,6 +1,9 @@
 /**
  * 개인정보 마스킹 유틸.
  * 규칙을 여기 한 곳에만 두고, 사용자 데이터를 밖으로 내보내는 모든 경로가 이 함수를 거치게 한다.
+ *
+ * v0.1 부터 실명·이메일·학교명을 저장하지 않는다(GOALS 결정 15). 그래서 마스킹 대상은
+ * 사용자가 고른 닉네임과 교사가 지정한 학번뿐이다.
  */
 
 /** 홍길동 → 홍O동, 김수 → 김O, Alex → A**x */
@@ -11,24 +14,11 @@ export function maskName(name: string): string {
   return `${chars[0]}${'O'.repeat(chars.length - 2)}${chars.at(-1)}`;
 }
 
-/** kimsoo@school.kr → ki****@sc****.kr */
-export function maskEmail(email: string): string {
-  const [local = '', domain = ''] = email.split('@');
-  const head = local.slice(0, 2) || '*';
-  const [host = '', ...rest] = domain.split('.');
-  const tld = rest.length ? `.${rest.join('.')}` : '';
-  return `${head}****@${host.slice(0, 2)}****${tld}`;
-}
-
-/** 010-1234-5678 → 010-****-5678 */
-export function maskPhone(phone: string): string {
-  return phone.replace(/(\d{2,3})-?(\d{3,4})-?(\d{4})/, '$1-****-$3');
-}
-
-/** 원광초등학교 → O광초등학교 (학교명은 첫 글자만 가린다) */
-export function maskSchool(school: string | null): string {
-  if (!school) return '—';
-  const chars = [...school];
-  if (chars.length <= 1) return school;
-  return `O${chars.slice(1).join('')}`;
+/** 2-3-07 → **-**-07 (마지막 마디만 남긴다) */
+export function maskStudentNo(studentNo: string | null): string | null {
+  if (!studentNo) return null;
+  const parts = studentNo.split('-');
+  if (parts.length <= 1) return `**${studentNo.slice(-2)}`;
+  const tail = parts[parts.length - 1] ?? '';
+  return [...parts.slice(0, -1).map(() => '**'), tail].join('-');
 }

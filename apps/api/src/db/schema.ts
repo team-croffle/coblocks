@@ -31,25 +31,49 @@ export const auditCategory = pgEnum('audit_category', ['access', 'activity', 'ad
 export const auditOutcome = pgEnum('audit_outcome', ['success', 'failure', 'pending']);
 export const inquiryState = pgEnum('inquiry_state', ['open', 'in_progress', 'answered', 'held']);
 
+export const accountType = pgEnum('account_type', ['personal', 'edu']);
+
+/**
+ * 실명·이메일·생년월일을 저장하지 않는다. 만 14세 미만 아동의 개인정보를 아예 받지 않기 위해
+ * 컬럼 자체를 두지 않는 것이 이 스키마의 핵심이다(GOALS 결정 15).
+ * 닉네임이 로그인 아이디이자 표시 이름이고, 학번은 교육 계정에서 교사가 지정한다.
+ */
 export const users = pgTable(
   'users',
   {
     id: uuid('id').defaultRandom().primaryKey(),
-    memberNo: text('member_no').notNull(),
-    loginId: text('login_id').notNull(),
+    nickname: text('nickname').notNull(),
     passwordHash: text('password_hash').notNull(),
-    // 원본 개인정보. 조회 API 는 반드시 마스킹해서 내보낸다(common/masking.ts).
-    name: text('name').notNull(),
-    email: text('email').notNull(),
     role: userRole('role').notNull().default('student'),
-    schoolName: text('school_name'),
+    type: accountType('type').notNull().default('personal'),
+    /** 교육 계정에서 교사가 지정한다. 일반 계정은 null. */
+    studentNo: text('student_no'),
     state: accountState('state').notNull().default('active'),
     lastSeenAt: timestamp('last_seen_at', { withTimezone: true }),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => ({
-    loginIdx: uniqueIndex('users_login_id_idx').on(t.loginId),
-    memberIdx: uniqueIndex('users_member_no_idx').on(t.memberNo),
+    nicknameIdx: uniqueIndex('users_nickname_idx').on(t.nickname),
+  }),
+);
+
+/**
+ * 복구 코드. 이메일을 받지 않으므로 비밀번호를 잊었을 때 쓸 수 있는 유일한 수단이다.
+ * 원본은 발급 응답에서 한 번만 보여주고 서버는 해시만 보관한다.
+ */
+export const recoveryCodes = pgTable(
+  'recovery_codes',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    codeHash: text('code_hash').notNull(),
+    usedAt: timestamp('used_at', { withTimezone: true }),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({
+    userIdx: index('recovery_codes_user_idx').on(t.userId),
   }),
 );
 
