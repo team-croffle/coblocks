@@ -4,6 +4,7 @@ import type { FormEvent } from 'react';
 
 import { validateNickname, validatePassword } from '@coblocks/shared';
 
+import { BrandMark } from '@/components/BrandMark';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { useAuthStore } from '@/stores/auth';
 
@@ -42,7 +43,7 @@ export function SignupPage() {
       <nav className='border-b border-line bg-paper'>
         <div className='mx-auto flex max-w-[1180px] items-center px-6 py-3'>
           <span className='flex items-center gap-2.5 font-display text-[19px]'>
-            <span className='h-6 w-6 rounded-lg bg-seq' aria-hidden='true' />
+            <BrandMark />
             Coblocks
           </span>
           <span className='flex-1' />
@@ -55,9 +56,9 @@ export function SignupPage() {
           <div className='w-full max-w-[460px] rounded-[18px] border border-line bg-paper p-8 shadow-card'>
             <h2 className='mb-1.5 text-2xl'>복구 코드를 적어 두세요</h2>
             <p className='mb-4 text-sm text-muted'>
-              비밀번호를 잊었을 때 쓰는 코드입니다.{' '}
-              <strong>이 화면을 닫으면 다시 볼 수 없어요.</strong> 종이에 적거나 사진으로 남겨
-              두세요. 한 코드는 한 번만 쓸 수 있습니다.
+              비밀번호를 잊었을 때 <strong>로그인 화면 → “복구 코드로 다시 정하기”</strong>에서 쓰는
+              코드입니다. <strong>이 화면을 닫으면 다시 볼 수 없어요.</strong> 종이에 적거나
+              사진으로 남겨 두세요. 한 코드는 한 번만 쓸 수 있습니다.
             </p>
 
             <ul className='mb-4 grid grid-cols-2 gap-2 rounded-[10px] border border-dashed border-line-strong bg-surface p-3'>
