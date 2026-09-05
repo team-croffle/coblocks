@@ -30,6 +30,12 @@ on:
         type: choice
         options: [auto, 'true', 'false']
         default: auto
+      apps:
+        description: '빌드·푸시할 이미지. 버전은 어느 쪽을 고르든 하나로 움직인다'
+        required: true
+        type: choice
+        options: [all, api, web]
+        default: all
       draft:
         description: '업로드 후에도 draft 로 둔다'
         required: true
@@ -64,6 +70,7 @@ jobs:
       tag: ${{ steps.calc.outputs.tag }}
       title: ${{ steps.calc.outputs.title }}
       is_prerelease: ${{ steps.calc.outputs.is_prerelease }}
+      apps: ${{ steps.input.outputs.apps }}
       dry_run: ${{ steps.calc.outputs.dry_run }}
       draft: ${{ steps.calc.outputs.draft }}
       ref: ${{ steps.commit.outputs.ref }}
@@ -101,6 +108,13 @@ jobs:
             echo "draft=$(get draft true)"
             echo "dry_run=$(get dry_run false)"
           } >> "$GITHUB_OUTPUT"
+
+          # 이미지 선택을 매트릭스가 바로 쓸 수 있는 JSON 배열로 바꾼다.
+          case "$(get apps all)" in
+            api) echo 'apps=["api"]' >> "$GITHUB_OUTPUT" ;;
+            web) echo 'apps=["web"]' >> "$GITHUB_OUTPUT" ;;
+            *)   echo 'apps=["api","web"]' >> "$GITHUB_OUTPUT" ;;
+          esac
 
       - name: Calculate version
         id: calc
@@ -257,7 +271,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        app: [api, web]
+        # 버전은 하나지만 이미지는 따로 밀 수 있다 — 한쪽만 고쳐 다시 낼 때 쓴다.
+        app: ${{ fromJSON(needs.version.outputs.apps) }}
     steps:
       - uses: actions/checkout@v4
         with:
