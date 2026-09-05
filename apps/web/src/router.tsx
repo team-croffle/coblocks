@@ -59,9 +59,13 @@ const loginRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/login',
   component: LoginPage,
-  validateSearch: (search: Record<string, unknown>) => ({
-    redirect: typeof search.redirect === 'string' ? search.redirect : undefined,
-  }),
+  /**
+   * `redirect` 는 **선택** 속성이어야 한다.
+   * `{ redirect: string | undefined }` 로 두면 값이 없어도 키는 있어야 하는 타입이 되어,
+   * 라우터가 `/login` 으로 가는 모든 곳에 `search` 를 요구한다.
+   */
+  validateSearch: (search: Record<string, unknown>): { redirect?: string } =>
+    typeof search.redirect === 'string' ? { redirect: search.redirect } : {},
 });
 
 /** 로그인이 필요한 영역. 서버 가드가 진짜 방어선이고 여기는 UX 용이다. */

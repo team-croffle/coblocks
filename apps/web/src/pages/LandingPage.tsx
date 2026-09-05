@@ -92,7 +92,6 @@ export function LandingPage() {
           </button>
           <Link
             to='/login'
-            search={{ redirect: undefined }}
             className='rounded-[10px] border border-line-strong px-4 py-2 text-sm font-semibold'
           >
             로그인

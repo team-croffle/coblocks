@@ -42,7 +42,7 @@ export function RecoverPage() {
   return (
     <div>
       <nav className='border-b border-line bg-paper'>
-        <div className='mx-auto flex max-w-[1180px] items-center px-6 py-3'>
+        <div className='mx-auto flex max-w-295 items-center px-6 py-3'>
           <span className='flex items-center gap-2.5 font-display text-[19px]'>
             <BrandMark />
             Coblocks
@@ -54,7 +54,7 @@ export function RecoverPage() {
 
       <div className='flex min-h-[calc(100vh-60px)] items-center justify-center bg-surface p-6'>
         {done ? (
-          <div className='w-full max-w-[400px] rounded-[18px] border border-line bg-paper p-8 shadow-card'>
+          <div className='w-full max-w-100 rounded-[18px] border border-line bg-paper p-8 shadow-card'>
             <h2 className='mb-1.5 text-2xl'>비밀번호를 바꿨어요</h2>
             <p className='mb-5 text-sm text-muted'>
               방금 쓴 복구 코드는 이제 쓸 수 없습니다. 남은 코드는 그대로 두고, 새 비밀번호로
@@ -70,7 +70,7 @@ export function RecoverPage() {
           </div>
         ) : (
           <form
-            className='w-full max-w-[400px] rounded-[18px] border border-line bg-paper p-8 shadow-card'
+            className='w-full max-w-100 rounded-[18px] border border-line bg-paper p-8 shadow-card'
             onSubmit={onSubmit}
           >
             <h2 className='mb-1.5 text-2xl'>복구 코드로 다시 시작하기</h2>
