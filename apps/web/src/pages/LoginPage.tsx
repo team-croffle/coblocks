@@ -12,7 +12,7 @@ export function LoginPage() {
   const loading = useAuthStore((s) => s.loading);
   const navigate = useNavigate();
 
-  const [loginId, setLoginId] = useState('');
+  const [nickname, setNickname] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
 
@@ -20,12 +20,12 @@ export function LoginPage() {
     e.preventDefault();
     setError('');
     try {
-      const user = await login(loginId.trim(), password);
+      const user = await login(nickname.trim(), password);
       if (redirect) void navigate({ to: redirect });
       else if (user.role === 'admin') void navigate({ to: '/admin/overview' });
       else void navigate({ to: '/app/dashboard' });
     } catch {
-      setError('아이디 또는 비밀번호를 확인해 주세요.');
+      setError('닉네임 또는 비밀번호를 확인해 주세요.');
     }
   }
 
@@ -50,19 +50,16 @@ export function LoginPage() {
           <h2 className='mb-1.5 text-2xl'>다시 만나서 반가워요</h2>
           <p className='mb-5 text-sm text-muted'>로그인하면 마지막으로 하던 미션부터 이어집니다.</p>
 
-          <div className='mb-3.5'>
-            <label
-              htmlFor='loginId'
-              className='mb-1.5 block text-[13px] font-semibold text-ink-soft'
-            >
-              아이디
+          <div className="mb-3.5">
+            <label htmlFor="nickname" className="mb-1.5 block text-[13px] font-semibold text-ink-soft">
+              닉네임
             </label>
             <input
-              id='loginId'
-              className='field-input'
-              autoComplete='username'
-              value={loginId}
-              onChange={(e) => setLoginId(e.target.value)}
+              id="nickname"
+              className="field-input"
+              autoComplete="username"
+              value={nickname}
+              onChange={(e) => setNickname(e.target.value)}
               required
             />
           </div>
@@ -97,10 +94,14 @@ export function LoginPage() {
             <code className='mono'>admin / admin</code>
           </p>
 
-          <Link
-            to='/'
-            className='mt-4 inline-block text-[13.5px] text-muted underline underline-offset-4'
-          >
+          <p className="mt-4 text-[13.5px] text-muted">
+            아직 계정이 없나요?{' '}
+            <Link to="/signup" className="underline underline-offset-4">
+              닉네임으로 시작하기
+            </Link>
+          </p>
+
+          <Link to="/" className="mt-3 inline-block text-[13.5px] text-muted underline underline-offset-4">
             ← 소개 페이지로 돌아가기
           </Link>
         </form>

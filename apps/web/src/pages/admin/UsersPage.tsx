@@ -14,10 +14,12 @@ const STATE = {
   suspended: { label: '정지', cssVar: '--color-bad' },
 } as const;
 const ROLE = { student: '학생', teacher: '교사', admin: '관리자' } as const;
+const ACCOUNT_TYPE = { personal: '일반', edu: '교육' } as const;
 
 export function UsersPage() {
   const [q, setQ] = useState('');
   const [notice, setNotice] = useState('');
+  
   /** 열람 사유를 입력받는 중인 사용자. null 이면 폼이 닫혀 있다. */
   const [unmaskTarget, setUnmaskTarget] = useState<MaskedUser | null>(null);
   const [reason, setReason] = useState('');
@@ -41,17 +43,12 @@ export function UsersPage() {
     setReason('');
   }
 
-  async function submitUnmask(e: FormEvent) {
-    e.preventDefault();
-    const trimmed = reason.trim();
-    if (!unmaskTarget || !trimmed) return;
-
-    setSubmitting(true);
+  async function onUnmask(user: MaskedUser) {
+    const reason = window.prompt(`${user.maskedNickname}의 식별 정보 열람 사유를 입력하세요.`);
+    if (!reason) return;
     try {
-      await requestUnmask(unmaskTarget.id, trimmed);
-      setNotice(
-        `${unmaskTarget.memberNo} 열람 요청을 기록했습니다. 책임자 승인 후에만 마스킹이 해제됩니다.`,
-      );
+      await requestUnmask(user.id, reason);
+      setNotice(`${user.maskedNickname} 열람 요청을 기록했습니다. 책임자 승인 후에만 마스킹이 해제됩니다.`);
     } catch {
       setNotice('API 연결 전입니다. 요청은 감사 로그에 남는 설계입니다.');
     } finally {
@@ -62,15 +59,16 @@ export function UsersPage() {
 
   return (
     <section>
-      <h3 className='text-[21px]'>유저 관리</h3>
-      <p className='mb-4 text-sm text-muted'>
-        이름·이메일은 서버가 마스킹한 값만 내려옵니다. 원본 열람은 사유 입력과 승인이 필요합니다.
+      <h3 className="text-[21px]">유저 관리</h3>
+      <p className="mb-4 text-sm text-muted">
+        실명·이메일은 저장하지 않습니다. 닉네임과 학번만 있고, 그마저도 서버가 마스킹한 값만
+        내려옵니다. 원본 열람은 사유 입력과 승인이 필요합니다.
       </p>
 
       <input
-        type='search'
-        className='field-input mb-4 max-w-[420px]'
-        placeholder='회원번호, 학교로 검색 (Enter)'
+        type="search"
+        className="field-input mb-4 max-w-[420px]"
+        placeholder="닉네임, 학번으로 검색 (Enter)"
         value={q}
         onChange={(e) => setQ(e.target.value)}
         onKeyDown={(e) => {
@@ -81,90 +79,46 @@ export function UsersPage() {
       <div className='overflow-x-auto rounded-card border border-line'>
         <table className='w-full min-w-[760px] text-[13.5px]'>
           <thead>
-            <tr className='bg-surface text-muted'>
-              <th className='th'>회원번호</th>
-              <th className='th'>이름</th>
-              <th className='th'>이메일</th>
-              <th className='th'>구분</th>
-              <th className='th'>학교</th>
-              <th className='th'>최근 접속</th>
-              <th className='th'>상태</th>
-              <th className='th' aria-label='관리' />
+            <tr className="bg-surface text-muted">
+              <th className="th">닉네임</th>
+              <th className="th">계정</th>
+              <th className="th">학번</th>
+              <th className="th">구분</th>
+              <th className="th">최근 접속</th>
+              <th className="th">상태</th>
+              <th className="th" />
             </tr>
           </thead>
           <tbody>
             {data.items.map((u) => (
-              <Fragment key={u.id}>
-                <tr className='border-t border-line'>
-                  <td className='td mono'>{u.memberNo}</td>
-                  <td className='td'>{u.maskedName}</td>
-                  <td className='td mono'>{u.maskedEmail}</td>
-                  <td className='td'>{ROLE[u.role]}</td>
-                  <td className='td'>{u.schoolLabel}</td>
-                  <td className='td mono'>{u.lastSeenAt ?? '—'}</td>
-                  <td className='td'>
-                    <span
-                      className='rounded-full border px-2.5 py-0.5 text-xs font-semibold'
-                      style={{
-                        borderColor: `var(${STATE[u.state].cssVar})`,
-                        color: `var(${STATE[u.state].cssVar})`,
-                      }}
-                    >
-                      {STATE[u.state].label}
-                    </span>
-                  </td>
-                  <td className='td'>
-                    <button
-                      type='button'
-                      className='rounded-md bg-surface-2 px-2.5 py-1 text-[12.5px] text-ink-soft'
-                      aria-expanded={unmaskTarget?.id === u.id}
-                      onClick={() => openUnmaskForm(u)}
-                    >
-                      원본 열람 요청
-                    </button>
-                  </td>
-                </tr>
-
-                {unmaskTarget?.id === u.id && (
-                  <tr className='border-t border-line bg-surface'>
-                    <td className='td' colSpan={8}>
-                      <form className='flex flex-wrap items-center gap-2' onSubmit={submitUnmask}>
-                        <label className='text-[13px] text-ink-soft' htmlFor='unmask-reason'>
-                          {u.memberNo} 열람 사유
-                        </label>
-                        <input
-                          id='unmask-reason'
-                          className='field-input min-w-[300px] flex-1'
-                          value={reason}
-                          placeholder='예: 학부모 정정 요청 확인 — 입력한 사유가 감사 로그에 그대로 남습니다'
-                          onChange={(e) => setReason(e.target.value)}
-                          onKeyDown={(e) => {
-                            if (e.key === 'Escape') closeUnmaskForm();
-                          }}
-                        />
-                        <button
-                          type='submit'
-                          className='rounded-md bg-ink px-2.5 py-1 text-[12.5px] text-paper disabled:opacity-45'
-                          disabled={submitting || reason.trim().length === 0}
-                        >
-                          기록하고 요청
-                        </button>
-                        <button
-                          type='button'
-                          className='rounded-md bg-surface-2 px-2.5 py-1 text-[12.5px] text-ink-soft'
-                          onClick={closeUnmaskForm}
-                        >
-                          취소
-                        </button>
-                      </form>
-                    </td>
-                  </tr>
-                )}
-              </Fragment>
+              <tr key={u.id} className="border-t border-line">
+                <td className="td">{u.maskedNickname}</td>
+                <td className="td">{ACCOUNT_TYPE[u.accountType]}</td>
+                <td className="td mono">{u.maskedStudentNo ?? '—'}</td>
+                <td className="td">{ROLE[u.role]}</td>
+                <td className="td mono">{u.lastSeenAt ?? '—'}</td>
+                <td className="td">
+                  <span
+                    className="rounded-full border px-2.5 py-0.5 text-xs font-semibold"
+                    style={{ borderColor: `var(${STATE[u.state].cssVar})`, color: `var(${STATE[u.state].cssVar})` }}
+                  >
+                    {STATE[u.state].label}
+                  </span>
+                </td>
+                <td className="td">
+                  <button
+                    type="button"
+                    className="rounded-md bg-surface-2 px-2.5 py-1 text-[12.5px] text-ink-soft"
+                    onClick={() => onUnmask(u)}
+                  >
+                    원본 열람 요청
+                  </button>
+                </td>
+              </tr>
             ))}
             {data.items.length === 0 && (
               <tr>
-                <td className='td text-muted' colSpan={8}>
+                <td className="td text-muted" colSpan={7}>
                   표시할 사용자가 없습니다. (API 연결 전)
                 </td>
               </tr>
