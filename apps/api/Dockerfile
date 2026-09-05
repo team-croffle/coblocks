@@ -30,13 +30,9 @@ RUN pnpm install --frozen-lockfile --prod --filter @coblocks/api...
 FROM deps AS build
 COPY packages/shared packages/shared
 COPY apps/api apps/api
-RUN pnpm --filter @coblocks/api build
-# tsconfig 의 include 가 packages/shared 를 함께 잡으므로 dist 안의 경로가 달라질 수 있다.
-# 진입점을 빌드 시점에 찾아 기록해 두고 런타임에서 그대로 쓴다.
-RUN ENTRY="$(find apps/api/dist -name main.js | head -n 1)" \
-    && test -n "$ENTRY" \
-    && echo "$ENTRY" > /app/entrypoint.path \
-    && echo "entry: $ENTRY"
+# 점 셋(...)이 있어야 의존 워크스페이스인 @coblocks/shared 를 먼저 빌드한다.
+# api 는 이제 shared 의 소스가 아니라 packages/shared/dist 를 참조하므로 이게 없으면 실패한다.
+RUN pnpm --filter "@coblocks/api..." build
 
 # ── 런타임
 FROM base AS runtime
@@ -45,10 +41,14 @@ ENV NODE_ENV=production \
 COPY --from=prod-deps /app/node_modules ./node_modules
 COPY --from=prod-deps /app/apps/api/node_modules ./apps/api/node_modules
 COPY --from=build /app/apps/api/dist ./apps/api/dist
-COPY --from=build /app/entrypoint.path ./entrypoint.path
+# node_modules 의 @coblocks/shared 는 /app/packages/shared 를 가리키는 심링크다.
+# 그 실체(빌드 산출물 + package.json)를 함께 넣어야 런타임에서 해석된다.
+COPY --from=build /app/packages/shared/dist ./packages/shared/dist
+COPY packages/shared/package.json packages/shared/package.json
 COPY apps/api/package.json apps/api/package.json
 USER node
 EXPOSE 3000
 HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
   CMD node -e "fetch('http://127.0.0.1:'+(process.env.PORT||3000)+'/api').then(r=>process.exit(r.status<500?0:1)).catch(()=>process.exit(1))"
-CMD ["sh", "-c", "node $(cat /app/entrypoint.path)"]
+# tsconfig.build.json 이 rootDir 을 src 로 고정하므로 진입점은 항상 dist/main.js 다.
+CMD ["node", "apps/api/dist/main.js"]

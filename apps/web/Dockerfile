@@ -23,7 +23,10 @@ ARG VITE_API_BASE_URL=/api
 ENV VITE_API_BASE_URL=$VITE_API_BASE_URL
 COPY packages/shared packages/shared
 COPY apps/web apps/web
-RUN pnpm --filter @coblocks/web build
+# 점 셋(...)이 있어야 의존 워크스페이스인 @coblocks/shared 를 먼저 빌드한다.
+# vite 별칭을 걷어내서 web 도 shared 의 소스가 아니라 packages/shared/dist 를 쓴다.
+# (정적 산출물만 nginx 로 넘기므로 런타임 스테이지에는 shared 를 넣을 필요가 없다.)
+RUN pnpm --filter "@coblocks/web..." build
 
 FROM nginx:1.27-alpine AS runtime
 # API_UPSTREAM 을 넣으면 /api 를 그쪽으로 프록시한다(compose 에서 사용).

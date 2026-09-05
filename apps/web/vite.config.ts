@@ -1,8 +1,9 @@
 import { fileURLToPath, URL } from 'node:url';
-import { defineConfig } from 'vite';
-import react, { reactCompilerPreset } from '@vitejs/plugin-react';
+
 import babel from '@rolldown/plugin-babel';
 import tailwindcss from '@tailwindcss/vite';
+import react, { reactCompilerPreset } from '@vitejs/plugin-react';
+import { defineConfig } from 'vite';
 
 export default defineConfig({
   plugins: [
@@ -15,9 +16,6 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
-      // shared 는 빌드 산출물이 아니라 TS 소스를 그대로 쓴다.
-      // 별칭이 없으면 Vite 가 node_modules 의존성으로 보고 사전 번들링하다 실패한다.
-      '@coblocks/shared': fileURLToPath(new URL('../../packages/shared/src/index.ts', import.meta.url)),
     },
   },
   optimizeDeps: { exclude: ['@coblocks/shared'] },

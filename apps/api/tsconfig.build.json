@@ -1,0 +1,11 @@
+{
+  // 빌드 전용. 에디터/typecheck 용 tsconfig.json 은 test 와 drizzle.config.ts 까지 보지만,
+  // 그것들이 프로그램에 들어가면 rootDir 이 apps/api 로 추론되어 산출물이 dist/src/main.js 가
+  // 된다. 빌드할 때만 src 로 좁혀 dist/main.js 를 그대로 얻는다.
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "rootDir": "./src"
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules", "dist", "test", "**/*.spec.ts"]
+}
