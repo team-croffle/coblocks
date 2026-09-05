@@ -111,10 +111,11 @@ TanStack Router derives path types from the route tree. If `Link to="..."` gives
 
 - **Commit in small units.** One commit = one logical change (a rule change, one feature, one fix, one refactor). Do not bundle unrelated changes, and do not start the next sub-task while a finished one is still uncommitted.
 - Run `pnpm check` before every commit.
-- **Commit message = title + summary + bullets.** Record the work in detail:
+- **Commit message = `type(scope): subject`, then summary, then bullets.** The subject line follows
+  Conventional Commits; the body is what makes the history readable a year later:
 
   ```
-  <title: imperative mood, ≤ 72 chars, what changed>
+  <type>(<scope>): <subject: imperative mood, whole line ≤ 72 chars>
 
   <summary: 1–3 sentences — why this change, what it affects>
 
@@ -122,7 +123,12 @@ TanStack Router derives path types from the route tree. If `Link to="..."` gives
   - <bullet: decisions made, alternatives rejected, anything a reviewer should check>
   ```
 
-  A bare title is acceptable only for trivial one-liners (typo, formatting). Everything else gets the summary and bullets.
+  - `type` is one of `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `build`, `ci`,
+    `chore`, `release`. A breaking change adds `!` before the colon.
+  - `scope` is optional and names the area: `api`, `web`, `shared`, `db`, `auth`, `docker`, `deps`.
+  - A bare subject line is acceptable only for trivial one-liners (typo, formatting). Everything else
+    gets the summary and bullets.
+  - The `commit-msg` hook rejects a subject that does not match this shape.
 - **Trailers: `Co-Authored-By` only.** When an AI agent wrote the change, close the message with a
   single `Co-Authored-By:` line. Do not append session links or any other trailer — the message
   should stay readable in `git log` a year from now.
