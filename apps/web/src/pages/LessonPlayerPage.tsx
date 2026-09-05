@@ -1,17 +1,20 @@
 import { useQuery } from '@tanstack/react-query';
 import { Link, useParams } from '@tanstack/react-router';
-import { useState } from 'react';
+import { lazy, Suspense, useState } from 'react';
 
 import { DEFAULT_STAGE, LESSON_SEED, STANDARD_TEXT } from '@coblocks/shared';
-import type { BlockProgram, ProgramBlock } from '@coblocks/shared';
+import type { BlockProgram } from '@coblocks/shared';
 
-import { fetchLesson, submitAttempt } from '@/api/lessons';
-import { BlockPalette } from '@/components/BlockPalette';
-import { BlockWorkspace } from '@/components/BlockWorkspace';
+import { fetchLesson, fetchMyProgress, submitAttempt } from '@/api/lessons';
 import { StageCanvas } from '@/components/StageCanvas';
 import { ZoomPanel } from '@/components/ZoomPanel';
 import { useBlockRunner } from '@/hooks/use-block-runner';
 import { useAuthStore } from '@/stores/auth';
+
+/** Blockly 는 번들이 크다. 플레이어에 들어올 때만 내려받는다. */
+const BlocklyEditor = lazy(async () => ({
+  default: (await import('@/components/BlocklyEditor')).BlocklyEditor,
+}));
 
 const GOALS = [
   '오른쪽 블록 스페이스에서 블록을 눌러 순서대로 쌓습니다.',
@@ -50,23 +53,21 @@ function Player({
   stage: NonNullable<(typeof LESSON_SEED)[number]['stage']>;
 }) {
   const [program, setProgram] = useState<BlockProgram>([]);
+  const [workspace, setWorkspace] = useState<unknown>(null);
   const [award, setAward] = useState<number | null>(null);
   const refreshUser = useAuthStore((s) => s.refresh);
   const runner = useBlockRunner(stage);
 
-  function add(block: ProgramBlock) {
-    setProgram((prev) => [...prev, block]);
-    runner.reset('블록을 추가했어요. 실행해 볼까요?');
-  }
+  // 마지막으로 저장한 워크스페이스를 가져와 에디터를 그 상태로 연다.
+  const { data: saved, isPending: savedPending } = useQuery({
+    queryKey: ['progress', 'me'],
+    queryFn: fetchMyProgress,
+  });
+  const savedWorkspace = saved?.find((p) => p.lessonId === lesson.id)?.workspace ?? null;
 
-  function remove(index: number) {
-    setProgram((prev) => prev.filter((_, i) => i !== index));
-    runner.reset();
-  }
-
-  function setCount(index: number, count: number) {
-    setProgram((prev) => prev.map((b, i) => (i === index ? { ...b, count } : b)));
-    runner.reset();
+  function onEditorChange(next: BlockProgram, nextWorkspace: unknown) {
+    setProgram(next);
+    setWorkspace(nextWorkspace);
   }
 
   async function onRun() {
@@ -74,7 +75,7 @@ function Player({
     runner.run(program);
     // 채점 근거는 서버가 다시 계산한다. 실패해도 학습 흐름은 막지 않는다.
     try {
-      const result = await submitAttempt(lesson.id, program);
+      const result = await submitAttempt(lesson.id, program, workspace);
       setAward(result.awardedXp);
       // 이미 완료한 미션은 XP 가 0 이라 헤더를 다시 읽을 필요가 없다.
       if (result.awardedXp > 0) await refreshUser();
@@ -151,25 +152,28 @@ function Player({
         </div>
 
         <ZoomPanel title='블록 코딩 스페이스'>
-          <BlockPalette onAdd={add} />
-          <BlockWorkspace
-            program={program}
-            activeIndex={runner.activeIndex}
-            onRemove={remove}
-            onSetCount={setCount}
-          />
-          <div className='mt-3.5 flex flex-wrap gap-2'>
-            <button
-              type='button'
-              className='btn btn-ghost'
-              onClick={() => {
-                setProgram([]);
-                runner.reset();
-              }}
+          {savedPending ? (
+            <div className='grid h-[420px] place-items-center text-[13.5px] text-muted'>
+              불러오는 중…
+            </div>
+          ) : (
+            <Suspense
+              fallback={
+                <div className='grid h-[420px] place-items-center text-[13.5px] text-muted'>
+                  블록 편집기를 준비하고 있어요…
+                </div>
+              }
             >
-              블록 모두 지우기
-            </button>
-          </div>
+              <BlocklyEditor
+                initialWorkspace={savedWorkspace}
+                onChange={onEditorChange}
+                activeBlockId={runner.activeBlockId}
+              />
+            </Suspense>
+          )}
+          <p className='mt-3 text-[12.5px] text-muted'>
+            블록 {program.length}개 · 왼쪽 서랍에서 블록을 끌어다 이어 붙입니다.
+          </p>
         </ZoomPanel>
       </div>
     </div>

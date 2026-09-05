@@ -28,5 +28,5 @@ export const fetchLesson = async (slug: string) =>
 export const fetchMyProgress = async () => (await http.get<LessonProgress[]>('/progress/me')).data;
 
 /** 서버가 shared 인터프리터로 다시 채점한다 — 클라이언트 결과는 미리보기일 뿐이다. */
-export const submitAttempt = async (lessonId: string, program: BlockProgram) =>
-  (await http.post<AttemptResult>(`/progress/${lessonId}/attempt`, { program })).data;
+export const submitAttempt = async (lessonId: string, program: BlockProgram, workspace: unknown) =>
+  (await http.post<AttemptResult>(`/progress/${lessonId}/attempt`, { program, workspace })).data;

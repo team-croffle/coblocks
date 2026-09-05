@@ -157,8 +157,10 @@ export const progress = pgTable(
       .notNull()
       .references(() => lessons.id, { onDelete: 'cascade' }),
     state: progressState('state').notNull().default('not_started'),
-    /** 마지막으로 저장된 BlockProgram */
+    /** 마지막으로 저장된 BlockProgram(IR). 채점 입력은 이것뿐이다. */
     program: jsonb('program').$type<unknown>(),
+    /** 마지막으로 저장된 에디터 워크스페이스. 화면 복원 전용이고 채점에 쓰지 않는다. */
+    workspace: jsonb('workspace').$type<unknown>(),
     attempts: integer('attempts').notNull().default(0),
     completedAt: timestamp('completed_at', { withTimezone: true }),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),

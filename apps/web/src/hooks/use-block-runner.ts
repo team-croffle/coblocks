@@ -16,6 +16,8 @@ export function useBlockRunner(stage: StageConfig, stepMs = 430) {
   const [status, setStatus] = useState<RunStatus>('idle');
   const [message, setMessage] = useState(IDLE_MESSAGE);
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
+  /** 실행 중인 에디터 블록 id. Blockly 하이라이트에 쓴다. */
+  const [activeBlockId, setActiveBlockId] = useState<string | null>(null);
   const timer = useRef<number | null>(null);
 
   const stop = useCallback(() => {
@@ -24,6 +26,7 @@ export function useBlockRunner(stage: StageConfig, stepMs = 430) {
       timer.current = null;
     }
     setActiveIndex(null);
+    setActiveBlockId(null);
   }, []);
 
   // 미션을 옮기거나 화면을 떠날 때 타이머가 남지 않도록.
@@ -78,6 +81,7 @@ export function useBlockRunner(stage: StageConfig, stepMs = 430) {
         const step = steps[i++];
         if (!step) return;
         setActiveIndex(step.sourceIndex);
+        setActiveBlockId(step.id ?? null);
 
         const next = applyStep(stage, current, step);
         if (!next) {
@@ -93,5 +97,5 @@ export function useBlockRunner(stage: StageConfig, stepMs = 430) {
     [stage, stepMs, stop],
   );
 
-  return { pose, status, message, activeIndex, run, reset };
+  return { pose, status, message, activeIndex, activeBlockId, run, reset };
 }
