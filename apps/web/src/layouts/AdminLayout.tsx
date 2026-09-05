@@ -1,5 +1,6 @@
 import { Link, Outlet, useNavigate } from '@tanstack/react-router';
 
+import { BrandMark } from '@/components/BrandMark';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { useAuthStore } from '@/stores/auth';
 
@@ -30,7 +31,7 @@ export function AdminLayout() {
       <header className='sticky top-0 z-40 border-b border-line bg-paper'>
         <div className='mx-auto flex max-w-[1180px] flex-wrap items-center gap-4 px-6 py-2.5'>
           <span className='flex items-center gap-2.5 font-display text-[19px]'>
-            <span className='h-6 w-6 rounded-lg bg-seq' aria-hidden='true' />
+            <BrandMark />
             Coblocks
           </span>
           <span className='rounded-md bg-algo px-2 py-0.5 text-[11.5px] font-semibold text-white'>

@@ -3,6 +3,7 @@ import { Link, useNavigate } from '@tanstack/react-router';
 import { GRADE_BANDS } from '@coblocks/shared';
 import type { GradeBand } from '@coblocks/shared';
 
+import { BrandMark } from '@/components/BrandMark';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { useAuthStore } from '@/stores/auth';
 
@@ -71,7 +72,7 @@ export function LandingPage() {
       <nav className='sticky top-0 z-40 border-b border-line bg-paper/90 backdrop-blur'>
         <div className='mx-auto flex max-w-[1180px] items-center gap-3.5 px-6 py-3'>
           <span className='flex items-center gap-2.5 font-display text-[19px]'>
-            <span className='h-6 w-6 rounded-lg bg-seq' aria-hidden='true' />
+            <BrandMark />
             Coblocks
           </span>
           <span className='flex-1' />
