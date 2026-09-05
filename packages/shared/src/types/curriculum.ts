@@ -2,15 +2,7 @@
 export type GradeBand = 'e34' | 'e56' | 'm' | 'h';
 
 /** 블록 색과 1:1로 대응하는 개념 축. 색은 web 쪽 토큰(--c-*)에서 정의한다. */
-export type ConceptKey =
-  | 'seq'
-  | 'loop'
-  | 'cond'
-  | 'data'
-  | 'func'
-  | 'ds'
-  | 'algo'
-  | 'ai';
+export type ConceptKey = 'seq' | 'loop' | 'cond' | 'data' | 'func' | 'ds' | 'algo' | 'ai';
 
 /** 1 입문 / 2 기본 / 3 심화 */
 export type LessonLevel = 1 | 2 | 3;
@@ -58,7 +50,16 @@ export interface Lesson {
 /** 목록/카드용 축약형 */
 export type LessonSummary = Pick<
   Lesson,
-  'id' | 'slug' | 'title' | 'description' | 'band' | 'concept' | 'level' | 'periods' | 'standardCode' | 'blockLabels'
+  | 'id'
+  | 'slug'
+  | 'title'
+  | 'description'
+  | 'band'
+  | 'concept'
+  | 'level'
+  | 'periods'
+  | 'standardCode'
+  | 'blockLabels'
 >;
 
 export interface LessonQuery {

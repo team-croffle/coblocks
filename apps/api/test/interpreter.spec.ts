@@ -1,13 +1,10 @@
 import { describe, expect, it } from 'vitest';
+
 import { DEFAULT_STAGE, compile, run, type BlockProgram } from '@coblocks/shared';
 
 describe('블록 인터프리터', () => {
   it('반복 블록을 펼친다', () => {
-    const program: BlockProgram = [
-      { kind: 'rep', count: 3 },
-      { kind: 'fwd' },
-      { kind: 'end' },
-    ];
+    const program: BlockProgram = [{ kind: 'rep', count: 3 }, { kind: 'fwd' }, { kind: 'end' }];
     expect(compile(program)).toHaveLength(3);
   });
 

@@ -1,6 +1,8 @@
-import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { useState } from 'react';
+
 import type { Inquiry } from '@coblocks/shared';
+
 import { answerInquiry, fetchInquiries, holdInquiry } from '@/api/admin';
 
 const STATE = {
@@ -52,26 +54,27 @@ export function InquiryPage() {
 
   return (
     <section>
-      <h3 className="text-[21px]">문의 관리</h3>
-      <p className="mb-5 text-sm text-muted">문의를 고르면 오른쪽에서 답변을 작성합니다.</p>
+      <h3 className='text-[21px]'>문의 관리</h3>
+      <p className='mb-5 text-sm text-muted'>문의를 고르면 오른쪽에서 답변을 작성합니다.</p>
 
-      <div className="grid items-start gap-4 lg:grid-cols-2">
-        <div className="flex flex-col gap-2.5">
+      <div className='grid items-start gap-4 lg:grid-cols-2'>
+        <div className='flex flex-col gap-2.5'>
           {data.map((item) => (
             <button
               key={item.id}
-              type="button"
-              className="flex w-full flex-col gap-1.5 rounded-xl border p-3.5 text-left"
+              type='button'
+              className='flex w-full flex-col gap-1.5 rounded-xl border p-3.5 text-left'
               style={{
                 borderColor: selected?.id === item.id ? 'var(--color-brand)' : 'var(--color-line)',
-                background: selected?.id === item.id ? 'var(--color-brand-soft)' : 'var(--color-paper)',
+                background:
+                  selected?.id === item.id ? 'var(--color-brand-soft)' : 'var(--color-paper)',
               }}
               onClick={() => select(item)}
             >
-              <span className="text-[14.5px] font-semibold">{item.title}</span>
-              <span className="flex flex-wrap items-center gap-2 text-xs text-muted">
+              <span className='text-[14.5px] font-semibold'>{item.title}</span>
+              <span className='flex flex-wrap items-center gap-2 text-xs text-muted'>
                 <span
-                  className="rounded-full border px-2.5 py-0.5 font-semibold"
+                  className='rounded-full border px-2.5 py-0.5 font-semibold'
                   style={{
                     borderColor: `var(${STATE[item.state].cssVar})`,
                     color: `var(${STATE[item.state].cssVar})`,
@@ -84,40 +87,44 @@ export function InquiryPage() {
             </button>
           ))}
 
-          {data.length === 0 && <p className="text-sm text-muted">문의가 없습니다. (API 연결 전)</p>}
+          {data.length === 0 && (
+            <p className='text-sm text-muted'>문의가 없습니다. (API 연결 전)</p>
+          )}
         </div>
 
-        <div className="panel sticky top-[86px] p-5">
-          <h4 className="font-display text-[17px]">{selected?.title ?? '문의를 선택해 주세요'}</h4>
-          <div className="text-xs text-muted">
-            {selected ? `${selected.code} · ${selected.authorMemberNo} · ${selected.createdAt}` : ''}
+        <div className='panel sticky top-[86px] p-5'>
+          <h4 className='font-display text-[17px]'>{selected?.title ?? '문의를 선택해 주세요'}</h4>
+          <div className='text-xs text-muted'>
+            {selected
+              ? `${selected.code} · ${selected.authorMemberNo} · ${selected.createdAt}`
+              : ''}
           </div>
-          <div className="my-3 rounded-[10px] bg-surface p-3 text-sm text-ink-soft">
+          <div className='my-3 rounded-[10px] bg-surface p-3 text-sm text-ink-soft'>
             {selected?.body ?? '왼쪽 목록에서 문의를 선택하면 내용이 여기에 표시됩니다.'}
           </div>
 
-          <label htmlFor="reply" className="mb-1.5 block text-[13px] font-semibold text-ink-soft">
+          <label htmlFor='reply' className='mb-1.5 block text-[13px] font-semibold text-ink-soft'>
             답변
           </label>
           <textarea
-            id="reply"
-            className="field-input min-h-[120px]"
-            placeholder="답변 내용을 입력하세요."
+            id='reply'
+            className='field-input min-h-[120px]'
+            placeholder='답변 내용을 입력하세요.'
             value={reply}
             onChange={(e) => setReply(e.target.value)}
           />
 
-          <div className="mt-3 flex flex-wrap gap-2.5">
-            <button type="button" className="btn btn-primary" onClick={send}>
+          <div className='mt-3 flex flex-wrap gap-2.5'>
+            <button type='button' className='btn btn-primary' onClick={send}>
               답변 보내기
             </button>
-            <button type="button" className="btn btn-ghost" onClick={hold}>
+            <button type='button' className='btn btn-ghost' onClick={hold}>
               보류로 표시
             </button>
           </div>
 
           {notice && (
-            <p className="mt-3.5 rounded-[10px] border border-dashed border-line-strong bg-surface p-3 text-[13.5px] text-ink-soft">
+            <p className='mt-3.5 rounded-[10px] border border-dashed border-line-strong bg-surface p-3 text-[13.5px] text-ink-soft'>
               {notice}
             </p>
           )}

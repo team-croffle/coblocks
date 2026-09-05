@@ -1,7 +1,8 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import type { Request } from 'express';
-import { DB } from '../db/database.module';
+
 import type { Db } from '../db/client';
+import { DB } from '../db/database.module';
 import { auditLogs } from '../db/schema';
 
 type Category = 'access' | 'activity' | 'admin';

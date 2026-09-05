@@ -1,5 +1,6 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { and, desc, eq, gte, ilike, inArray, or, sql, type SQL } from 'drizzle-orm';
+
 import type {
   AuditCategory,
   AuditLog,
@@ -9,11 +10,19 @@ import type {
   Paginated,
   SystemOverview,
 } from '@coblocks/shared';
-import { DB } from '../db/database.module';
-import type { Db } from '../db/client';
-import { auditLogs, inquiries, lessonRevisions, lessons, unmaskRequests, users } from '../db/schema';
-import { maskEmail, maskName, maskSchool } from '../common/masking';
+
 import { AuditService } from '../common/audit.service';
+import { maskEmail, maskName, maskSchool } from '../common/masking';
+import type { Db } from '../db/client';
+import { DB } from '../db/database.module';
+import {
+  auditLogs,
+  inquiries,
+  lessonRevisions,
+  lessons,
+  unmaskRequests,
+  users,
+} from '../db/schema';
 
 @Injectable()
 export class AdminService {
@@ -51,7 +60,10 @@ export class AdminService {
       .where(and(gte(auditLogs.occurredAt, startOfDay), eq(auditLogs.category, 'access')))
       .groupBy(sql`1`);
 
-    const hourlyOnline = Array.from({ length: 24 }, (_, h) => hourly.find((r) => r.hour === h)?.count ?? 0);
+    const hourlyOnline = Array.from(
+      { length: 24 },
+      (_, h) => hourly.find((r) => r.hour === h)?.count ?? 0,
+    );
 
     return {
       // TODO: 실시간 접속자는 세션 저장소(Redis)가 붙으면 교체
@@ -162,7 +174,13 @@ export class AdminService {
    * 마스킹 해제는 즉시 열어 주지 않는다. 요청만 만들고 승인 대기 상태로 둔다.
    * 승인 흐름은 별도 화면에서 처리한다.
    */
-  async requestUnmask(requesterId: string, requesterLabel: string, targetUserId: string, reason: string, ip: string) {
+  async requestUnmask(
+    requesterId: string,
+    requesterLabel: string,
+    targetUserId: string,
+    reason: string,
+    ip: string,
+  ) {
     const [row] = await this.db
       .insert(unmaskRequests)
       .values({ requesterId, targetUserId, reason })
@@ -184,7 +202,12 @@ export class AdminService {
 
   async lessonList(): Promise<Paginated<Lesson>> {
     const rows = await this.db.select().from(lessons).orderBy(lessons.orderIndex);
-    return { items: rows as unknown as Lesson[], total: rows.length, page: 1, pageSize: rows.length };
+    return {
+      items: rows as unknown as Lesson[],
+      total: rows.length,
+      page: 1,
+      pageSize: rows.length,
+    };
   }
 
   async createLesson(editorId: string, editorLabel: string, body: Partial<Lesson>, ip: string) {
@@ -220,7 +243,13 @@ export class AdminService {
     return row;
   }
 
-  async updateLesson(editorId: string, editorLabel: string, id: string, body: Partial<Lesson>, ip: string) {
+  async updateLesson(
+    editorId: string,
+    editorLabel: string,
+    id: string,
+    body: Partial<Lesson>,
+    ip: string,
+  ) {
     const [row] = await this.db
       .update(lessons)
       .set({ ...body, updatedAt: new Date() } as never)

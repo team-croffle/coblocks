@@ -3,15 +3,45 @@
  * 여기서 만드는 비밀번호는 개발 전용이며 운영에서는 절대 쓰지 않는다.
  */
 import * as argon2 from 'argon2';
+
 import { LESSON_SEED, STANDARDS } from '@coblocks/shared';
+
 import { db, queryClient } from './client';
 import { inquiries, lessons, standards, users } from './schema';
 
 const DEV_ACCOUNTS = [
-  { memberNo: 'U-24019', loginId: 'student1', name: '김민수', email: 'minsoo@school.kr', role: 'student' as const, schoolName: '원광초등학교' },
-  { memberNo: 'U-24020', loginId: 'student2', name: '박서은', email: 'seoeun@school.kr', role: 'student' as const, schoolName: '원광초등학교' },
-  { memberNo: 'T-10442', loginId: 'teacher1', name: '이정아', email: 'junga@teacher.kr', role: 'teacher' as const, schoolName: '원광초등학교' },
-  { memberNo: 'A-00001', loginId: 'admin', name: '운영자', email: 'admin@coblocks.kr', role: 'admin' as const, schoolName: null },
+  {
+    memberNo: 'U-24019',
+    loginId: 'student1',
+    name: '김민수',
+    email: 'minsoo@school.kr',
+    role: 'student' as const,
+    schoolName: '원광초등학교',
+  },
+  {
+    memberNo: 'U-24020',
+    loginId: 'student2',
+    name: '박서은',
+    email: 'seoeun@school.kr',
+    role: 'student' as const,
+    schoolName: '원광초등학교',
+  },
+  {
+    memberNo: 'T-10442',
+    loginId: 'teacher1',
+    name: '이정아',
+    email: 'junga@teacher.kr',
+    role: 'teacher' as const,
+    schoolName: '원광초등학교',
+  },
+  {
+    memberNo: 'A-00001',
+    loginId: 'admin',
+    name: '운영자',
+    email: 'admin@coblocks.kr',
+    role: 'admin' as const,
+    schoolName: null,
+  },
 ];
 
 async function main() {

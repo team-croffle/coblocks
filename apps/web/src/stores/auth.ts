@@ -1,5 +1,7 @@
 import { create } from 'zustand';
+
 import type { AuthUser } from '@coblocks/shared';
+
 import { login as loginRequest, logout as logoutRequest, me } from '@/api/auth';
 
 const TOKEN_KEY = 'coblocks.token';

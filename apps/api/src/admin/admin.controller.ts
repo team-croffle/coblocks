@@ -1,13 +1,15 @@
 import { Body, Controller, Get, Param, Patch, Post, Query, Req, UseGuards } from '@nestjs/common';
-import type { Request } from 'express';
 import { IsString, MinLength } from 'class-validator';
+import type { Request } from 'express';
+
 import type { AuditCategory, AuthUser, Lesson } from '@coblocks/shared';
-import { AdminService } from './admin.service';
+
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { RolesGuard } from '../common/roles.guard';
-import { Roles } from '../common/roles.decorator';
-import { CurrentUser } from '../common/current-user.decorator';
 import { AuditService } from '../common/audit.service';
+import { CurrentUser } from '../common/current-user.decorator';
+import { Roles } from '../common/roles.decorator';
+import { RolesGuard } from '../common/roles.guard';
+import { AdminService } from './admin.service';
 
 class UnmaskDto {
   @IsString()
@@ -33,7 +35,11 @@ export class AdminController {
   }
 
   @Get('audit-logs')
-  auditLogs(@Query('q') q?: string, @Query('categories') categories?: string, @Query('page') page?: string) {
+  auditLogs(
+    @Query('q') q?: string,
+    @Query('categories') categories?: string,
+    @Query('page') page?: string,
+  ) {
     return this.admin.auditLogList({
       q,
       categories: categories ? (categories.split(',') as AuditCategory[]) : undefined,
@@ -47,7 +53,12 @@ export class AdminController {
   }
 
   @Post('users/:id/unmask-requests')
-  unmask(@CurrentUser() me: AuthUser, @Param('id') id: string, @Body() dto: UnmaskDto, @Req() req: Request) {
+  unmask(
+    @CurrentUser() me: AuthUser,
+    @Param('id') id: string,
+    @Body() dto: UnmaskDto,
+    @Req() req: Request,
+  ) {
     return this.admin.requestUnmask(me.id, me.loginId, id, dto.reason, AuditService.clientIp(req));
   }
 
@@ -77,7 +88,12 @@ export class AdminController {
   }
 
   @Post('inquiries/:id/answer')
-  answer(@CurrentUser() me: AuthUser, @Param('id') id: string, @Body() dto: AnswerDto, @Req() req: Request) {
+  answer(
+    @CurrentUser() me: AuthUser,
+    @Param('id') id: string,
+    @Body() dto: AnswerDto,
+    @Req() req: Request,
+  ) {
     return this.admin.answerInquiry(me.id, me.loginId, id, dto.answer, AuditService.clientIp(req));
   }
 
