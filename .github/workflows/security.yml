@@ -6,7 +6,7 @@ on:
     tags-ignore: ['**']
   pull_request:
   schedule:
-    # 매주 월요일 09:00 KST (00:00 UTC)
+    # Mondays at 09:00 KST (00:00 UTC)
     - cron: '0 0 * * 1'
   workflow_dispatch:
 
@@ -14,23 +14,29 @@ permissions:
   contents: read
 
 concurrency:
-  group: security-${{ github.ref }}
-  cancel-in-progress: true
+  # The event name is part of the group so that a branch push does not cancel the
+  # pull request run for the same commit.
+  group: security-${{ github.event_name }}-${{ github.ref }}
+  # Never cancel a pull request run: it carries the dependency review, and a
+  # cancelled run leaves the check hanging instead of reporting a result.
+  cancel-in-progress: ${{ github.event_name != 'pull_request' }}
 
 jobs:
-  # 검증된(verified) 시크릿만 빌드를 세운다.
-  # unknown 까지 켜면 .env.example 의 placeholder DSN 이나 개발 시드 비밀번호가 매번 걸려
-  # 경보가 무의미해진다. 제외 경로는 .github/trufflehog-exclude.txt 에 이유와 함께 적는다.
+  # Only verified secrets fail the build. Turning on unknown results means every
+  # placeholder in .env.example and every development seed password is a finding,
+  # and an alarm that always fires is an alarm nobody reads. Exclusions live in
+  # .github/trufflehog-exclude.txt, each with the reason it is not a real secret.
   secrets:
     name: TruffleHog secret scan
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
-          # PR 은 base..head 차분만 보므로 전체 히스토리가 필요하다.
+          # A pull request scan needs both sides of the range.
           fetch-depth: 0
 
-      # PR: 이 PR 이 새로 들여온 커밋만 검사한다. 빠르고, 남의 과거 커밋으로 실패하지 않는다.
+      # Pull request: scan only the commits this pull request introduces. Fast, and
+      # it does not fail on somebody else's older commit.
       - name: Scan pull request range
         if: github.event_name == 'pull_request'
         uses: trufflesecurity/trufflehog@main
@@ -39,7 +45,7 @@ jobs:
           head: ${{ github.event.pull_request.head.sha }}
           extra_args: --results=verified --exclude-paths=.github/trufflehog-exclude.txt
 
-      # 그 외(브랜치 푸시·정기·수동): 작업 트리 전체를 검사한다.
+      # Branch push, schedule or manual run: scan the whole working tree.
       - name: Scan working tree
         if: github.event_name != 'pull_request'
         uses: trufflesecurity/trufflehog@main
@@ -49,7 +55,7 @@ jobs:
 
   deps:
     name: Dependency review
-    # PR 에서만 동작하는 액션이다.
+    # The action only works on pull requests.
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     permissions:

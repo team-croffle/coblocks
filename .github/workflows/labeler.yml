@@ -12,16 +12,16 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  # .github/labels.yml 에 정의된 라벨 중 저장소에 없는 것을 만든다.
-  # actions/labeler 는 없는 라벨을 만들어 주지 않으므로 라벨링 전에 먼저 돌린다.
+  # Creates any label from .github/labels.yml that the repository does not have yet.
+  # actions/labeler does not create labels, so this runs first.
   sync-labels:
     name: Create missing labels
     runs-on: ubuntu-latest
     permissions:
       issues: write
     steps:
-      # pull_request_target 이므로 base 브랜치가 체크아웃된다.
-      # PR 브랜치의 labels.yml 을 신뢰하지 않기 위한 것이기도 하다.
+      # pull_request_target checks out the base branch, which is also what keeps a
+      # fork from getting its own labels.yml executed here.
       - uses: actions/checkout@v4
 
       - name: Install yq if missing
@@ -43,7 +43,7 @@ jobs:
             name=$(jq -r '.name' <<<"$row")
             color=$(jq -r '.color' <<<"$row")
             description=$(jq -r '.description // ""' <<<"$row")
-            # --force 는 없으면 만들고 있으면 색·설명을 맞춘다.
+            # --force creates the label, or updates its colour and description.
             gh label create "$name" --color "$color" --description "$description" --force
           done
 
@@ -59,5 +59,5 @@ jobs:
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           configuration-path: .github/labeler.yml
-          # 경로 조건에서 벗어난 라벨은 자동으로 뗀다.
+          # Labels whose path rule no longer matches are removed again.
           sync-labels: true

@@ -1,4 +1,4 @@
-# 모든 경로의 코드 소유자. PR 이 열리면 자동으로 리뷰어로 지정된다.
-# 더 구체적인 규칙을 아래에 추가하면 마지막으로 일치한 줄이 이긴다.
+# Code owner for every path. Opening a pull request requests their review.
+# A more specific rule added below wins: the last matching line applies.
 
 * @bluenyang
