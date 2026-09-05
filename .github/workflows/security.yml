@@ -18,6 +18,9 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # 검증된(verified) 시크릿만 빌드를 세운다.
+  # unknown 까지 켜면 .env.example 의 placeholder DSN 이나 개발 시드 비밀번호가 매번 걸려
+  # 경보가 무의미해진다. 제외 경로는 .github/trufflehog-exclude.txt 에 이유와 함께 적는다.
   secrets:
     name: TruffleHog secret scan
     runs-on: ubuntu-latest
@@ -34,7 +37,7 @@ jobs:
         with:
           base: ${{ github.event.pull_request.base.sha }}
           head: ${{ github.event.pull_request.head.sha }}
-          extra_args: --results=verified,unknown
+          extra_args: --results=verified --exclude-paths=.github/trufflehog-exclude.txt
 
       # 그 외(브랜치 푸시·정기·수동): 작업 트리 전체를 검사한다.
       - name: Scan working tree
@@ -42,7 +45,7 @@ jobs:
         uses: trufflesecurity/trufflehog@main
         with:
           path: ./
-          extra_args: --results=verified,unknown
+          extra_args: --results=verified --exclude-paths=.github/trufflehog-exclude.txt
 
   deps:
     name: Dependency review

@@ -1,0 +1,10 @@
+# TruffleHog 제외 경로 (정규식, 한 줄에 하나)
+# 예시 설정 파일과 개발용 시드에는 진짜 자격 증명이 없다.
+# 여기에 무언가를 추가할 때는 "왜 진짜 비밀이 아닌가"를 한 줄로 함께 적을 것.
+
+# 로컬 개발용 placeholder 값만 들어 있다.
+^apps/[^/]+/\.env\.example$
+# 개발 계정 시드 — 비밀번호가 닉네임과 같은, 개발 DB 전용 계정이다.
+^apps/api/src/db/seed\.ts$
+# 개발용 compose 는 로컬 전용 자격 증명(coblocks/coblocks)을 그대로 쓴다.
+^docker/docker-compose\.dev\.yaml$
