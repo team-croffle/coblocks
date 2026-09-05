@@ -35,6 +35,8 @@ jobs:
         run: pnpm lint
       - name: oxfmt --check
         run: pnpm fmt:check
+      - name: shared build
+        run: pnpm build:shared
       - name: typecheck
         run: pnpm typecheck
 
@@ -49,6 +51,8 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      # vitest 도 @coblocks/shared 를 dist 로 해석한다. 먼저 만들지 않으면 임포트에서 깨진다.
+      - run: pnpm build:shared
       # 인터프리터 테스트. 채점이 여기에 의존하므로 실패하면 머지하지 않는다.
       - name: interpreter tests
         run: pnpm --filter @coblocks/api test
@@ -64,6 +68,7 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      - run: pnpm build:shared
       - run: pnpm build
 
   docker:
