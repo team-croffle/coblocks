@@ -1,3 +1,7 @@
+// 이 화면에서는 배열 인덱스가 곧 블록의 정체성이다. 인터프리터가 돌려주는
+// ExecStep.sourceIndex, 하이라이트용 activeIndex, onRemove(i)/onSetCount(i) 가
+// 모두 같은 인덱스를 가리키므로 별도의 id 를 만들면 오히려 두 체계가 갈린다.
+/* oxlint-disable react/no-array-index-key */
 import type { BlockKind, BlockProgram } from '@coblocks/shared';
 
 const LABEL: Record<BlockKind, string> = {
@@ -38,15 +42,17 @@ export function BlockWorkspace({ program, activeIndex, onRemove, onSetCount }: P
   const depths = depthsOf(program);
 
   return (
-    <div className="flex min-h-[190px] flex-col items-start gap-1.5 rounded-xl border border-dashed border-line-strong bg-surface p-3">
+    <div className='flex min-h-[190px] flex-col items-start gap-1.5 rounded-xl border border-dashed border-line-strong bg-surface p-3'>
       {program.length === 0 && (
-        <p className="m-auto text-center text-[13.5px] text-muted">위의 블록을 눌러 순서대로 쌓아 보세요.</p>
+        <p className='m-auto text-center text-[13.5px] text-muted'>
+          위의 블록을 눌러 순서대로 쌓아 보세요.
+        </p>
       )}
 
       {program.map((block, i) => (
         <div
           key={i}
-          className="flex min-w-[190px] items-center gap-2.5 rounded-[9px] py-2 pr-2.5 pl-3 text-[13.5px] font-semibold text-white"
+          className='flex min-w-[190px] items-center gap-2.5 rounded-[9px] py-2 pr-2.5 pl-3 text-[13.5px] font-semibold text-white'
           style={{
             background: `var(${COLOR[block.kind]})`,
             marginLeft: `${(depths[i] ?? 0) * 18}px`,
@@ -56,10 +62,10 @@ export function BlockWorkspace({ program, activeIndex, onRemove, onSetCount }: P
         >
           {block.kind === 'rep' && (
             <select
-              className="rounded-md border-0 px-1 py-0.5 text-[13px] text-black"
+              className='rounded-md border-0 px-1 py-0.5 text-[13px] text-black'
               value={block.count ?? 3}
               onChange={(e) => onSetCount(i, Number(e.target.value))}
-              aria-label="반복 횟수"
+              aria-label='반복 횟수'
             >
               {COUNTS.map((n) => (
                 <option key={n} value={n}>
@@ -70,9 +76,9 @@ export function BlockWorkspace({ program, activeIndex, onRemove, onSetCount }: P
           )}
           <span>{LABEL[block.kind]}</span>
           <button
-            type="button"
-            className="ml-auto grid h-5 w-5 place-items-center rounded-md bg-white/25 text-[13px] leading-none"
-            aria-label="블록 삭제"
+            type='button'
+            className='ml-auto grid h-5 w-5 place-items-center rounded-md bg-white/25 text-[13px] leading-none'
+            aria-label='블록 삭제'
             onClick={() => onRemove(i)}
           >
             ×

@@ -9,9 +9,10 @@ Block-coding learning service for elementary/middle/high school students, aligne
 ## Commands
 
 ```bash
-pnpm dev              # web + api together
+pnpm dev              # web + api + shared(tsup --watch) together
 pnpm dev:web          # :5173
 pnpm dev:api          # :3000/api
+pnpm build            # shared → api/web (pnpm -r 이 위상 순서로 돈다)
 pnpm typecheck        # whole repo
 pnpm lint             # oxlint
 pnpm fmt              # oxfmt (check only: pnpm fmt:check)
@@ -42,6 +43,22 @@ pnpm db:up && pnpm db:push && pnpm db:seed   # db:up 은 docker/docker-compose.d
   oxlint has no `import/order`. Never hand-sort imports; run `pnpm fmt`.
 - Colors go through Tailwind token utilities (`bg-loop`, `text-ink-soft`) or `var(--color-loop)`. No raw hex in components. Only when the value is decided at runtime use `style={{ background: \`var(${cssVar})\` }}`.
 - API response types are defined in `@coblocks/shared` and imported by both web and api. No duplicate definitions.
+- **`@coblocks/shared` is a built package, not a source alias.** tsup emits `dist/index.js` (ESM),
+  `dist/index.cjs` (CJS) and both `.d.ts`/`.d.cts`; `exports` routes web to the ESM build and api
+  (CommonJS, `moduleResolution: node16`) to the CJS one. Neither app maps it through tsconfig `paths`
+  or a Vite alias any more — **edit shared and it is stale until it is rebuilt**, so run `pnpm dev`
+  (which includes `tsup --watch`) rather than `pnpm dev:web` alone. Anything that builds an app must
+  build shared first: `pnpm --filter "@coblocks/api..." build` — the trailing `...` is what pulls in
+  workspace dependencies, and the Dockerfiles depend on it.
+- tsup's `--dts` runs its own TS program that injects `baseUrl`, which TypeScript 6 rejects
+  (`TS5101`). `packages/shared/tsconfig.json` keeps `"ignoreDeprecations": "6.0"` for that reason —
+  removing it breaks only the declaration step, leaving a typeless `dist` behind.
+- **`apps/api` builds through `tsconfig.build.json`** (wired in `nest-cli.json`), which pins
+  `rootDir` to `src` so the entry point is `dist/main.js`. The editor-facing `tsconfig.json` also
+  covers `test/` and `drizzle.config.ts`; if the build used it, the inferred rootDir would widen to
+  `apps/api` and the entry point would silently move to `dist/src/main.js`. Never drop `outDir` from
+  it either — the Nest CLI's own default only governs asset copying, so tsc would emit `.js` files
+  next to the sources, where nothing gitignores them.
 
 ## Invariants — never break these
 
@@ -69,7 +86,7 @@ pnpm db:up && pnpm db:push && pnpm db:seed   # db:up 은 docker/docker-compose.d
 3. Add an item to `MENU` in `apps/web/src/layouts/AdminLayout.tsx`.
 
 **Routing gotcha**
-TanStack Router derives path types from the route tree. If `Link to="..."` gives a type error, the route is usually missing from `addChildren`. Pages with params read them via `route.useParams()`; use `useParams({ strict: false })` only when two routes share one component.
+TanStack Router derives path types from the route tree. If `Link to="..."` gives a type error, the route is usually missing from `addChildren`. `router.tsx` does not export route objects — a page importing one back creates a cycle. Pages read params and search with the route **id**: `useParams({ from: '/app/learn/$slug' })`, `useSearch({ from: '/login' })`. The id is checked against the route tree, so this is exactly as type-safe as the route object was. Use `useParams({ strict: false })` only when two routes share one component.
 
 ## Documentation and i18n
 

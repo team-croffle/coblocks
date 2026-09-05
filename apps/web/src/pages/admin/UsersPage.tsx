@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
-import { useState } from 'react';
+import { Fragment, useState } from 'react';
+import type { FormEvent } from 'react';
 
 import type { MaskedUser, Paginated } from '@coblocks/shared';
 
@@ -17,6 +18,10 @@ const ROLE = { student: '학생', teacher: '교사', admin: '관리자' } as con
 export function UsersPage() {
   const [q, setQ] = useState('');
   const [notice, setNotice] = useState('');
+  /** 열람 사유를 입력받는 중인 사용자. null 이면 폼이 닫혀 있다. */
+  const [unmaskTarget, setUnmaskTarget] = useState<MaskedUser | null>(null);
+  const [reason, setReason] = useState('');
+  const [submitting, setSubmitting] = useState(false);
 
   const { data, refetch } = useQuery({
     queryKey: ['admin', 'users', q],
@@ -25,16 +30,33 @@ export function UsersPage() {
     enabled: false,
   });
 
-  async function onUnmask(user: MaskedUser) {
-    const reason = window.prompt(`${user.memberNo}의 개인정보 열람 사유를 입력하세요.`);
-    if (!reason) return;
+  function openUnmaskForm(user: MaskedUser) {
+    setUnmaskTarget(user);
+    setReason('');
+    setNotice('');
+  }
+
+  function closeUnmaskForm() {
+    setUnmaskTarget(null);
+    setReason('');
+  }
+
+  async function submitUnmask(e: FormEvent) {
+    e.preventDefault();
+    const trimmed = reason.trim();
+    if (!unmaskTarget || !trimmed) return;
+
+    setSubmitting(true);
     try {
-      await requestUnmask(user.id, reason);
+      await requestUnmask(unmaskTarget.id, trimmed);
       setNotice(
-        `${user.memberNo} 열람 요청을 기록했습니다. 책임자 승인 후에만 마스킹이 해제됩니다.`,
+        `${unmaskTarget.memberNo} 열람 요청을 기록했습니다. 책임자 승인 후에만 마스킹이 해제됩니다.`,
       );
     } catch {
       setNotice('API 연결 전입니다. 요청은 감사 로그에 남는 설계입니다.');
+    } finally {
+      setSubmitting(false);
+      closeUnmaskForm();
     }
   }
 
@@ -72,34 +94,73 @@ export function UsersPage() {
           </thead>
           <tbody>
             {data.items.map((u) => (
-              <tr key={u.id} className='border-t border-line'>
-                <td className='td mono'>{u.memberNo}</td>
-                <td className='td'>{u.maskedName}</td>
-                <td className='td mono'>{u.maskedEmail}</td>
-                <td className='td'>{ROLE[u.role]}</td>
-                <td className='td'>{u.schoolLabel}</td>
-                <td className='td mono'>{u.lastSeenAt ?? '—'}</td>
-                <td className='td'>
-                  <span
-                    className='rounded-full border px-2.5 py-0.5 text-xs font-semibold'
-                    style={{
-                      borderColor: `var(${STATE[u.state].cssVar})`,
-                      color: `var(${STATE[u.state].cssVar})`,
-                    }}
-                  >
-                    {STATE[u.state].label}
-                  </span>
-                </td>
-                <td className='td'>
-                  <button
-                    type='button'
-                    className='rounded-md bg-surface-2 px-2.5 py-1 text-[12.5px] text-ink-soft'
-                    onClick={() => onUnmask(u)}
-                  >
-                    원본 열람 요청
-                  </button>
-                </td>
-              </tr>
+              <Fragment key={u.id}>
+                <tr className='border-t border-line'>
+                  <td className='td mono'>{u.memberNo}</td>
+                  <td className='td'>{u.maskedName}</td>
+                  <td className='td mono'>{u.maskedEmail}</td>
+                  <td className='td'>{ROLE[u.role]}</td>
+                  <td className='td'>{u.schoolLabel}</td>
+                  <td className='td mono'>{u.lastSeenAt ?? '—'}</td>
+                  <td className='td'>
+                    <span
+                      className='rounded-full border px-2.5 py-0.5 text-xs font-semibold'
+                      style={{
+                        borderColor: `var(${STATE[u.state].cssVar})`,
+                        color: `var(${STATE[u.state].cssVar})`,
+                      }}
+                    >
+                      {STATE[u.state].label}
+                    </span>
+                  </td>
+                  <td className='td'>
+                    <button
+                      type='button'
+                      className='rounded-md bg-surface-2 px-2.5 py-1 text-[12.5px] text-ink-soft'
+                      aria-expanded={unmaskTarget?.id === u.id}
+                      onClick={() => openUnmaskForm(u)}
+                    >
+                      원본 열람 요청
+                    </button>
+                  </td>
+                </tr>
+
+                {unmaskTarget?.id === u.id && (
+                  <tr className='border-t border-line bg-surface'>
+                    <td className='td' colSpan={8}>
+                      <form className='flex flex-wrap items-center gap-2' onSubmit={submitUnmask}>
+                        <label className='text-[13px] text-ink-soft' htmlFor='unmask-reason'>
+                          {u.memberNo} 열람 사유
+                        </label>
+                        <input
+                          id='unmask-reason'
+                          className='field-input min-w-[300px] flex-1'
+                          value={reason}
+                          placeholder='예: 학부모 정정 요청 확인 — 입력한 사유가 감사 로그에 그대로 남습니다'
+                          onChange={(e) => setReason(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Escape') closeUnmaskForm();
+                          }}
+                        />
+                        <button
+                          type='submit'
+                          className='rounded-md bg-ink px-2.5 py-1 text-[12.5px] text-paper disabled:opacity-45'
+                          disabled={submitting || reason.trim().length === 0}
+                        >
+                          기록하고 요청
+                        </button>
+                        <button
+                          type='button'
+                          className='rounded-md bg-surface-2 px-2.5 py-1 text-[12.5px] text-ink-soft'
+                          onClick={closeUnmaskForm}
+                        >
+                          취소
+                        </button>
+                      </form>
+                    </td>
+                  </tr>
+                )}
+              </Fragment>
             ))}
             {data.items.length === 0 && (
               <tr>
