@@ -147,7 +147,7 @@ export function LandingPage() {
             </div>
 
             <p className='mt-4 font-mono text-[13px] text-muted'>
-              // 정사각형 그리기 — 반복 x 조건의 첫 만남
+              {'// 정사각형 그리기 — 반복 x 조건의 첫 만남'}
             </p>
           </div>
         </div>
