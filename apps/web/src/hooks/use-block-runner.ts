@@ -1,9 +1,18 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-import { applyStep, compile } from '@coblocks/shared';
+import { applyStep, compile, headingVector, MAX_STEPS, validateProgram } from '@coblocks/shared';
 import type { BlockProgram, Pose, StageConfig } from '@coblocks/shared';
 
 export type RunStatus = 'idle' | 'running' | 'success' | 'failed';
+
+/** 다음 칸이 격자 밖인가 — 실패 이유를 벽 충돌과 구분하기 위해 본다. */
+function isOutsideAhead(stage: StageConfig, pose: Pose): boolean {
+  const vector = headingVector(pose.heading);
+  if (!vector) return true;
+  const nx = pose.x + vector[0];
+  const ny = pose.y + vector[1];
+  return nx < 0 || ny < 0 || nx >= stage.col || ny >= stage.row;
+}
 
 const IDLE_MESSAGE = '실행 버튼을 누르면 블록이 위에서부터 차례로 실행됩니다.';
 
@@ -52,10 +61,25 @@ export function useBlockRunner(stage: StageConfig, stepMs = 430) {
         return;
       }
 
+      // 서버가 거부할 제출은 화면에서 먼저 걸러 준다 — 같은 검증 함수를 쓴다.
+      const issue = validateProgram(program);
+      if (issue) {
+        setStatus('failed');
+        setMessage(`블록을 실행할 수 없어요: ${issue.reason}`);
+        return;
+      }
+
       const steps = compile(program);
       if (!steps) {
         setStatus('failed');
-        setMessage('반복 블록의 짝이 맞지 않아요. ‘반복 시작’과 ‘반복 끝’을 확인해 보세요.');
+        setMessage('반복 블록의 짝이 맞지 않아요. 반복 안에 블록이 들어 있는지 확인해 보세요.');
+        return;
+      }
+      if (steps.length > MAX_STEPS) {
+        setStatus('failed');
+        setMessage(
+          `움직임이 ${MAX_STEPS}번을 넘었어요. 반복 횟수를 줄이거나 더 짧은 길을 찾아볼까요?`,
+        );
         return;
       }
 
@@ -87,7 +111,12 @@ export function useBlockRunner(stage: StageConfig, stepMs = 430) {
         if (!next) {
           stop();
           setStatus('failed');
-          setMessage('벽에 부딪혔어요. 여기서 방향을 돌려 볼까요?');
+          // 벽인지 격자 밖인지 구분해서 알려 준다. "부딪혔다"만으로는 어디를 고칠지 모른다.
+          setMessage(
+            isOutsideAhead(stage, current)
+              ? '격자 밖으로 나가려고 했어요. 여기서 방향을 돌려 볼까요?'
+              : '벽에 부딪혔어요. 벽을 피해 돌아가는 길을 찾아볼까요?',
+          );
           return;
         }
         current = next;
