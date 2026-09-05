@@ -7,6 +7,10 @@ dist
 .DS_Store
 coverage
 
+# Playwright
+playwright-report
+test-results
+
 # Syncthing
 .stfolder
 .stignore
