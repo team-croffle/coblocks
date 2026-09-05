@@ -9,39 +9,15 @@ import { LESSON_SEED, STANDARDS } from '@coblocks/shared';
 import { db, queryClient } from './client';
 import { inquiries, lessons, standards, users } from './schema';
 
+/**
+ * 개발 계정. 비밀번호는 닉네임과 같다.
+ * 실명·이메일은 스키마에 없으므로 시드에도 없다 — 교육 계정만 학번을 갖는다.
+ */
 const DEV_ACCOUNTS = [
-  {
-    memberNo: 'U-24019',
-    loginId: 'student1',
-    name: '김민수',
-    email: 'minsoo@school.kr',
-    role: 'student' as const,
-    schoolName: '원광초등학교',
-  },
-  {
-    memberNo: 'U-24020',
-    loginId: 'student2',
-    name: '박서은',
-    email: 'seoeun@school.kr',
-    role: 'student' as const,
-    schoolName: '원광초등학교',
-  },
-  {
-    memberNo: 'T-10442',
-    loginId: 'teacher1',
-    name: '이정아',
-    email: 'junga@teacher.kr',
-    role: 'teacher' as const,
-    schoolName: '원광초등학교',
-  },
-  {
-    memberNo: 'A-00001',
-    loginId: 'admin',
-    name: '운영자',
-    email: 'admin@coblocks.kr',
-    role: 'admin' as const,
-    schoolName: null,
-  },
+  { nickname: 'student1', role: 'student' as const, type: 'personal' as const, studentNo: null },
+  { nickname: 'student2', role: 'student' as const, type: 'edu' as const, studentNo: '2-3-07' },
+  { nickname: 'teacher1', role: 'teacher' as const, type: 'edu' as const, studentNo: null },
+  { nickname: 'admin', role: 'admin' as const, type: 'personal' as const, studentNo: null },
 ];
 
 async function main() {
@@ -76,7 +52,7 @@ async function main() {
   for (const account of DEV_ACCOUNTS) {
     await db
       .insert(users)
-      .values({ ...account, passwordHash: await argon2.hash(account.loginId) })
+      .values({ ...account, passwordHash: await argon2.hash(account.nickname) })
       .onConflictDoNothing();
   }
 
