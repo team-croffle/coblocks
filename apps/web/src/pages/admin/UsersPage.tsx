@@ -4,7 +4,9 @@ import type { FormEvent } from 'react';
 
 import type { MaskedUser } from '@coblocks/shared';
 
-import { fetchUsers, requestUnmask } from '@/api/admin';
+import { requestUnmask } from '@/api/admin';
+import { adminUsersQuery } from '@/api/queries';
+import { toast } from '@/stores/toast';
 
 const STATE = {
   active: { label: '정상', cssVar: '--color-ok' },
@@ -18,24 +20,19 @@ export function UsersPage() {
   /** 입력 중인 검색어와 실제로 조회에 쓰는 검색어를 나눈다 — 한 글자마다 요청하지 않기 위해. */
   const [q, setQ] = useState('');
   const [query, setQuery] = useState('');
-  const [notice, setNotice] = useState('');
 
   /** 열람 사유를 입력받는 중인 사용자. null 이면 폼이 닫혀 있다. */
   const [unmaskTarget, setUnmaskTarget] = useState<MaskedUser | null>(null);
   const [reason, setReason] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
-  const { data, isPending, isError, refetch } = useQuery({
-    queryKey: ['admin', 'users', query],
-    queryFn: () => fetchUsers({ q: query }),
-  });
+  const { data, isPending, isError, refetch } = useQuery(adminUsersQuery(query));
 
   const users = data?.items ?? [];
 
   function openUnmaskForm(user: MaskedUser) {
     setUnmaskTarget(user);
     setReason('');
-    setNotice('');
   }
 
   function closeUnmaskForm() {
@@ -51,11 +48,11 @@ export function UsersPage() {
     setSubmitting(true);
     try {
       await requestUnmask(target.id, reason.trim());
-      setNotice(
+      toast.info(
         `${target.maskedNickname} 열람 요청을 기록했습니다. 책임자 승인 후에만 마스킹이 해제됩니다.`,
       );
     } catch {
-      setNotice('API 연결 전입니다. 요청은 감사 로그에 남는 설계입니다.');
+      toast.error('열람 요청을 기록하지 못했습니다.');
     } finally {
       setSubmitting(false);
       closeUnmaskForm();
@@ -194,12 +191,6 @@ export function UsersPage() {
             </button>
           </div>
         </form>
-      )}
-
-      {notice && (
-        <p className='mt-3.5 rounded-[10px] border border-dashed border-line-strong bg-surface p-3 text-[13.5px] text-ink-soft'>
-          {notice}
-        </p>
       )}
     </section>
   );

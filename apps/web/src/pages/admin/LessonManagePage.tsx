@@ -1,10 +1,10 @@
 import { useQuery } from '@tanstack/react-query';
 import { Link } from '@tanstack/react-router';
 
-import { CONCEPTS, GRADE_BANDS, LESSON_SEED } from '@coblocks/shared';
-import type { Lesson } from '@coblocks/shared';
+import { CONCEPTS, GRADE_BANDS } from '@coblocks/shared';
 
-import { fetchAdminLessons } from '@/api/admin';
+import { adminLessonsQuery } from '@/api/queries';
+import { LoadState } from '@/components/LoadState';
 
 const STATUS = {
   published: { label: '공개', cssVar: '--color-ok' },
@@ -13,16 +13,9 @@ const STATUS = {
 } as const;
 
 export function LessonManagePage() {
-  const { data } = useQuery({
-    queryKey: ['admin', 'lessons'],
-    queryFn: fetchAdminLessons,
-    initialData: {
-      items: LESSON_SEED as Lesson[],
-      total: LESSON_SEED.length,
-      page: 1,
-      pageSize: 200,
-    },
-  });
+  const { data, isPending, isError, refetch } = useQuery(adminLessonsQuery());
+
+  const lessons = data?.items ?? [];
 
   return (
     <section>
@@ -36,52 +29,68 @@ export function LessonManagePage() {
         </Link>
       </div>
 
-      <div className='overflow-x-auto rounded-card border border-line'>
-        <table className='w-full min-w-[720px] text-[13.5px]'>
-          <thead>
-            <tr className='bg-surface text-muted'>
-              <th className='th'>미션</th>
-              <th className='th'>학년군</th>
-              <th className='th'>개념</th>
-              <th className='th'>성취기준</th>
-              <th className='th'>차시</th>
-              <th className='th'>상태</th>
-              <th className='th' aria-label='관리' />
-            </tr>
-          </thead>
-          <tbody>
-            {data.items.map((l) => (
-              <tr key={l.id} className='border-t border-line'>
-                <td className='td whitespace-normal'>{l.title}</td>
-                <td className='td'>{GRADE_BANDS[l.band].label}</td>
-                <td className='td'>{CONCEPTS[l.concept].label}</td>
-                <td className='td mono'>{l.standardCode ?? '—'}</td>
-                <td className='td'>{l.periods}차시</td>
-                <td className='td'>
-                  <span
-                    className='rounded-full border px-2.5 py-0.5 text-xs font-semibold'
-                    style={{
-                      borderColor: `var(${STATUS[l.status].cssVar})`,
-                      color: `var(${STATUS[l.status].cssVar})`,
-                    }}
-                  >
-                    {STATUS[l.status].label}
-                  </span>
-                </td>
-                <td className='td'>
-                  <Link
-                    to='/admin/lessons/$id/edit'
-                    params={{ id: l.id }}
-                    className='rounded-md bg-surface-2 px-2.5 py-1 text-[12.5px] text-ink-soft'
-                  >
-                    수정
-                  </Link>
-                </td>
+      <LoadState
+        pending={isPending}
+        error={isError}
+        onRetry={() => void refetch()}
+        label='미션 목록'
+      />
+
+      {!isPending && !isError && (
+        <div className='overflow-x-auto rounded-card border border-line'>
+          <table className='w-full min-w-[720px] text-[13.5px]'>
+            <thead>
+              <tr className='bg-surface text-muted'>
+                <th className='th'>미션</th>
+                <th className='th'>학년군</th>
+                <th className='th'>개념</th>
+                <th className='th'>성취기준</th>
+                <th className='th'>차시</th>
+                <th className='th'>상태</th>
+                <th className='th' aria-label='관리' />
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+            </thead>
+            <tbody>
+              {lessons.map((l) => (
+                <tr key={l.id} className='border-t border-line'>
+                  <td className='td whitespace-normal'>{l.title}</td>
+                  <td className='td'>{GRADE_BANDS[l.band].label}</td>
+                  <td className='td'>{CONCEPTS[l.concept].label}</td>
+                  <td className='td mono'>{l.standardCode ?? '—'}</td>
+                  <td className='td'>{l.periods}차시</td>
+                  <td className='td'>
+                    <span
+                      className='rounded-full border px-2.5 py-0.5 text-xs font-semibold'
+                      style={{
+                        borderColor: `var(${STATUS[l.status].cssVar})`,
+                        color: `var(${STATUS[l.status].cssVar})`,
+                      }}
+                    >
+                      {STATUS[l.status].label}
+                    </span>
+                  </td>
+                  <td className='td'>
+                    <Link
+                      to='/admin/lessons/$id/edit'
+                      params={{ id: l.id }}
+                      className='rounded-md bg-surface-2 px-2.5 py-1 text-[12.5px] text-ink-soft'
+                    >
+                      수정
+                    </Link>
+                  </td>
+                </tr>
+              ))}
+              {lessons.length === 0 && (
+                <tr>
+                  <td className='td text-muted' colSpan={7}>
+                    등록된 미션이 없습니다. 오른쪽 위 “문제 등록”으로 첫 미션을 만들어 주세요.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      )}
     </section>
   );
 }

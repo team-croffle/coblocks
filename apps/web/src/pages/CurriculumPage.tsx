@@ -2,12 +2,13 @@ import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from '@tanstack/react-router';
 import { useState } from 'react';
 
-import { CONCEPT_ORDER, CONCEPTS, GRADE_BANDS, LESSON_SEED, LEVELS } from '@coblocks/shared';
+import { CONCEPT_ORDER, CONCEPTS, GRADE_BANDS, LEVELS } from '@coblocks/shared';
 import type { ConceptKey, GradeBand, LessonLevel, LessonSummary } from '@coblocks/shared';
 
-import { fetchLessons, fetchMyProgress } from '@/api/lessons';
+import { lessonsQuery, myProgressQuery } from '@/api/queries';
 import { LessonCard } from '@/components/LessonCard';
 import { LessonDetailModal } from '@/components/LessonDetailModal';
+import { LoadState } from '@/components/LoadState';
 
 function toggle<T>(list: T[], value: T): T[] {
   return list.includes(value) ? list.filter((v) => v !== value) : [...list, value];
@@ -22,31 +23,22 @@ export function CurriculumPage() {
   const [levels, setLevels] = useState<LessonLevel[]>([]);
   const [selected, setSelected] = useState<LessonSummary | null>(null);
 
-  const { data } = useQuery({
-    queryKey: ['lessons'],
-    queryFn: () => fetchLessons({ pageSize: 200 }),
-    // API 연결 전에도 화면을 확인할 수 있도록 시드로 폴백한다.
-    initialData: {
-      items: LESSON_SEED as LessonSummary[],
-      total: LESSON_SEED.length,
-      page: 1,
-      pageSize: 200,
-    },
-  });
+  const lessons = useQuery(lessonsQuery());
 
-  const { data: progress } = useQuery({
-    queryKey: ['progress', 'me'],
-    queryFn: fetchMyProgress,
-    initialData: [],
-  });
-  const doneIds = new Set(progress.filter((p) => p.state === 'completed').map((p) => p.lessonId));
+  // 진행률은 곁들이는 정보다. 못 불러와도 목록은 보여 준다.
+  const { data: progress } = useQuery(myProgressQuery());
+  const doneIds = new Set(
+    (progress ?? []).filter((p) => p.state === 'completed').map((p) => p.lessonId),
+  );
+
+  const items = lessons.data?.items ?? [];
 
   /**
    * 필터는 클라이언트에서 건다. 미션 수가 수백 단위를 넘으면
    * fetchLessons(query) 로 서버 필터링으로 옮긴다.
    */
   const keyword = q.trim().toLowerCase();
-  const filtered = data.items.filter((l) => {
+  const filtered = items.filter((l) => {
     if (bands.length && !bands.includes(l.band)) return false;
     if (concepts.length && !concepts.includes(l.concept)) return false;
     if (levels.length && !levels.includes(l.level)) return false;
@@ -149,8 +141,7 @@ export function CurriculumPage() {
 
       <div className='mb-5 flex flex-wrap items-center justify-between gap-3 border-t border-line pt-3.5'>
         <span className='text-sm text-muted'>
-          전체 {data.items.length}개 미션 중{' '}
-          <b className='text-ink tabular-nums'>{filtered.length}</b>개
+          전체 {items.length}개 미션 중 <b className='text-ink tabular-nums'>{filtered.length}</b>개
         </span>
         <button
           type='button'
@@ -161,25 +152,35 @@ export function CurriculumPage() {
         </button>
       </div>
 
-      {filtered.length > 0 ? (
-        <div className='grid gap-4 sm:grid-cols-2 xl:grid-cols-3'>
-          {filtered.map((lesson) => (
-            <LessonCard
-              key={lesson.id}
-              lesson={lesson}
-              done={doneIds.has(lesson.id)}
-              onOpen={() => setSelected(lesson)}
-            />
-          ))}
-        </div>
-      ) : (
-        <div className='rounded-card border border-dashed border-line-strong p-11 text-center text-muted'>
-          <strong className='mb-1.5 block font-display text-[19px] text-ink'>
-            조건에 맞는 미션이 없습니다
-          </strong>
-          검색어를 줄이거나 필터를 하나 풀어 보세요.
-        </div>
-      )}
+      <LoadState
+        pending={lessons.isPending}
+        error={lessons.isError}
+        onRetry={() => void lessons.refetch()}
+        label='미션 목록'
+      />
+
+      {lessons.isSuccess &&
+        (filtered.length > 0 ? (
+          <div className='grid gap-4 sm:grid-cols-2 xl:grid-cols-3'>
+            {filtered.map((lesson) => (
+              <LessonCard
+                key={lesson.id}
+                lesson={lesson}
+                done={doneIds.has(lesson.id)}
+                onOpen={() => setSelected(lesson)}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className='rounded-card border border-dashed border-line-strong p-11 text-center text-muted'>
+            <strong className='mb-1.5 block font-display text-[19px] text-ink'>
+              {items.length === 0 ? '등록된 미션이 없습니다' : '조건에 맞는 미션이 없습니다'}
+            </strong>
+            {items.length === 0
+              ? '관리자 페이지에서 미션을 등록하면 여기에 나타납니다.'
+              : '검색어를 줄이거나 필터를 하나 풀어 보세요.'}
+          </div>
+        ))}
 
       {selected && (
         <LessonDetailModal

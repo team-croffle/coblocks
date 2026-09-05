@@ -1,11 +1,15 @@
+import { useQuery } from '@tanstack/react-query';
 import { useNavigate, useParams } from '@tanstack/react-router';
 import { useState } from 'react';
 import type { FormEvent } from 'react';
 
-import { CONCEPT_ORDER, CONCEPTS, GRADE_BANDS, LESSON_SEED, LEVELS } from '@coblocks/shared';
-import type { ConceptKey, GradeBand, LessonLevel } from '@coblocks/shared';
+import { CONCEPT_ORDER, CONCEPTS, GRADE_BANDS, LEVELS } from '@coblocks/shared';
+import type { ConceptKey, GradeBand, Lesson, LessonLevel } from '@coblocks/shared';
 
 import { createLesson, updateLesson } from '@/api/admin';
+import { adminLessonsQuery } from '@/api/queries';
+import { LoadState } from '@/components/LoadState';
+import { toast } from '@/stores/toast';
 
 interface FormState {
   title: string;
@@ -31,22 +35,20 @@ const EMPTY: FormState = {
   stageNote: '8x8 · 시작 (0,7) · 목표 (6,1) · 벽 8칸',
 };
 
-/** 수정 모드면 기존 값으로 시작한다. TODO: 서버 단건 조회로 교체 */
-function initialFor(id: string | undefined): FormState {
-  if (!id) return EMPTY;
-  const found = LESSON_SEED.find((l) => l.id === id);
-  if (!found) return EMPTY;
+/** 수정 모드의 시작값. TODO: 목록 대신 서버 단건 조회(`/admin/lessons/:id`)로 바꾼다. */
+function formFor(lesson: Lesson | undefined): FormState {
+  if (!lesson) return EMPTY;
   return {
-    title: found.title,
-    band: found.band,
-    concept: found.concept,
-    level: found.level,
-    periods: found.periods,
-    standardCode: found.standardCode ?? '',
-    description: found.description,
-    blockLabels: found.blockLabels.join(', '),
-    stageNote: found.stage
-      ? `${found.stage.col}x${found.stage.row} · 목표 (${found.stage.goal.x},${found.stage.goal.y})`
+    title: lesson.title,
+    band: lesson.band,
+    concept: lesson.concept,
+    level: lesson.level,
+    periods: lesson.periods,
+    standardCode: lesson.standardCode ?? '',
+    description: lesson.description,
+    blockLabels: lesson.blockLabels.join(', '),
+    stageNote: lesson.stage
+      ? `${lesson.stage.col}x${lesson.stage.row} · 목표 (${lesson.stage.goal.x},${lesson.stage.goal.y})`
       : '스테이지 없음',
   };
 }
@@ -54,10 +56,34 @@ function initialFor(id: string | undefined): FormState {
 export function LessonFormPage() {
   // /admin/lessons/new 와 /admin/lessons/$id/edit 이 같은 컴포넌트를 쓴다.
   const { id } = useParams({ strict: false }) as { id?: string };
+
+  // 등록 모드는 서버를 볼 필요가 없다. 수정 모드에서만 원본을 기다린다.
+  const lessons = useQuery({ ...adminLessonsQuery(), enabled: Boolean(id) });
+
+  if (id && !lessons.isSuccess) {
+    return (
+      <section>
+        <h3 className='text-[21px]'>문제 수정</h3>
+        <LoadState
+          pending={lessons.isPending}
+          error={lessons.isError}
+          onRetry={() => void lessons.refetch()}
+          label='미션 원본'
+        />
+      </section>
+    );
+  }
+
+  const existing = id ? lessons.data?.items.find((l) => l.id === id) : undefined;
+
+  // key 를 걸어 두면 다른 미션으로 이동할 때 폼 상태가 통째로 새로 시작한다.
+  return <Form key={id ?? 'new'} id={id} initial={formFor(existing)} />;
+}
+
+function Form({ id, initial }: { id: string | undefined; initial: FormState }) {
   const navigate = useNavigate();
 
-  const [form, setForm] = useState<FormState>(() => initialFor(id));
-  const [notice, setNotice] = useState('');
+  const [form, setForm] = useState<FormState>(initial);
 
   function set<K extends keyof FormState>(key: K, value: FormState[K]) {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -82,9 +108,10 @@ export function LessonFormPage() {
     try {
       if (id) await updateLesson(id, payload);
       else await createLesson(payload);
+      toast.info(id ? '미션을 수정했습니다.' : '미션을 등록했습니다.');
       void navigate({ to: '/admin/lessons' });
     } catch {
-      setNotice('API 연결 전이라 저장되지 않았습니다. 입력값은 그대로 남아 있습니다.');
+      toast.error('저장하지 못했습니다. 입력값은 그대로 남아 있습니다.');
     }
   }
 
@@ -240,16 +267,10 @@ export function LessonFormPage() {
           <button type='submit' className='btn btn-primary'>
             저장하기
           </button>
-          <button type='button' className='btn btn-ghost' onClick={() => setForm(initialFor(id))}>
+          <button type='button' className='btn btn-ghost' onClick={() => setForm(initial)}>
             초기화
           </button>
         </div>
-
-        {notice && (
-          <p className='rounded-[10px] border border-dashed border-line-strong bg-surface p-3 text-[13.5px] text-ink-soft md:col-span-2'>
-            {notice}
-          </p>
-        )}
       </form>
     </section>
   );

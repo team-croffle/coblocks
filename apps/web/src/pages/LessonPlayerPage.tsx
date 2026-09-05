@@ -2,14 +2,17 @@ import { useQuery } from '@tanstack/react-query';
 import { Link, useParams } from '@tanstack/react-router';
 import { lazy, Suspense, useState } from 'react';
 
-import { DEFAULT_STAGE, LESSON_SEED, STANDARD_TEXT } from '@coblocks/shared';
-import type { BlockProgram } from '@coblocks/shared';
+import { DEFAULT_STAGE, STANDARD_TEXT } from '@coblocks/shared';
+import type { BlockProgram, Lesson, StageConfig } from '@coblocks/shared';
 
-import { fetchLesson, fetchMyProgress, submitAttempt } from '@/api/lessons';
+import { submitAttempt } from '@/api/lessons';
+import { lessonQuery, myProgressQuery } from '@/api/queries';
+import { LoadState } from '@/components/LoadState';
 import { StageCanvas } from '@/components/StageCanvas';
 import { ZoomPanel } from '@/components/ZoomPanel';
 import { useBlockRunner } from '@/hooks/use-block-runner';
 import { useAuthStore } from '@/stores/auth';
+import { toast } from '@/stores/toast';
 
 /** Blockly 는 번들이 크다. 플레이어에 들어올 때만 내려받는다. */
 const BlocklyEditor = lazy(async () => ({
@@ -26,32 +29,27 @@ export function LessonPlayerPage() {
   // 라우트 객체를 import 하면 router.tsx 와 순환이 생긴다. 라우트 ID 로 읽는다.
   const { slug } = useParams({ from: '/app/learn/$slug' });
 
-  const { data: lesson } = useQuery({
-    queryKey: ['lesson', slug],
-    queryFn: () => fetchLesson(slug),
-    initialData: () => {
-      // noUncheckedIndexedAccess 때문에 LESSON_SEED[0] 도 undefined 가 될 수 있다.
-      // 시드는 빌드 시점에 고정이라 실제로는 비지 않지만, 단언 대신 좁혀서 쓴다.
-      const seeded = LESSON_SEED.find((l) => l.slug === slug) ?? LESSON_SEED[0];
-      if (!seeded) throw new Error('LESSON_SEED 가 비어 있습니다.');
-      return seeded;
-    },
-  });
+  const lesson = useQuery(lessonQuery(slug));
+
+  if (!lesson.isSuccess) {
+    return (
+      <LoadState
+        pending={lesson.isPending}
+        error={lesson.isError}
+        onRetry={() => void lesson.refetch()}
+        label='미션'
+      />
+    );
+  }
 
   /** 스테이지가 없는 미션(토론·언플러그드)은 기본 스테이지로 대체한다. */
-  const stage = lesson.stage ?? DEFAULT_STAGE;
+  const stage = lesson.data.stage ?? DEFAULT_STAGE;
 
   // key 로 슬러그를 걸어 두면 미션이 바뀔 때 상태가 통째로 초기화된다.
-  return <Player key={slug} lesson={lesson} stage={stage} />;
+  return <Player key={slug} lesson={lesson.data} stage={stage} />;
 }
 
-function Player({
-  lesson,
-  stage,
-}: {
-  lesson: (typeof LESSON_SEED)[number];
-  stage: NonNullable<(typeof LESSON_SEED)[number]['stage']>;
-}) {
+function Player({ lesson, stage }: { lesson: Lesson; stage: StageConfig }) {
   const [program, setProgram] = useState<BlockProgram>([]);
   const [workspace, setWorkspace] = useState<unknown>(null);
   const [award, setAward] = useState<number | null>(null);
@@ -59,10 +57,7 @@ function Player({
   const runner = useBlockRunner(stage);
 
   // 마지막으로 저장한 워크스페이스를 가져와 에디터를 그 상태로 연다.
-  const { data: saved, isPending: savedPending } = useQuery({
-    queryKey: ['progress', 'me'],
-    queryFn: fetchMyProgress,
-  });
+  const { data: saved, isPending: savedPending } = useQuery(myProgressQuery());
   const savedWorkspace = saved?.find((p) => p.lessonId === lesson.id)?.workspace ?? null;
 
   function onEditorChange(next: BlockProgram, nextWorkspace: unknown) {
@@ -73,14 +68,15 @@ function Player({
   async function onRun() {
     setAward(null);
     runner.run(program);
-    // 채점 근거는 서버가 다시 계산한다. 실패해도 학습 흐름은 막지 않는다.
+    // 채점 근거는 서버가 다시 계산한다. 화면의 실행 결과는 미리보기일 뿐이다.
     try {
       const result = await submitAttempt(lesson.id, program, workspace);
       setAward(result.awardedXp);
       // 이미 완료한 미션은 XP 가 0 이라 헤더를 다시 읽을 필요가 없다.
       if (result.awardedXp > 0) await refreshUser();
     } catch {
-      /* API 연결 전이면 무시 */
+      // 조용히 삼키면 학생은 저장된 줄 안다. 실패는 실패라고 말한다.
+      toast.error('기록을 서버에 저장하지 못했습니다. 화면의 결과는 미리보기입니다.');
     }
   }
 
