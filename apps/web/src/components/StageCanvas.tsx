@@ -62,7 +62,7 @@ export function StageCanvas({ stage, pose }: Props) {
         >
           <span
             className='grid h-2/3 w-2/3 place-items-center rounded-lg bg-seq text-[13px] text-white transition-transform duration-200'
-            style={{ rotate: `${pose.dir * 90}deg` }}
+            style={{ rotate: `${pose.heading}deg` }}
           >
             ▶
           </span>
