@@ -6,11 +6,13 @@
  * 사용자가 고른 닉네임과 교사가 지정한 학번뿐이다.
  */
 
-/** 홍길동 → 홍O동, 김수 → 김O, Alex → A**x */
-export function maskName(name: string): string {
-  const chars = [...name.trim()];
-  if (chars.length <= 1) return name;
-  if (chars.length === 2) return `${chars[0]}O`;
+/**
+ * 코딩냥이 → 코OO이, 냥이 → 냥이
+ * 두 글자 이하는 가려도 남는 정보가 없어 그대로 둔다.
+ */
+export function maskNickname(nickname: string): string {
+  const chars = [...nickname.trim()];
+  if (chars.length <= 2) return nickname;
   return `${chars[0]}${'O'.repeat(chars.length - 2)}${chars.at(-1)}`;
 }
 

@@ -59,7 +59,7 @@ export class AdminController {
     @Body() dto: UnmaskDto,
     @Req() req: Request,
   ) {
-    return this.admin.requestUnmask(me.id, me.loginId, id, dto.reason, AuditService.clientIp(req));
+    return this.admin.requestUnmask(me.id, me.nickname, id, dto.reason, AuditService.clientIp(req));
   }
 
   @Get('lessons')
@@ -94,7 +94,7 @@ export class AdminController {
     @Body() dto: AnswerDto,
     @Req() req: Request,
   ) {
-    return this.admin.answerInquiry(me.id, me.loginId, id, dto.answer, AuditService.clientIp(req));
+    return this.admin.answerInquiry(me.id, me.nickname, id, dto.answer, AuditService.clientIp(req));
   }
 
   @Post('inquiries/:id/hold')

@@ -12,6 +12,7 @@ import type {
 } from '@coblocks/shared';
 
 import { AuditService } from '../common/audit.service';
+import { maskNickname, maskStudentNo } from '../common/masking';
 import type { Db } from '../db/client';
 import { DB } from '../db/database.module';
 import {
