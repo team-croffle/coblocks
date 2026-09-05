@@ -2,11 +2,9 @@ import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import type { FormEvent } from 'react';
 
-import type { MaskedUser, Paginated } from '@coblocks/shared';
+import type { MaskedUser } from '@coblocks/shared';
 
 import { fetchUsers, requestUnmask } from '@/api/admin';
-
-const EMPTY: Paginated<MaskedUser> = { items: [], total: 0, page: 1, pageSize: 20 };
 
 const STATE = {
   active: { label: '정상', cssVar: '--color-ok' },
@@ -17,7 +15,9 @@ const ROLE = { student: '학생', teacher: '교사', admin: '관리자' } as con
 const ACCOUNT_TYPE = { personal: '일반', edu: '교육' } as const;
 
 export function UsersPage() {
+  /** 입력 중인 검색어와 실제로 조회에 쓰는 검색어를 나눈다 — 한 글자마다 요청하지 않기 위해. */
   const [q, setQ] = useState('');
+  const [query, setQuery] = useState('');
   const [notice, setNotice] = useState('');
 
   /** 열람 사유를 입력받는 중인 사용자. null 이면 폼이 닫혀 있다. */
@@ -25,12 +25,12 @@ export function UsersPage() {
   const [reason, setReason] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
-  const { data, refetch } = useQuery({
-    queryKey: ['admin', 'users', q],
-    queryFn: () => fetchUsers({ q }),
-    initialData: EMPTY,
-    enabled: false,
+  const { data, isPending, isError, refetch } = useQuery({
+    queryKey: ['admin', 'users', query],
+    queryFn: () => fetchUsers({ q: query }),
   });
+
+  const users = data?.items ?? [];
 
   function openUnmaskForm(user: MaskedUser) {
     setUnmaskTarget(user);
@@ -77,7 +77,7 @@ export function UsersPage() {
         value={q}
         onChange={(e) => setQ(e.target.value)}
         onKeyDown={(e) => {
-          if (e.key === 'Enter') void refetch();
+          if (e.key === 'Enter') setQuery(q.trim());
         }}
       />
 
@@ -97,7 +97,7 @@ export function UsersPage() {
             </tr>
           </thead>
           <tbody>
-            {data.items.map((u) => (
+            {users.map((u) => (
               <tr key={u.id} className='border-t border-line'>
                 <td className='td'>{u.maskedNickname}</td>
                 <td className='td'>{ACCOUNT_TYPE[u.accountType]}</td>
@@ -126,10 +126,33 @@ export function UsersPage() {
                 </td>
               </tr>
             ))}
-            {data.items.length === 0 && (
+            {isPending && (
               <tr>
                 <td className='td text-muted' colSpan={7}>
-                  표시할 사용자가 없습니다. (API 연결 전)
+                  불러오는 중…
+                </td>
+              </tr>
+            )}
+            {isError && (
+              <tr>
+                <td className='td text-bad' colSpan={7}>
+                  목록을 불러오지 못했습니다.{' '}
+                  <button
+                    type='button'
+                    className='underline underline-offset-4'
+                    onClick={() => void refetch()}
+                  >
+                    다시 시도
+                  </button>
+                </td>
+              </tr>
+            )}
+            {!isPending && !isError && users.length === 0 && (
+              <tr>
+                <td className='td text-muted' colSpan={7}>
+                  {query
+                    ? `'${query}' 에 해당하는 사용자가 없습니다.`
+                    : '표시할 사용자가 없습니다.'}
                 </td>
               </tr>
             )}
