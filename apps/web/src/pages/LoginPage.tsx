@@ -50,14 +50,17 @@ export function LoginPage() {
           <h2 className='mb-1.5 text-2xl'>다시 만나서 반가워요</h2>
           <p className='mb-5 text-sm text-muted'>로그인하면 마지막으로 하던 미션부터 이어집니다.</p>
 
-          <div className="mb-3.5">
-            <label htmlFor="nickname" className="mb-1.5 block text-[13px] font-semibold text-ink-soft">
+          <div className='mb-3.5'>
+            <label
+              htmlFor='nickname'
+              className='mb-1.5 block text-[13px] font-semibold text-ink-soft'
+            >
               닉네임
             </label>
             <input
-              id="nickname"
-              className="field-input"
-              autoComplete="username"
+              id='nickname'
+              className='field-input'
+              autoComplete='username'
               value={nickname}
               onChange={(e) => setNickname(e.target.value)}
               required
@@ -94,14 +97,17 @@ export function LoginPage() {
             <code className='mono'>admin / admin</code>
           </p>
 
-          <p className="mt-4 text-[13.5px] text-muted">
+          <p className='mt-4 text-[13.5px] text-muted'>
             아직 계정이 없나요?{' '}
-            <Link to="/signup" className="underline underline-offset-4">
+            <Link to='/signup' className='underline underline-offset-4'>
               닉네임으로 시작하기
             </Link>
           </p>
 
-          <Link to="/" className="mt-3 inline-block text-[13.5px] text-muted underline underline-offset-4">
+          <Link
+            to='/'
+            className='mt-3 inline-block text-[13.5px] text-muted underline underline-offset-4'
+          >
             ← 소개 페이지로 돌아가기
           </Link>
         </form>

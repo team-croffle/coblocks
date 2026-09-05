@@ -43,8 +43,8 @@ export function DashboardPage() {
     <div>
       <div className='mb-6 flex flex-wrap items-end justify-between gap-5'>
         <div>
-          <h2 className="text-[28px]">{user?.nickname}님, 이어서 해볼까요?</h2>
-          <p className="text-[14.5px] text-muted">
+          <h2 className='text-[28px]'>{user?.nickname}님, 이어서 해볼까요?</h2>
+          <p className='text-[14.5px] text-muted'>
             완료한 미션 {completedIds.size}개 / 전체 {LESSON_SEED.length}개
           </p>
         </div>

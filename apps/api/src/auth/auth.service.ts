@@ -1,8 +1,10 @@
+import { randomInt } from 'node:crypto';
+
 import { ConflictException, Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { randomInt } from 'node:crypto';
-import { and, eq, isNull } from 'drizzle-orm';
 import * as argon2 from 'argon2';
+import { and, eq, isNull } from 'drizzle-orm';
+
 import {
   validateNickname,
   validatePassword,
@@ -10,10 +12,11 @@ import {
   type LoginResponse,
   type SignupResponse,
 } from '@coblocks/shared';
-import { DB } from '../db/database.module';
-import type { Db } from '../db/client';
-import { recoveryCodes, users } from '../db/schema';
+
 import { AuditService } from '../common/audit.service';
+import type { Db } from '../db/client';
+import { DB } from '../db/database.module';
+import { recoveryCodes, users } from '../db/schema';
 
 /**
  * 해시 형식이 깨져 있으면 argon2 가 예외를 던진다.
@@ -113,7 +116,7 @@ export class AuthService {
     const [row] = await this.db.select().from(users).where(eq(users.nickname, trimmed)).limit(1);
 
     // 닉네임이 없을 때도 같은 메시지를 준다 — 계정 존재 여부를 흘리지 않기 위해.
-    const ok = row ? await argon2.verify(row.passwordHash, password).catch(() => false) : false;
+    const ok = row ? await verifyPassword(row.passwordHash, password) : false;
 
     if (!row || !ok) {
       await this.audit.record({
@@ -156,7 +159,12 @@ export class AuthService {
    * 복구 코드로 비밀번호를 재설정한다.
    * 코드는 한 번만 쓸 수 있고, 성공·실패 모두 감사 로그에 남는다.
    */
-  async recover(nickname: string, code: string, newPassword: string, ip: string): Promise<{ ok: true }> {
+  async recover(
+    nickname: string,
+    code: string,
+    newPassword: string,
+    ip: string,
+  ): Promise<{ ok: true }> {
     const trimmed = nickname.trim();
     const normalized = code.trim().toUpperCase();
     const reason = validatePassword(newPassword);
@@ -171,9 +179,12 @@ export class AuthService {
           .where(and(eq(recoveryCodes.userId, row.id), isNull(recoveryCodes.usedAt)))
       : [];
 
+    // 코드를 순서대로 확인하고 맞으면 곧바로 멈춘다. argon2 검증은 의도적으로 비싼 연산이라
+    // 병렬로 전부 돌리면 한 번의 복구 시도가 8회분 CPU 를 쓴다.
     let matched: string | null = null;
     for (const candidate of unused) {
-      if (await argon2.verify(candidate.codeHash, normalized).catch(() => false)) {
+      // oxlint-disable-next-line no-await-in-loop -- 위 주석 참고: 조기 종료가 목적이다
+      if (await verifyPassword(candidate.codeHash, normalized)) {
         matched = candidate.id;
         break;
       }
