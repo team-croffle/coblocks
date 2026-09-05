@@ -21,6 +21,7 @@ import { DashboardPage } from '@/pages/DashboardPage';
 import { LandingPage } from '@/pages/LandingPage';
 import { LessonPlayerPage } from '@/pages/LessonPlayerPage';
 import { LoginPage } from '@/pages/LoginPage';
+import { SignupPage } from './pages/SignupPage';
 import { NotFoundPage } from '@/pages/NotFoundPage';
 import { useAuthStore } from '@/stores/auth';
 
@@ -38,6 +39,12 @@ const landingRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/',
   component: LandingPage,
+});
+
+const signupRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/signup',
+  component: SignupPage,
 });
 
 const loginRoute = createRoute({
@@ -141,6 +148,7 @@ const adminInquiriesRoute = createRoute({
 const routeTree = rootRoute.addChildren([
   landingRoute,
   loginRoute,
+  signupRoute,
   appRoute.addChildren([appIndexRoute, dashboardRoute, curriculumRoute, lessonRoute]),
   adminRoute.addChildren([
     adminIndexRoute,

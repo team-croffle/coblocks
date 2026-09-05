@@ -61,9 +61,9 @@ export function AppLayout() {
                 background: user?.role === 'admin' ? 'var(--color-algo)' : 'var(--color-loop)',
               }}
             >
-              {user?.displayName.charAt(0) ?? '?'}
+              {user?.nickname.charAt(0) ?? '?'}
             </span>
-            {user?.displayName}
+            {user?.nickname}
           </span>
 
           <button
