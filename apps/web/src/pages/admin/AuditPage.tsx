@@ -1,11 +1,9 @@
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 
-import type { AuditCategory, AuditLog, Paginated } from '@coblocks/shared';
+import type { AuditCategory } from '@coblocks/shared';
 
-import { fetchAuditLogs } from '@/api/admin';
-
-const EMPTY: Paginated<AuditLog> = { items: [], total: 0, page: 1, pageSize: 50 };
+import { adminAuditQuery } from '@/api/queries';
 
 const CATEGORY = {
   access: { label: '접속', cssVar: '--color-muted' },
@@ -22,11 +20,9 @@ export function AuditPage() {
   const [q, setQ] = useState('');
   const [categories, setCategories] = useState<AuditCategory[]>([]);
 
-  const { data, refetch } = useQuery({
-    queryKey: ['admin', 'audit', q, categories.join(',')],
-    queryFn: () => fetchAuditLogs({ q, categories }),
-    initialData: EMPTY,
-  });
+  const { data, isPending, isError, refetch } = useQuery(adminAuditQuery(q, categories));
+
+  const logs = data?.items ?? [];
 
   function toggle(c: AuditCategory) {
     setCategories((prev) => (prev.includes(c) ? prev.filter((v) => v !== c) : [...prev, c]));
@@ -82,7 +78,7 @@ export function AuditPage() {
             </tr>
           </thead>
           <tbody>
-            {data.items.map((log) => (
+            {logs.map((log) => (
               <tr key={log.id} className='border-t border-line'>
                 <td className='td mono'>{log.occurredAt}</td>
                 <td className='td'>
@@ -113,10 +109,31 @@ export function AuditPage() {
                 </td>
               </tr>
             ))}
-            {data.items.length === 0 && (
+            {isPending && (
               <tr>
                 <td className='td text-muted' colSpan={7}>
-                  표시할 로그가 없습니다. (API 연결 전)
+                  로그를 불러오는 중…
+                </td>
+              </tr>
+            )}
+            {isError && (
+              <tr>
+                <td className='td text-bad' colSpan={7}>
+                  로그를 불러오지 못했습니다.{' '}
+                  <button
+                    type='button'
+                    className='underline underline-offset-4'
+                    onClick={() => void refetch()}
+                  >
+                    다시 시도
+                  </button>
+                </td>
+              </tr>
+            )}
+            {!isPending && !isError && logs.length === 0 && (
+              <tr>
+                <td className='td text-muted' colSpan={7}>
+                  조건에 맞는 로그가 없습니다.
                 </td>
               </tr>
             )}
@@ -125,7 +142,7 @@ export function AuditPage() {
       </div>
 
       <p className='mt-2.5 text-[12.5px] text-muted'>
-        표시 {data.items.length}건 / 전체 {data.total}건 · 보관 기간 1년
+        표시 {logs.length}건 / 전체 {data?.total ?? 0}건 · 보관 기간 1년
       </p>
     </section>
   );

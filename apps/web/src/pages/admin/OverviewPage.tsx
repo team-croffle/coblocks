@@ -1,17 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 
-import type { SystemOverview } from '@coblocks/shared';
-
-import { fetchOverview } from '@/api/admin';
-
-const FALLBACK: SystemOverview = {
-  onlineNow: 0,
-  loginsToday: 0,
-  loginFailuresToday: 0,
-  programRunsToday: 0,
-  hourlyOnline: Array.from({ length: 24 }, () => 0),
-  services: [],
-};
+import { adminOverviewQuery } from '@/api/queries';
+import { LoadState } from '@/components/LoadState';
 
 const STATUS = {
   ok: { label: '정상', cssVar: '--color-ok' },
@@ -20,12 +10,24 @@ const STATUS = {
 } as const;
 
 export function OverviewPage() {
-  const { data } = useQuery({
-    queryKey: ['admin', 'overview'],
-    queryFn: fetchOverview,
-    initialData: FALLBACK,
-  });
+  const overview = useQuery(adminOverviewQuery());
 
+  if (!overview.isSuccess) {
+    return (
+      <section>
+        <h3 className='text-[21px]'>시스템 개요</h3>
+        <p className='mb-5 text-sm text-muted'>5분마다 갱신되는 운영 지표입니다.</p>
+        <LoadState
+          pending={overview.isPending}
+          error={overview.isError}
+          onRetry={() => void overview.refetch()}
+          label='운영 지표'
+        />
+      </section>
+    );
+  }
+
+  const data = overview.data;
   const peak = Math.max(1, ...data.hourlyOnline);
   const peakHour = data.hourlyOnline.indexOf(Math.max(...data.hourlyOnline));
 
@@ -110,7 +112,9 @@ export function OverviewPage() {
               <span className='mono ml-auto text-muted'>{s.note}</span>
             </div>
           ))}
-          {data.services.length === 0 && <p className='text-sm text-muted'>API 연결 전입니다.</p>}
+          {data.services.length === 0 && (
+            <p className='text-sm text-muted'>등록된 서비스가 없습니다.</p>
+          )}
         </div>
       </div>
     </section>

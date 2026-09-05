@@ -3,7 +3,10 @@ import { useState } from 'react';
 
 import type { Inquiry } from '@coblocks/shared';
 
-import { answerInquiry, fetchInquiries, holdInquiry } from '@/api/admin';
+import { answerInquiry, holdInquiry } from '@/api/admin';
+import { adminInquiriesQuery } from '@/api/queries';
+import { LoadState } from '@/components/LoadState';
+import { toast } from '@/stores/toast';
 
 const STATE = {
   open: { label: '대기', cssVar: '--color-warn' },
@@ -13,42 +16,38 @@ const STATE = {
 } as const;
 
 export function InquiryPage() {
-  const { data, refetch } = useQuery({
-    queryKey: ['admin', 'inquiries'],
-    queryFn: fetchInquiries,
-    initialData: [] as Inquiry[],
-  });
+  const { data, isPending, isError, refetch } = useQuery(adminInquiriesQuery());
+
+  const inquiries = data ?? [];
 
   const [selected, setSelected] = useState<Inquiry | null>(null);
   const [reply, setReply] = useState('');
-  const [notice, setNotice] = useState('');
 
   function select(item: Inquiry) {
     setSelected(item);
     setReply(item.answer ?? '');
-    setNotice('');
   }
 
   async function send() {
-    if (!selected) return setNotice('먼저 왼쪽에서 문의를 선택해 주세요.');
-    if (!reply.trim()) return setNotice('답변 내용을 입력해 주세요.');
+    if (!selected) return toast.error('먼저 왼쪽에서 문의를 선택해 주세요.');
+    if (!reply.trim()) return toast.error('답변 내용을 입력해 주세요.');
     try {
       await answerInquiry(selected.id, reply.trim());
-      setNotice(`${selected.code} 답변을 전송했습니다. 발송 내역은 감사 로그에 남습니다.`);
+      toast.info(`${selected.code} 답변을 전송했습니다. 발송 내역은 감사 로그에 남습니다.`);
       void refetch();
     } catch {
-      setNotice('API 연결 전입니다.');
+      toast.error('답변을 전송하지 못했습니다.');
     }
   }
 
   async function hold() {
-    if (!selected) return setNotice('먼저 왼쪽에서 문의를 선택해 주세요.');
+    if (!selected) return toast.error('먼저 왼쪽에서 문의를 선택해 주세요.');
     try {
       await holdInquiry(selected.id);
-      setNotice(`${selected.code}을 보류로 표시했습니다.`);
+      toast.info(`${selected.code}을 보류로 표시했습니다.`);
       void refetch();
     } catch {
-      setNotice('API 연결 전입니다.');
+      toast.error('보류로 표시하지 못했습니다.');
     }
   }
 
@@ -59,7 +58,14 @@ export function InquiryPage() {
 
       <div className='grid items-start gap-4 lg:grid-cols-2'>
         <div className='flex flex-col gap-2.5'>
-          {data.map((item) => (
+          <LoadState
+            pending={isPending}
+            error={isError}
+            onRetry={() => void refetch()}
+            label='문의 목록'
+          />
+
+          {inquiries.map((item) => (
             <button
               key={item.id}
               type='button'
@@ -87,8 +93,8 @@ export function InquiryPage() {
             </button>
           ))}
 
-          {data.length === 0 && (
-            <p className='text-sm text-muted'>문의가 없습니다. (API 연결 전)</p>
+          {!isPending && !isError && inquiries.length === 0 && (
+            <p className='text-sm text-muted'>접수된 문의가 없습니다.</p>
           )}
         </div>
 
@@ -122,12 +128,6 @@ export function InquiryPage() {
               보류로 표시
             </button>
           </div>
-
-          {notice && (
-            <p className='mt-3.5 rounded-[10px] border border-dashed border-line-strong bg-surface p-3 text-[13.5px] text-ink-soft'>
-              {notice}
-            </p>
-          )}
         </div>
       </div>
     </section>
