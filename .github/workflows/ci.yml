@@ -80,15 +80,13 @@ jobs:
       - name: Build shared package
         run: pnpm build:shared
 
-      # The suite runs against the production bundle served by vite preview.
-      - name: Build web
-        run: pnpm --filter @coblocks/web build
-
       - name: Install Playwright browser
         run: pnpm --filter @coblocks/web exec playwright install --with-deps chromium
 
-      # The API is stubbed at the network layer, so no database is needed yet.
-      - name: Run end-to-end tests
+      # The e2e script builds first: vite preview serves dist as-is and would
+      # otherwise test whatever was built last. The API is stubbed at the
+      # network layer, so no database is needed yet.
+      - name: Build web and run end-to-end tests
         run: pnpm --filter @coblocks/web e2e
 
       - name: Upload report on failure
