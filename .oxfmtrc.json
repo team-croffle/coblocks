@@ -28,5 +28,13 @@
   },
   "jsxSingleQuote": true,
   "useTabs": false,
-  "ignorePatterns": [".github/**", ".vscode/**", "docs/**", "*.md", "apps/api/drizzle/**"]
+  "ignorePatterns": [
+    ".github/**",
+    ".vscode/**",
+    "docs/**",
+    "*.md",
+    "apps/api/drizzle/**",
+    "**/test-results/**",
+    "**/playwright-report/**"
+  ]
 }
