@@ -143,9 +143,10 @@ TanStack Router derives path types from the route tree. If `Link to="..."` gives
 - Hooks (husky, installed by `pnpm install`): `pre-commit` runs lint-staged on staged files,
   `commit-msg` rejects a subject over 72 characters or a missing blank line after it, `pre-push` runs
   `pnpm typecheck`. They are a safety net, not a substitute for running `pnpm check` yourself.
-- CI runs the same checks plus tests, a build and a Docker image build on **every branch push** and
-  every pull request; a pull request is not done until it is green. `Security` additionally runs a
-  TruffleHog secret scan and a dependency review.
+- CI runs the same checks plus tests, a build and a Docker image build on **every pull request** and
+  on pushes to `master`; a pull request is not done until it is green. A branch with no pull request
+  open gets no CI, so open the pull request early — a draft counts. `Security` additionally runs a
+  TruffleHog secret scan and a dependency review, on the same triggers plus a weekly schedule.
 - Releases are container images on GHCR, cut by the manual `Release` workflow. Version numbering,
   release titles and the rc-suffix rule live in `.ai/VERSIONING.md`; the plan → work → branch → PR →
   release-note procedure lives in `.ai/WORKFLOW.md`. Both are local, like the rest of `.ai/`.
