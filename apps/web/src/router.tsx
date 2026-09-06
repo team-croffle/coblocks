@@ -35,13 +35,15 @@ import { LoginPage } from '@/pages/LoginPage';
 import { NotFoundPage } from '@/pages/NotFoundPage';
 import { RecoverPage } from '@/pages/RecoverPage';
 import { queryClient } from '@/query';
-import { useAuthStore } from '@/stores/auth';
+import { authReady, useAuthStore } from '@/stores/auth';
 
 import { SignupPage } from './pages/SignupPage';
 
 export interface RouterContext {
   /** 가드에서 최신 상태를 읽어야 하므로 값이 아니라 함수를 넘긴다. */
   getUser: () => AuthUser | null;
+  /** 세션 복원이 끝날 때까지 기다린다. 가드는 이걸 먼저 기다린 뒤 판단한다. */
+  waitForAuth: () => Promise<void>;
   queryClient: QueryClient;
 }
 
@@ -86,7 +88,10 @@ const appRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/app',
   component: AppLayout,
-  beforeLoad: ({ context, location }) => {
+  // 새로고침 직후에는 아직 세션 복원이 안 끝나 `user` 가 null 이다.
+  // 기다리지 않고 판단하면 로그인된 사용자가 매번 로그인 화면으로 튕긴다.
+  beforeLoad: async ({ context, location }) => {
+    await context.waitForAuth();
     if (!context.getUser()) {
       throw redirect({ to: '/login', search: { redirect: location.href } });
     }
@@ -138,7 +143,8 @@ const adminRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/admin',
   component: AdminLayout,
-  beforeLoad: ({ context, location }) => {
+  beforeLoad: async ({ context, location }) => {
+    await context.waitForAuth();
     const user = context.getUser();
     if (!user) throw redirect({ to: '/login', search: { redirect: location.href } });
     if (user.role !== 'admin') throw redirect({ to: '/app/dashboard' });
@@ -226,7 +232,7 @@ const routeTree = rootRoute.addChildren([
 
 export const router = createRouter({
   routeTree,
-  context: { getUser: () => useAuthStore.getState().user, queryClient },
+  context: { getUser: () => useAuthStore.getState().user, waitForAuth: authReady, queryClient },
   defaultPreload: 'intent',
 });
 
