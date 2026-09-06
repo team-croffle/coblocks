@@ -1,10 +1,17 @@
 name: CI
 
-# Every branch push is verified. Pull requests run the same checks again.
+# Pull requests are where branches are verified. `push` is limited to the default
+# branch on purpose: with `branches: ['**']` a push to a branch that already has a
+# pull request fired twice for the same commit — once as `push`, once as
+# `pull_request: synchronize` — and the two runs were identical.
+#
+# The trade-off is that a branch with no pull request yet gets no CI. Open the pull
+# request early (a draft is enough) and it is covered from the first push.
+#
+# A `branches` filter also excludes tag pushes, so no `tags-ignore` is needed.
 on:
   push:
-    branches: ['**']
-    tags-ignore: ['**']
+    branches: [master]
   pull_request:
   workflow_dispatch:
 
@@ -12,8 +19,10 @@ permissions:
   contents: read
 
 concurrency:
-  group: ci-${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  group: ${{ github.workflow }}-${{ github.ref }}
+  # Superseding a pull request run is fine — the newer commit is what matters.
+  # A push to master is not superseded by anything: let every merged commit finish.
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 env:
   NODE_VERSION: '22'

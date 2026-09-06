@@ -1,9 +1,11 @@
 name: Security
 
+# Same trigger shape as CI: pull requests cover branches, `push` covers the default
+# branch. `branches: ['**']` ran this twice for every push to a branch with an open
+# pull request. The weekly schedule is the backstop for anything never opened as one.
 on:
   push:
-    branches: ['**']
-    tags-ignore: ['**']
+    branches: [master]
   pull_request:
   schedule:
     # Mondays at 09:00 KST (00:00 UTC)
@@ -14,8 +16,8 @@ permissions:
   contents: read
 
 concurrency:
-  # The event name is part of the group so that a branch push does not cancel the
-  # pull request run for the same commit.
+  # The event name stays in the group: a scheduled run and a push to master share
+  # `github.ref`, and they should not cancel each other.
   group: security-${{ github.event_name }}-${{ github.ref }}
   # Never cancel a pull request run: it carries the dependency review, and a
   # cancelled run leaves the check hanging instead of reporting a result.
