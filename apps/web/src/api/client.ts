@@ -15,6 +15,13 @@ http.interceptors.request.use((config) => {
  * 로그인·가입·복구는 401 이 "자격 증명이 틀렸다"는 정상 응답이다.
  * 세션 만료로 취급해 로그인으로 튕기면 화면이 오류를 보여줄 새가 없다.
  */
+/**
+ * 401 은 "이 토큰으로는 안 된다"이고, 네트워크 오류는 "지금 물어볼 수 없다"이다.
+ * 둘을 같이 다루면 API 가 잠깐 죽었을 때 멀쩡한 세션을 지우게 된다.
+ */
+export const isUnauthorized = (error: unknown): boolean =>
+  axios.isAxiosError(error) && error.response?.status === 401;
+
 const AUTH_ATTEMPT_PATHS = ['/auth/login', '/auth/signup', '/auth/recover'];
 const isAuthAttempt = (url: string | undefined): boolean =>
   !!url && AUTH_ATTEMPT_PATHS.some((path) => url.startsWith(path));
