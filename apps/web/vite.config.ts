@@ -19,6 +19,32 @@ export default defineConfig({
     },
   },
   optimizeDeps: { exclude: ['@coblocks/shared'] },
+
+  build: {
+    /**
+     * Blockly 만 이 선 가까이 간다(약 708 kB / gzip 194 kB). 코어를 더 줄일 방법이 없다 —
+     * 이미 `blockly/core` 만 쓰고 있고, 한국어 로케일을 빼도 628 kB 다.
+     * 그래서 경고를 끄는 대신 **Blockly 바로 위**로 올려 둔다. 다른 청크가 이 선에 걸리면
+     * 그건 진짜 신호이고, Blockly 가 걸리면 라이브러리가 커졌다는 뜻이다.
+     */
+    chunkSizeWarningLimit: 750,
+    rolldownOptions: {
+      output: {
+        /**
+         * 벤더를 갈라 두면 앱 코드를 배포해도 react·tanstack 캐시가 살아 있다.
+         * Blockly 는 이름만 붙인다 — 진입점에서 정적으로 닿지 않으므로 그대로 지연 로드다
+         * (빌드 결과의 index.html 에 modulepreload 가 붙지 않는 것으로 확인한다).
+         */
+        codeSplitting: {
+          groups: [
+            { name: 'blockly', test: /node_modules[\\/]blockly[\\/]/ },
+            { name: 'react', test: /node_modules[\\/](react|react-dom|scheduler)[\\/]/ },
+            { name: 'tanstack', test: /node_modules[\\/]@tanstack[\\/]/ },
+          ],
+        },
+      },
+    },
+  },
   server: {
     port: 5173,
     proxy: {
