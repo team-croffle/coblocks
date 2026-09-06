@@ -8,7 +8,7 @@
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
-    "e2e": "playwright test"
+    "e2e": "pnpm build && playwright test"
   },
   "dependencies": {
     "@coblocks/shared": "workspace:*",
