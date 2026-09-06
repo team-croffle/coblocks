@@ -134,6 +134,11 @@ TanStack Router derives path types from the route tree. If `Link to="..."` gives
   should stay readable in `git log` a year from now.
 - **Every branch ends in a pull request.** Nothing is pushed straight to an integration branch, and
   the pull request body is written to `.ai/pr/` first (see `.ai/WORKFLOW.md`).
+- **A branch is sized by the work, not by the plan.** Small work units share one branch. If planned
+  units each turn out to be about a commit's worth, do them together and rename the branch to cover
+  what it actually holds (`git branch -m`). Four one-commit branches produce four pull requests that
+  review as one, and the reviewer pays for the split. Open a second branch when the work is large
+  enough to review on its own, or when one part must merge without the other.
 - Never commit `.ai/`, `.env*`, or Syncthing files (`.stfolder`, `.stignore`, `.stversions`). They are gitignored; do not undo that.
 - Hooks (husky, installed by `pnpm install`): `pre-commit` runs lint-staged on staged files,
   `commit-msg` rejects a subject over 72 characters or a missing blank line after it, `pre-push` runs
