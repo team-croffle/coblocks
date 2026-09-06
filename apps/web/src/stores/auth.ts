@@ -8,6 +8,7 @@ import {
   me,
   signup as signupRequest,
 } from '@/api/auth';
+import { isUnauthorized } from '@/api/client';
 
 const TOKEN_KEY = 'coblocks.token';
 
@@ -41,9 +42,14 @@ export const useAuthStore = create<AuthState>((set) => ({
     if (!saved) return set({ restoring: false });
     try {
       set({ user: await me(), token: saved });
-    } catch {
-      localStorage.removeItem(TOKEN_KEY);
-      set({ user: null, token: null });
+    } catch (error) {
+      // 토큰이 거절당한 것이 확인됐을 때만 지운다.
+      // API 가 안 떠 있어서 실패한 것까지 로그아웃으로 처리하면, 서버를 껐다 켤 때마다
+      // 멀쩡한 세션이 사라진다.
+      if (isUnauthorized(error)) {
+        localStorage.removeItem(TOKEN_KEY);
+        set({ user: null, token: null });
+      }
     } finally {
       set({ restoring: false });
     }
@@ -96,5 +102,19 @@ export const useAuthStore = create<AuthState>((set) => ({
     set({ user: null, token: null });
   },
 }));
+
+let restorePromise: Promise<void> | null = null;
+
+/**
+ * 세션 복원이 끝날 때까지 기다린다. 여러 번 불러도 복원은 한 번만 돈다.
+ *
+ * 라우터 가드가 이걸 기다리지 않으면, 새로고침 직후에는 아직 `user` 가 null 이라
+ * 로그인된 사용자도 `/login` 으로 튕긴다. `restoring` 플래그만 두고 아무도 읽지 않으면
+ * 없는 것과 같다.
+ */
+export const authReady = (): Promise<void> => {
+  restorePromise ??= useAuthStore.getState().restore();
+  return restorePromise;
+};
 
 export const selectIsAdmin = (s: AuthState) => s.user?.role === 'admin';
