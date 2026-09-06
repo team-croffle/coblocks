@@ -31,7 +31,8 @@ test('가입한 학생이 미션을 열고 실행 결과를 받는다', async ({
   await expect(page.getByRole('heading', { name: LESSON.title })).toBeVisible();
 
   // Blockly 는 별도 청크다. 내려받아 붙을 때까지 기다린다.
-  await expect(page.locator('.blocklyWorkspace')).toBeVisible({ timeout: 30_000 });
+  // `.blocklyWorkspace` 는 툴박스·플라이아웃에도 붙어서 셋이 잡힌다. 주입 컨테이너는 하나다.
+  await expect(page.locator('.injectionDiv')).toBeVisible({ timeout: 30_000 });
 
   await page.getByRole('button', { name: '▶ 실행하기' }).click();
   await expect(page.getByText('+20 XP')).toBeVisible();
