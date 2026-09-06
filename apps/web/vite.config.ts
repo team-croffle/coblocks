@@ -21,6 +21,24 @@ export default defineConfig({
   optimizeDeps: { exclude: ['@coblocks/shared'] },
   server: {
     port: 5173,
-    proxy: { '/api': { target: 'http://localhost:3000', changeOrigin: true } },
+    proxy: {
+      '/api': {
+        target: 'http://127.0.0.1:3000',
+        changeOrigin: true,
+        // 기본 출력은 AggregateError 스택이라 "API 가 안 떠 있다"는 사실이 안 보인다.
+        configure: (proxy) => {
+          proxy.on('error', (error, req) => {
+            const down =
+              error.name === 'AggregateError' ||
+              (error as NodeJS.ErrnoException).code === 'ECONNREFUSED';
+            const reason = down
+              ? 'API 가 3000 번에 없습니다 — `pnpm db:up` 후 `pnpm dev:api` (또는 `pnpm dev`)'
+              : error.message;
+            console.error(`[api-proxy] ${req.url ?? ''} → ${reason}`);
+          });
+        },
+      },
+    },
   },
+  preview: { host: '127.0.0.1', port: 4173, strictPort: true },
 });
